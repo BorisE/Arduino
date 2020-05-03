@@ -1,14 +1,15 @@
 /*
   WATERING CONTROL
-  by Boris Emchenko
+  (c) 2020 by Boris Emchenko
   
  Changes:
-   ver 0.1 [18102] - WiFi, DHT wo lib, Relay
+   ver 0.2 2020/05/03 [18872] - web pages with redirect (rnd fix)
+   ver 0.1 2020/05/03 [18102] - Starting release (WiFi, DHT wo lib, pump relay)
 */
 #include "WiFiEsp.h"
 
 //Compile version
-#define VERSION "0.1"
+#define VERSION "0.2"
 #define VERSION_DATE "20200503"
 
 // Emulate Serial1 on pins 6/7 if not present
@@ -17,8 +18,8 @@
 SoftwareSerial Serial1(6, 5); // RX, TX
 #endif
 
-char ssid[] = "BATMAJ";            // your network SSID (name)
-char pass[] = "8oknehcmE";        // your network password
+char ssid[] = "BATMAJ";          // your network SSID (name)
+char pass[] = "8oknehcmE";       // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 int reqCount = 0;                // number of requests received
 
@@ -48,7 +49,7 @@ unsigned long _lastReadTime_DHT=0;
 void setup()
 {
   Serial.begin(9600);
-  Serial.print("Watering Station v");
+  Serial.print("Watering Control v");
   Serial.print(VERSION);
   Serial.print(" [");
   Serial.print(VERSION_DATE);
@@ -83,6 +84,8 @@ void setup()
   
   pinMode(RELAY_PUMP_PIN, OUTPUT);
   digitalWrite(RELAY_PUMP_PIN, HIGH);
+
+  randomSeed(analogRead(A5));
 }
 
 
@@ -103,14 +106,39 @@ void loop()
       if (client.available()) {
         char c = client.read();
         readBuffer += c;
-        Serial.write(c);
+        //Serial.write(c);
     
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
-        if (c == '\n' && currentLineIsBlank) {
-          //Answer to client
-          sendHttpResponse(client);
+        if (c == '\n' && currentLineIsBlank) 
+        {
+          Serial.println(readBuffer);
+          
+          //Parse commands
+          if (readBuffer.indexOf("GET /dht")>=0)
+          {
+            Serial.println("GET /dht");
+            sendHttpResponse_goRoot(client);
+          }
+          else if (readBuffer.indexOf("GET /pumpon")>=0)
+          {
+            Serial.println("GET /pumpon");
+            switchOn();
+            sendHttpResponse_goRoot(client);
+          }
+          else if (readBuffer.indexOf("GET /pumpoff")>=0)
+          {
+            Serial.println("GET /pumpoff");
+            switchOff();
+            sendHttpResponse_goRoot(client);
+          }
+          else
+          {
+            //Answer to client
+            sendHttpResponse_MainPage(client);
+          } 
+
           break;
         }
         
@@ -125,21 +153,7 @@ void loop()
     delay(10);
     // close the connection:
     client.stop();
-    Serial.println("Client disconnected");
-    
-    //Parse commands
-    if (readBuffer.indexOf("GET /dht")>=0)
-    {
-    }
-    else if (readBuffer.indexOf("GET /pumpon")>=0)
-    {
-      switchOn();
-      
-    }
-    else if (readBuffer.indexOf("GET /pumpoff")>=0)
-    {
-      switchOff();
-    }
+    Serial.println("Sending done. Client disconnected");
   }
   else
   {

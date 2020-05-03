@@ -11,9 +11,9 @@ void printWifiStatus()
   Serial.println();
 }
 
-void sendHttpResponse(WiFiEspClient client)
+void sendHttpResponse_MainPage(WiFiEspClient client)
 {
-    Serial.println("Sending response");
+    Serial.println("Sending main page...");
     // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
     // and a content-type so the client knows what's coming, then a blank line:
     // send a standard http response header
@@ -26,7 +26,7 @@ void sendHttpResponse(WiFiEspClient client)
       "\r\n");
     //client.print("<!DOCTYPE HTML>\r\n");
     client.print("<html>\r\n");
-    client.print("<h1>Water Station</h1>\r\n");
+    client.print("<h1>Watering Control</h1>\r\n");
     client.print("v");
     client.print(VERSION);
     client.print(" [");
@@ -49,15 +49,20 @@ void sendHttpResponse(WiFiEspClient client)
     client.print("<br>\r\n");
 
     client.print("Pump switch: ");
+    int sid=random(10000);
     if (PumpStatus == LOW)
     {
       client.print("ON");
-      client.print(" <a href=/pumpoff>>off</a>");
+      client.print(" <a href=/pumpoff/");
+      client.print(sid);
+      client.print(">off</a>");
     }
     else
     {
       client.print("OFF");
-      client.print(" <a href=/pumpon>>on</a>");
+      client.print(" <a href=/pumpon/");
+      client.print(sid);
+      client.print(">on</a>");
     }
     client.print("<br>\r\n");
   
@@ -66,9 +71,10 @@ void sendHttpResponse(WiFiEspClient client)
     // The HTTP response ends with another blank line:
     client.println();
 }
+
 void sendHttpResponse_goRoot(WiFiEspClient client)
 {
-    Serial.println("Sending response");
+    Serial.println("Sending redirect response...");
     //HTTP/1.1 301 Moved Permanently 
     //Location: http://www.example.org/index.asp
     client.print(
