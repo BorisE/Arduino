@@ -1,18 +1,15 @@
 /*
- WiFiEsp example: WebServer
-
- A simple web server that shows the value of the analog input 
- pins via a web page using an ESP8266 module.
- This sketch will print the IP address of your ESP8266 module (once connected)
- to the Serial monitor. From there, you can open that address in a web browser
- to display the web page.
- The web page will be automatically refreshed each 20 seconds.
-
- For more details see: http://yaab-arduino.blogspot.com/p/wifiesp.html
+  WATERING CONTROL
+  by Boris Emchenko
+  
+ Changes:
+   ver 0.8i2 [26 644/29 834] - also get current params
 */
-
 #include "WiFiEsp.h"
-#include "DHT.h"
+
+//Compile version
+#define VERSION "0.1"
+#define VERSION_DATE "20200503"
 
 
 // Emulate Serial1 on pins 6/7 if not present
@@ -30,21 +27,33 @@ WiFiEspServer server(80);
 
 String readBuffer;
 
-#define DHTPIN 4     // what pin we're connected to
 #define DHT_PIN 4
-#define DHTTYPE DHT22   // DHT 22  (AM2302)
-DHT dht(DHTPIN, DHTTYPE);
+// DHT functions enumerated
+enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};
+// DHT error codes enumerated
+enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};
 float dhtTemp = -100;
 float dhtHum =0;
 
 #define RELAY_PUMP_PIN 7
 
+
+unsigned long currenttime;
+unsigned long _lastReadTime_DHT=0;
+#define DHT_READ_INTERVAL 3000
+
 void setup()
 {
-  // initialize serial for debugging
   Serial.begin(9600);
-  // initialize serial for ESP module
+  Serial.print("Watering Station v");
+  Serial.print(VERSION);
+  Serial.print(" [");
+  Serial.print(VERSION_DATE);
+  Serial.println("]");
+  
+  
   Serial1.begin(9600);
+
   // initialize ESP module
   WiFi.init(&Serial1);
 
@@ -69,9 +78,6 @@ void setup()
   // start the web server on port 80
   server.begin();
   
-  //Start DHT lib
-  dht.begin();
-
   pinMode(RELAY_PUMP_PIN, OUTPUT);
   digitalWrite(RELAY_PUMP_PIN, HIGH);
 }
@@ -82,6 +88,8 @@ void loop()
 {
   // listen for incoming clients
   WiFiEspClient client = server.available();
+  
+  // IF ANY CONNECTION, HANDLE IT
   if (client) {
     Serial.println("New client connected");
     // an http request ends with a blank line
@@ -115,6 +123,8 @@ void loop()
     // close the connection:
     client.stop();
     Serial.println("Client disconnected");
+    
+    //Parse commands
     if (readBuffer.indexOf("GET /dht")>=0)
     {
     }
@@ -129,109 +139,22 @@ void loop()
   }
   else
   {
-    // Read data
+    // IF NO CONNECTIONS, READ SENSOR DATA, MAKE CALCULATIONS, ETC
+    currenttime = millis();
+
+    //Analog Read
     //Serial.print("Analog input A0: ");
     //Serial.println(analogRead(0));
-    readDHTSensor(dhtTemp,dhtHum);
-  }
-  
 
+    //DHT Read
+    if ((currenttime - _lastReadTime_DHT) > DHT_READ_INTERVAL)
+    {
+      readDHTSensor(dhtTemp,dhtHum);
+      _lastReadTime_DHT= currenttime;
+    }
+  }
+ 
+
+  // END OF CYCLE
   delay(10);
-  
-}
-
-
-void printWifiStatus()
-{
-  // print the SSID of the network you're attached to
-  Serial.print("SSID: ");
-  Serial.println(WiFi.SSID());
-
-  // print your WiFi shield's IP address
-  IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
-  Serial.println(ip);
-  Serial.println();
-}
-
-void sendHttpResponse(WiFiEspClient client)
-{
-    Serial.println("Sending response");
-    // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-    // and a content-type so the client knows what's coming, then a blank line:
-    // send a standard http response header
-    // use \r\n instead of many println statements to speedup data send
-    client.print(
-      "HTTP/1.1 200 OK\r\n"
-      "Content-Type: text/html\r\n"
-      "Connection: close\r\n"  // the connection will be closed after completion of the response
-      "Refresh: 20\r\n"        // refresh the page automatically every 20 sec
-      "\r\n");
-    client.print("<!DOCTYPE HTML>\r\n");
-    client.print("<html>\r\n");
-    client.print("<h1>Hello World!</h1>\r\n");
-    client.print("Requests received: ");
-    client.print(++reqCount);
-    client.print("<br>\r\n");
-    client.print("Analog input A0: ");
-    client.print(analogRead(0));
-    client.print("<br>\r\n");
-
-    client.print("DHT temp: ");
-    client.print(dhtTemp);
-    client.print("<br>\r\n");
-    client.print("DHT humidity: ");
-    client.print(dhtHum);
-    client.print("<br>\r\n");
-
-    client.print("Pump switch: ");
-    client.print(digitalRead(RELAY_PUMP_PIN));
-    client.print("<br>\r\n");
-  
-    client.print("</html>\r\n");
-
-    // The HTTP response ends with another blank line:
-    client.println();
-}
-
-void swapInt( int*a, int *b)
-{
-     int c = *a;
-     *a = *b;
-     *b = c;
-}
-
-void readDHTSensor(float &t, float &h)
-{
-  // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  h = dht.readHumidity();
-  t = dht.readTemperature();
-
-  // check if returns are valid, if they are NaN (not a number) then something went wrong!
-  if (isnan(t) || isnan(h)) {
-    Serial.println("Failed to read from DHT");
-  } else {
-    /*
-    Serial.print("Humidity: "); 
-    Serial.print(h);
-    Serial.print(" %\t");
-    Serial.print("Temperature: "); 
-    Serial.print(t);
-    Serial.println(" *C");
-    */
-  }
-}
-
-
-void switchOn()
-{
-  digitalWrite(RELAY_PUMP_PIN, LOW);
-  Serial.println("Switching PUMP ON"); 
-
-}
-void switchOff()
-{
-  digitalWrite(RELAY_PUMP_PIN, HIGH);
-  Serial.println("Switching PUMP OFF"); 
 }

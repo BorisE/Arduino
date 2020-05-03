@@ -2,16 +2,6 @@
 // by 'jurs' for Arduino Forum
 // https://forum.arduino.cc/index.php?topic=308644.msg2142725#msg2142725
 
-// DHT functions enumerated
-enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};
-
-
-// DHT error codes enumerated
-enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};
-
-// DHT sensor pinout from left to right looking at the gridded side
-// 1-VCC  2-DATA  3-NC  4-GND
-
 int dhtCall(byte function)
 // input parameters are the data pin and one of the DHT functions
 // return value is DHT error code with function DHT11_SAMPLE or DHT22_SAMPLE
@@ -69,3 +59,34 @@ int dhtCall(byte function)
   }
 }
 
+void readDHTSensor(float &t, float &h)
+{
+  byte* b; // byte pointer for showing raw data
+  switch ((dhtCall(DHT22_SAMPLE))) // always request a sample first
+  {
+    case DHT_OK: // only if DHT_OK is true, get temperature, humidity and possibly raw data
+      t=dhtCall(DHT_TEMPERATURE)/10.0;
+      h=dhtCall(DHT_HUMIDITY)/10.0;
+      
+      Serial.print("Humidity: ");
+      Serial.print(h);
+      Serial.print("   Temp: ");
+      Serial.print(t);
+      Serial.print("     raw data:  ");
+      b = (byte*)dhtCall(DHT_DATAPTR);
+      for (int i = 0; i < 5; i++)
+      {
+        Serial.print(b[i]); Serial.print('\t');
+      }
+      Serial.println();
+      break;
+    case DHT_ERROR_TIMEOUT:
+      Serial.println("DHT Timeout Error");
+      break;
+    case DHT_ERROR_CRC:
+      Serial.println("DHT CRC Error");
+      break;
+    default:
+      Serial.println("DHT Unknown Error");
+  }
+}
