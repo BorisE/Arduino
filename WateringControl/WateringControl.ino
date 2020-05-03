@@ -22,20 +22,15 @@ char ssid[] = "BATMAJ";          // your network SSID (name)
 char pass[] = "8oknehcmE";       // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 int reqCount = 0;                // number of requests received
-
-WiFiEspServer server(80);
-
 String readBuffer;
+WiFiEspServer server(80);
 
 #define SOIL_1_PIN A0
 int Soil_1_Val=-1;
 
-
 #define DHT_PIN 4
-// DHT functions enumerated
-enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};
-// DHT error codes enumerated
-enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};
+enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
+enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};  // DHT error codes enumerated
 float dhtTemp = -100;
 float dhtHum =0;
 
