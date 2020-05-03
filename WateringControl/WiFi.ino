@@ -55,14 +55,14 @@ void sendHttpResponse_MainPage(WiFiEspClient client)
       client.print("ON");
       client.print(" <a href=/pumpoff/");
       client.print(sid);
-      client.print(">off</a>");
+      client.print(">OFF</a>");
     }
     else
     {
       client.print("OFF");
       client.print(" <a href=/pumpon/");
       client.print(sid);
-      client.print(">on</a>");
+      client.print(">ON</a>");
     }
     client.print("<br>\r\n");
   
