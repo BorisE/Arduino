@@ -72,12 +72,6 @@ void readDHTSensor(float &t, float &h)
       Serial.print(h);
       Serial.print("   Temp: ");
       Serial.print(t);
-      Serial.print("     raw data:  ");
-      b = (byte*)dhtCall(DHT_DATAPTR);
-      for (int i = 0; i < 5; i++)
-      {
-        Serial.print(b[i]); Serial.print('\t');
-      }
       Serial.println();
       break;
     case DHT_ERROR_TIMEOUT:

@@ -3,7 +3,7 @@
   by Boris Emchenko
   
  Changes:
-   ver 0.1 [18006] - WiFi, DHT wo lib, Relay
+   ver 0.1 [18102] - WiFi, DHT wo lib, Relay
 */
 #include "WiFiEsp.h"
 
@@ -26,6 +26,10 @@ WiFiEspServer server(80);
 
 String readBuffer;
 
+#define SOIL_1_PIN A0
+int Soil_1_Val=-1;
+
+
 #define DHT_PIN 4
 // DHT functions enumerated
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};
@@ -35,7 +39,7 @@ float dhtTemp = -100;
 float dhtHum =0;
 
 #define RELAY_PUMP_PIN 7
-
+byte PumpStatus;
 
 unsigned long currenttime;
 unsigned long _lastReadTime_DHT=0;
@@ -130,6 +134,7 @@ void loop()
     else if (readBuffer.indexOf("GET /pumpon")>=0)
     {
       switchOn();
+      
     }
     else if (readBuffer.indexOf("GET /pumpoff")>=0)
     {
@@ -142,8 +147,7 @@ void loop()
     currenttime = millis();
 
     //Analog Read
-    //Serial.print("Analog input A0: ");
-    //Serial.println(analogRead(0));
+    Soil_1_Val = analogRead(SOIL_1_PIN);
 
     //DHT Read
     if ((currenttime - _lastReadTime_DHT) > DHT_READ_INTERVAL)
@@ -151,6 +155,9 @@ void loop()
       readDHTSensor(dhtTemp,dhtHum);
       _lastReadTime_DHT= currenttime;
     }
+
+    //Pump Status
+    PumpStatus = digitalRead(RELAY_PUMP_PIN);
   }
  
 
