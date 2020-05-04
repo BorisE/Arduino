@@ -65,7 +65,11 @@ void sendHttpResponse_MainPage(WiFiEspClient client)
       client.print(">ON</a>");
     }
     client.print("<br>\r\n");
-  
+
+    client.print("Pump current: ");
+    client.print(AcsValueF);
+    client.print("<br>\r\n");
+    
     client.print("</html>\r\n");
 
     // The HTTP response ends with another blank line:
@@ -75,11 +79,18 @@ void sendHttpResponse_MainPage(WiFiEspClient client)
 void sendHttpResponse_goRoot(WiFiEspClient client)
 {
     Serial.println("Sending redirect response...");
+    int sid=random(10000);
+    
     //HTTP/1.1 301 Moved Permanently 
     //Location: http://www.example.org/index.asp
     client.print(
       "HTTP/1.1 301 Moved Permanently\r\n"
-      "Location: /\r\n"
+      "Location: /");
+    
+    //client.print(sid);
+    
+    client.print(
+      "\r\n"
       "Connection: close\r\n"  // the connection will be closed after completion of the response
       "\r\n");
 }

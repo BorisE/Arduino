@@ -3,14 +3,15 @@
   (c) 2020 by Boris Emchenko
   
  Changes:
+   ver 0.3 2020/05/04 [19106] - current sensor added
    ver 0.2 2020/05/03 [18872] - web pages with redirect (rnd fix)
    ver 0.1 2020/05/03 [18102] - Starting release (WiFi, DHT wo lib, pump relay)
 */
 #include "WiFiEsp.h"
 
 //Compile version
-#define VERSION "0.2"
-#define VERSION_DATE "20200503"
+#define VERSION "0.3"
+#define VERSION_DATE "20200504"
 
 // Emulate Serial1 on pins 6/7 if not present
 #ifndef HAVE_HWSERIAL1
@@ -36,6 +37,12 @@ float dhtHum =0;
 
 #define RELAY_PUMP_PIN 7
 byte PumpStatus;
+
+#define AMP_PIN A5
+#define AMP_SAMPLING_NUMBER 150
+float AcsValueF=0.0;
+unsigned long _lastReadTime_AMP=0;
+#define AMP_READ_INTERVAL 1111
 
 unsigned long currenttime;
 unsigned long _lastReadTime_DHT=0;
@@ -145,7 +152,7 @@ void loop()
       }
     }
     // give the web browser time to receive the data
-    delay(10);
+    delay(30);
     // close the connection:
     client.stop();
     Serial.println("Sending done. Client disconnected");
@@ -167,6 +174,14 @@ void loop()
 
     //Pump Status
     PumpStatus = digitalRead(RELAY_PUMP_PIN);
+
+    //Pump current 
+    if ((currenttime - _lastReadTime_AMP) > AMP_READ_INTERVAL)
+    {
+      GetAMPValue();
+      _lastReadTime_AMP= currenttime;
+    }
+    
   }
  
 
