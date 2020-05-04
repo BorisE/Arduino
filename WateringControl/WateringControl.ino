@@ -3,7 +3,7 @@
   (c) 2020 by Boris Emchenko
   
  Changes:
-   ver 0.3 2020/05/04 [19106] - current sensor added
+   ver 0.3 2020/05/04 [19254] - current sensor added, some web pages logic reworked
    ver 0.2 2020/05/03 [18872] - web pages with redirect (rnd fix)
    ver 0.1 2020/05/03 [18102] - Starting release (WiFi, DHT wo lib, pump relay)
 */
