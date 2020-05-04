@@ -3,11 +3,13 @@
   (c) 2020 by Boris Emchenko
   
  Changes:
-   ver 0.3 2020/05/04 [19254] - current sensor added, some web pages logic reworked
+   ver 0.4 2020/05/04 [19412] - optimizing command parsing (to use less readbuffer)
+   ver 0.3 2020/05/04 [19412] - current sensor added, some web pages logic reworked
    ver 0.2 2020/05/03 [18872] - web pages with redirect (rnd fix)
    ver 0.1 2020/05/03 [18102] - Starting release (WiFi, DHT wo lib, pump relay)
 */
 #include "WiFiEsp.h"
+#include <avr/pgmspace.h>
 
 //Compile version
 #define VERSION "0.3"
@@ -28,15 +30,19 @@ WiFiEspServer server(80);
 
 #define SOIL_1_PIN A0
 int Soil_1_Val=-1;
+#define SOIL_VERYWET_THRESHOLD 600
 
 #define DHT_PIN 4
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
 enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};  // DHT error codes enumerated
 float dhtTemp = -100;
 float dhtHum =0;
+unsigned long _lastReadTime_DHT=0;
+#define DHT_READ_INTERVAL 3000
 
 #define RELAY_PUMP_PIN 7
 byte PumpStatus;
+unsigned long pumpstarttime;
 
 #define AMP_PIN A5
 #define AMP_SAMPLING_NUMBER 150
@@ -45,8 +51,12 @@ unsigned long _lastReadTime_AMP=0;
 #define AMP_READ_INTERVAL 1111
 
 unsigned long currenttime;
-unsigned long _lastReadTime_DHT=0;
-#define DHT_READ_INTERVAL 3000
+unsigned long MAX_PUMP_RUNTIME = 10000;
+
+unsigned int cmd=0;
+#define CMD_MAIN       0
+#define CMD_PUMP_ON   10
+#define CMD_PUMP_OFF  11
 
 void setup()
 {
@@ -91,6 +101,9 @@ void setup()
 }
 
 
+const char pump1[] PROGMEM = {"Switching pump off by the "};
+
+
 
 void loop()
 {
@@ -103,9 +116,11 @@ void loop()
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
     readBuffer="";
+    cmd=CMD_MAIN;
     while (client.connected()) 
     {
-      if (client.available()) {
+      if (client.available()) 
+      {
         char c = client.read();
         readBuffer += c;
         //Serial.write(c);
@@ -113,35 +128,46 @@ void loop()
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
-        if (c == '\n' && currentLineIsBlank) 
+        if (c == '\n') 
         {
-          Serial.println(readBuffer);
-          
-          //Parse commands
-          if (readBuffer.indexOf("GET /dht")>=0)
+          if (readBuffer.indexOf("GET /")>=0)
           {
-            Serial.println("GET /dht");
-            sendHttpResponse_goRoot(client);
+            if (readBuffer.indexOf("GET /pumpon")>=0)
+            {
+              cmd=CMD_PUMP_ON;
+            }
+            else if (readBuffer.indexOf("GET /pumpoff")>=0)
+            {
+              cmd=CMD_PUMP_OFF;
+            }
           }
-          else if (readBuffer.indexOf("GET /pumpon")>=0)
-          {
-            Serial.println("GET /pumpon");
-            switchOn();
-            sendHttpResponse_goRoot(client);
-          }
-          else if (readBuffer.indexOf("GET /pumpoff")>=0)
-          {
-            Serial.println("GET /pumpoff");
-            switchOff();
-            sendHttpResponse_goRoot(client);
-          }
-          else
-          {
-            //Answer to client
-            sendHttpResponse_MainPage(client);
-          } 
+          readBuffer =""; // Очистить буфер, чтобы не занимал память
+                          // Т.е. мы храним в буффере только последнюю строчку
 
-          break;
+          if (currentLineIsBlank) 
+          {
+            Serial.println(readBuffer);
+            
+            //Parse commands
+            switch (cmd)
+            {
+              case CMD_PUMP_ON:
+                Serial.println("GET /pumpon");
+                switchOn();
+                sendHttpResponse_goRoot(client);
+                break;
+              case CMD_PUMP_OFF:
+                Serial.println("GET /pumpoff");
+                switchOff();
+                sendHttpResponse_goRoot(client);
+                break;
+              default:
+              //Answer to client
+                sendHttpResponse_MainPage(client);
+            } 
+  
+            break;
+          }
         }
         
         if (c == '\n') {
@@ -174,12 +200,32 @@ void loop()
 
     //Pump Status
     PumpStatus = digitalRead(RELAY_PUMP_PIN);
+    if (PumpStatus == LOW)
+    {
+      if ((currenttime - pumpstarttime) > MAX_PUMP_RUNTIME)
+      {
+        Serial.print(pump1);
+        Serial.println("the timer");  
+        switchOff();
+      }
+      else if (PumpStatus == LOW && (Soil_1_Val < 500))
+      {
+        Serial.print(pump1);
+        Serial.println("VERY WET event");  
+        switchOff();
+      }
+    }
+      
+ 
 
     //Pump current 
     if ((currenttime - _lastReadTime_AMP) > AMP_READ_INTERVAL)
     {
       GetAMPValue();
       _lastReadTime_AMP= currenttime;
+
+      Serial.print("Soil sensor: ");
+      Serial.println(Soil_1_Val);
     }
     
   }

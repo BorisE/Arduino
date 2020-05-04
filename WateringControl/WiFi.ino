@@ -85,12 +85,7 @@ void sendHttpResponse_goRoot(WiFiEspClient client)
     //Location: http://www.example.org/index.asp
     client.print(
       "HTTP/1.1 301 Moved Permanently\r\n"
-      "Location: /");
-    
-    //client.print(sid);
-    
-    client.print(
-      "\r\n"
+      "Location: /\r\n"
       "Connection: close\r\n"  // the connection will be closed after completion of the response
       "\r\n");
 }
