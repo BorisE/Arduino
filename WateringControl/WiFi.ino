@@ -13,7 +13,7 @@ void printWifiStatus()
 
 void sendHttpResponse_MainPage(WiFiEspClient client)
 {
-    Serial.println("Sending main page...");
+    Serial.println("Main page");
     // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
     // and a content-type so the client knows what's coming, then a blank line:
     // send a standard http response header
@@ -24,7 +24,6 @@ void sendHttpResponse_MainPage(WiFiEspClient client)
       "Connection: close\r\n"  // the connection will be closed after completion of the response
       "Refresh: 20\r\n"        // refresh the page automatically every 20 sec
       "\r\n");
-    //client.print("<!DOCTYPE HTML>\r\n");
     client.print("<html>\r\n");
     client.print("<h1>Watering Control</h1>\r\n");
     client.print("v");
@@ -33,7 +32,7 @@ void sendHttpResponse_MainPage(WiFiEspClient client)
     client.print(VERSION_DATE);
     client.print("]<br>\r\n");
 
-    client.print("Requests received: ");
+    client.print("Requests: ");
     client.print(++reqCount);
     client.print("<br><br>\r\n");
     
@@ -41,14 +40,14 @@ void sendHttpResponse_MainPage(WiFiEspClient client)
     client.print(Soil_1_Val);
     client.print("<br>\r\n");
 
-    client.print("DHT temp: ");
+    client.print("Temp: ");
     client.print(dhtTemp);
     client.print("<br>\r\n");
-    client.print("DHT humidity: ");
+    client.print("Humidity: ");
     client.print(dhtHum);
     client.print("<br>\r\n");
 
-    client.print("Pump switch: ");
+    client.print("Pump: ");
     int sid=random(10000);
     if (PumpStatus == LOW)
     {
@@ -78,9 +77,7 @@ void sendHttpResponse_MainPage(WiFiEspClient client)
 
 void sendHttpResponse_goRoot(WiFiEspClient client)
 {
-    Serial.println("Sending redirect response...");
-    int sid=random(10000);
-    
+    Serial.println("Redirect response");
     //HTTP/1.1 301 Moved Permanently 
     //Location: http://www.example.org/index.asp
     client.print(

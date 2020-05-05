@@ -68,19 +68,20 @@ void readDHTSensor(float &t, float &h)
       t=dhtCall(DHT_TEMPERATURE)/10.0;
       h=dhtCall(DHT_HUMIDITY)/10.0;
       
-      Serial.print("Humidity: ");
+      Serial.print("[!Hum:");
       Serial.print(h);
-      Serial.print("   Temp: ");
+      Serial.println("]");
+      Serial.print("[!Temp:");
       Serial.print(t);
-      Serial.println();
+      Serial.println("]");
       break;
     case DHT_ERROR_TIMEOUT:
-      Serial.println("DHT Timeout Error");
+      Serial.println("DHT Timeout");
       break;
     case DHT_ERROR_CRC:
-      Serial.println("DHT CRC Error");
+      Serial.println("DHT CRC");
       break;
     default:
-      Serial.println("DHT Unknown Error");
+      Serial.println("DHT Unknown");
   }
 }

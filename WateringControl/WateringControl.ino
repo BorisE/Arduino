@@ -3,7 +3,10 @@
   (c) 2020 by Boris Emchenko
   
  Changes:
-   ver 0.4 2020/05/04 [19412] - optimizing command parsing (to use less readbuffer)
+   ver 0.4 2020/05/04 [19386] - optimizing command parsing (to use less readbuffer, because we got into global memory restriction)
+                              - restrict pump running: by time and by very wet
+                              - amp correction pedestal
+                              - string messages optimized
    ver 0.3 2020/05/04 [19412] - current sensor added, some web pages logic reworked
    ver 0.2 2020/05/03 [18872] - web pages with redirect (rnd fix)
    ver 0.1 2020/05/03 [18102] - Starting release (WiFi, DHT wo lib, pump relay)
@@ -12,8 +15,8 @@
 #include <avr/pgmspace.h>
 
 //Compile version
-#define VERSION "0.3"
-#define VERSION_DATE "20200504"
+#define VERSION "0.4"
+#define VERSION_DATE "20200505"
 
 // Emulate Serial1 on pins 6/7 if not present
 #ifndef HAVE_HWSERIAL1
@@ -30,7 +33,7 @@ WiFiEspServer server(80);
 
 #define SOIL_1_PIN A0
 int Soil_1_Val=-1;
-#define SOIL_VERYWET_THRESHOLD 600
+#define SOIL_VERYWET_THRESHOLD 100
 
 #define DHT_PIN 4
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
@@ -43,15 +46,16 @@ unsigned long _lastReadTime_DHT=0;
 #define RELAY_PUMP_PIN 7
 byte PumpStatus;
 unsigned long pumpstarttime;
+unsigned long MAX_PUMP_RUNTIME = 60000;
 
 #define AMP_PIN A5
 #define AMP_SAMPLING_NUMBER 150
 float AcsValueF=0.0;
 unsigned long _lastReadTime_AMP=0;
+float AMP_Correction = 0.308;
 #define AMP_READ_INTERVAL 1111
 
 unsigned long currenttime;
-unsigned long MAX_PUMP_RUNTIME = 10000;
 
 unsigned int cmd=0;
 #define CMD_MAIN       0
@@ -101,7 +105,6 @@ void setup()
 }
 
 
-const char pump1[] PROGMEM = {"Switching pump off by the "};
 
 
 
@@ -112,7 +115,7 @@ void loop()
   
   // IF ANY CONNECTION, HANDLE IT
   if (client) {
-    Serial.println("New client connected");
+    Serial.println("[New client]");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
     readBuffer="";
@@ -152,12 +155,12 @@ void loop()
             switch (cmd)
             {
               case CMD_PUMP_ON:
-                Serial.println("GET /pumpon");
+                //Serial.println("GET /pumpon");
                 switchOn();
                 sendHttpResponse_goRoot(client);
                 break;
               case CMD_PUMP_OFF:
-                Serial.println("GET /pumpoff");
+                //Serial.println("GET /pumpoff");
                 switchOff();
                 sendHttpResponse_goRoot(client);
                 break;
@@ -181,7 +184,7 @@ void loop()
     delay(30);
     // close the connection:
     client.stop();
-    Serial.println("Sending done. Client disconnected");
+    Serial.println("Sending done.");
   }
   else
   {
@@ -204,14 +207,12 @@ void loop()
     {
       if ((currenttime - pumpstarttime) > MAX_PUMP_RUNTIME)
       {
-        Serial.print(pump1);
-        Serial.println("the timer");  
+        Serial.println("[OFF timer]");
         switchOff();
       }
-      else if (PumpStatus == LOW && (Soil_1_Val < 500))
+      else if (PumpStatus == LOW && (Soil_1_Val < SOIL_VERYWET_THRESHOLD))
       {
-        Serial.print(pump1);
-        Serial.println("VERY WET event");  
+        Serial.println("[OFF VERYWET]");
         switchOff();
       }
     }
@@ -224,8 +225,9 @@ void loop()
       GetAMPValue();
       _lastReadTime_AMP= currenttime;
 
-      Serial.print("Soil sensor: ");
-      Serial.println(Soil_1_Val);
+      Serial.print("[!Soil:");
+      Serial.print(Soil_1_Val);
+      Serial.println("]");
     }
     
   }

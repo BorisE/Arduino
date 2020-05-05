@@ -1,7 +1,7 @@
 void switchOn()
 {
   digitalWrite(RELAY_PUMP_PIN, LOW);
-  Serial.println("Switching PUMP ON"); 
+  Serial.println("PUMP ON"); 
   PumpStatus = digitalRead(RELAY_PUMP_PIN);
   pumpstarttime = millis();
   GetAMPValue();
@@ -9,7 +9,7 @@ void switchOn()
 void switchOff()
 {
   digitalWrite(RELAY_PUMP_PIN, HIGH);
-  Serial.println("Switching PUMP OFF"); 
+  Serial.println("PUMP OFF"); 
   PumpStatus = digitalRead(RELAY_PUMP_PIN);
   pumpstarttime = millis();
   GetAMPValue();
@@ -33,9 +33,10 @@ void GetAMPValue()
   //out to be 2.5 which is out offset. If your arduino is working on different voltage than 
   //you must change the offset according to the input voltage)
   //0.185v(185mV) is rise in output voltage when 1A current flows at input
-  AcsValueF = (2.5 - (AvgAcs * (5.0 / 1024.0)) )/0.185;
+  AcsValueF = (2.5 - (AvgAcs * (5.0 / 1024.0)) )/0.185 + AMP_Correction;
 
-  Serial.print("Pump current: "); 
-  Serial.println(AcsValueF); 
+  Serial.print("[!Cur:"); 
+  Serial.print(AcsValueF); 
+  Serial.println("]"); 
   
 }
