@@ -3,7 +3,8 @@
   (c) 2020 by Boris Emchenko
   
  Changes:
-   ver 0.4 2020/05/04 [19386] - optimizing command parsing (to use less readbuffer, because we got into global memory restriction)
+   ver 0.5 2020/05/05 [20146/1333] - set params from web
+   ver 0.4 2020/05/05 [19386] - optimizing command parsing (to use less readbuffer, because we got into global memory restriction)
                               - restrict pump running: by time and by very wet
                               - amp correction pedestal
                               - string messages optimized
@@ -15,7 +16,7 @@
 #include <avr/pgmspace.h>
 
 //Compile version
-#define VERSION "0.4"
+#define VERSION "0.5"
 #define VERSION_DATE "20200505"
 
 // Emulate Serial1 on pins 6/7 if not present
@@ -61,6 +62,7 @@ unsigned int cmd=0;
 #define CMD_MAIN       0
 #define CMD_PUMP_ON   10
 #define CMD_PUMP_OFF  11
+#define CMD_SETPARAM   2
 
 void setup()
 {
@@ -135,6 +137,7 @@ void loop()
         {
           if (readBuffer.indexOf("GET /")>=0)
           {
+            Serial.println(readBuffer);
             if (readBuffer.indexOf("GET /pumpon")>=0)
             {
               cmd=CMD_PUMP_ON;
@@ -142,6 +145,22 @@ void loop()
             else if (readBuffer.indexOf("GET /pumpoff")>=0)
             {
               cmd=CMD_PUMP_OFF;
+            }
+            else if (readBuffer.indexOf("GET /set/")>=0)
+            {
+              cmd=CMD_SETPARAM;
+              unsigned long tempParam= 0;
+              
+              if (tempParam = getParamLong("pumprun"))
+              {
+                MAX_PUMP_RUNTIME = tempParam;
+                Serial.print("PR set: ");
+                Serial.println(MAX_PUMP_RUNTIME);
+              }
+              else
+              {
+                Serial.print("Not Found");
+              }
             }
           }
           readBuffer =""; // Очистить буфер, чтобы не занимал память
@@ -162,6 +181,9 @@ void loop()
               case CMD_PUMP_OFF:
                 //Serial.println("GET /pumpoff");
                 switchOff();
+                sendHttpResponse_goRoot(client);
+                break;
+              case CMD_SETPARAM:
                 sendHttpResponse_goRoot(client);
                 break;
               default:
