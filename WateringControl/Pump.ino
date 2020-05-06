@@ -2,7 +2,7 @@ void switchOn()
 {
   digitalWrite(RELAY_PUMP_PIN, LOW);
   Serial.println("PUMP ON"); 
-  PumpStatus = digitalRead(RELAY_PUMP_PIN);
+  PumpStatus = !digitalRead(RELAY_PUMP_PIN);
   pumpstarttime = millis();
   GetAMPValue();
 }
@@ -10,7 +10,7 @@ void switchOff()
 {
   digitalWrite(RELAY_PUMP_PIN, HIGH);
   Serial.println("PUMP OFF"); 
-  PumpStatus = digitalRead(RELAY_PUMP_PIN);
+  PumpStatus = !digitalRead(RELAY_PUMP_PIN);
   pumpstarttime = millis();
   GetAMPValue();
 }

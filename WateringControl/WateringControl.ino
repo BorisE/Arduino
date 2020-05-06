@@ -3,6 +3,8 @@
   (c) 2020 by Boris Emchenko
   
  Changes:
+   ver 0.6 2020/05/05 [20026/1155] - moved to JSON responses
+                                   - set param VWT
    ver 0.5 2020/05/05 [20146/1333] - set params from web
    ver 0.4 2020/05/05 [19386] - optimizing command parsing (to use less readbuffer, because we got into global memory restriction)
                               - restrict pump running: by time and by very wet
@@ -34,7 +36,7 @@ WiFiEspServer server(80);
 
 #define SOIL_1_PIN A0
 int Soil_1_Val=-1;
-#define SOIL_VERYWET_THRESHOLD 100
+int SOIL_VERYWET_THRESHOLD=100;
 
 #define DHT_PIN 4
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
@@ -154,12 +156,18 @@ void loop()
               if (tempParam = getParamLong("pumprun"))
               {
                 MAX_PUMP_RUNTIME = tempParam;
-                Serial.print("PR set: ");
+                Serial.print("MPR set: ");
                 Serial.println(MAX_PUMP_RUNTIME);
+              }
+              else if (tempParam = getParamLong("verywet"))
+              {
+                SOIL_VERYWET_THRESHOLD = tempParam;
+                Serial.print("VWT set: ");
+                Serial.println(SOIL_VERYWET_THRESHOLD);
               }
               else
               {
-                Serial.print("Not Found");
+                Serial.print("Param Not Found");
               }
             }
           }
@@ -174,21 +182,19 @@ void loop()
             switch (cmd)
             {
               case CMD_PUMP_ON:
-                //Serial.println("GET /pumpon");
                 switchOn();
-                sendHttpResponse_goRoot(client);
+                sendHttpResponse_JSON(client);
                 break;
               case CMD_PUMP_OFF:
-                //Serial.println("GET /pumpoff");
                 switchOff();
-                sendHttpResponse_goRoot(client);
+                sendHttpResponse_JSON(client);
                 break;
               case CMD_SETPARAM:
-                sendHttpResponse_goRoot(client);
+                sendHttpResponse_Settings_JSON(client);
                 break;
               default:
-              //Answer to client
-                sendHttpResponse_MainPage(client);
+                //Answer to client
+                sendHttpResponse_JSON(client);
             } 
   
             break;
@@ -224,15 +230,15 @@ void loop()
     }
 
     //Pump Status
-    PumpStatus = digitalRead(RELAY_PUMP_PIN);
-    if (PumpStatus == LOW)
+    PumpStatus = !digitalRead(RELAY_PUMP_PIN);
+    if (PumpStatus == 1)
     {
       if ((currenttime - pumpstarttime) > MAX_PUMP_RUNTIME)
       {
         Serial.println("[OFF timer]");
         switchOff();
       }
-      else if (PumpStatus == LOW && (Soil_1_Val < SOIL_VERYWET_THRESHOLD))
+      else if (PumpStatus == 1 && (Soil_1_Val < SOIL_VERYWET_THRESHOLD))
       {
         Serial.println("[OFF VERYWET]");
         switchOff();
@@ -244,6 +250,10 @@ void loop()
     //Pump current 
     if ((currenttime - _lastReadTime_AMP) > AMP_READ_INTERVAL)
     {
+      Serial.print("[!Pump:");
+      Serial.print(PumpStatus);
+      Serial.println("]");
+      
       GetAMPValue();
       _lastReadTime_AMP= currenttime;
 
@@ -251,7 +261,6 @@ void loop()
       Serial.print(Soil_1_Val);
       Serial.println("]");
     }
-    
   }
  
 

@@ -11,78 +11,57 @@ void printWifiStatus()
   Serial.println();
 }
 
-void sendHttpResponse_MainPage(WiFiEspClient client)
+
+/* JSON repsonse
+ * {"ver":"0.5","ved":"20200505","req":1598,"soi":1020,"tem":28.30,"hum":39.80,"pum":0,"pcr":0.43}
+ */
+
+void sendHttpResponse_JSON(WiFiEspClient client)
 {
-    Serial.println("Main page");
-    // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-    // and a content-type so the client knows what's coming, then a blank line:
-    // send a standard http response header
-    // use \r\n instead of many println statements to speedup data send
-    client.print(
+  //{"req":1598,"soi":1020,"tem":28.30,"hum":39.80,"pum":0,"pcr":0.43}
+  client.print(
       "HTTP/1.1 200 OK\r\n"
-      "Content-Type: text/html\r\n"
+      "Content-Type: application/json\r\n"
       "Connection: close\r\n"  // the connection will be closed after completion of the response
-      "Refresh: 20\r\n"        // refresh the page automatically every 20 sec
       "\r\n");
-    client.print("<html>\r\n");
-    client.print("<h1>Watering Control</h1>\r\n");
-    client.print("v");
-    client.print(VERSION);
-    client.print(" [");
-    client.print(VERSION_DATE);
-    client.print("]<br>\r\n");
-
-    client.print("Requests: ");
-    client.print(++reqCount);
-    client.print("<br><br>\r\n");
-    
-    client.print("Soil sensor: ");
-    client.print(Soil_1_Val);
-    client.print("<br>\r\n");
-
-    client.print("Temp: ");
-    client.print(dhtTemp);
-    client.print("<br>\r\n");
-    client.print("Humidity: ");
-    client.print(dhtHum);
-    client.print("<br>\r\n");
-
-    client.print("Pump: ");
-    int sid=random(10000);
-    if (PumpStatus == LOW)
-    {
-      client.print("ON");
-      client.print(" <a href=/pumpoff/");
-      client.print(sid);
-      client.print(">OFF</a>");
-    }
-    else
-    {
-      client.print("OFF");
-      client.print(" <a href=/pumpon/");
-      client.print(sid);
-      client.print(">ON</a>");
-    }
-    client.print("<br>\r\n");
-
-    client.print("Pump current: ");
-    client.print(AcsValueF);
-    client.print("<br>\r\n");
-    
-    client.print("</html>\r\n");
-
-    // The HTTP response ends with another blank line:
-    client.println();
+  client.print('{');
+  client.print("\"R\":");
+  client.print(++reqCount);
+  client.print(",\"S\":");
+  client.print(Soil_1_Val);
+  client.print(",\"T\":");
+  client.print(dhtTemp);
+  client.print(",\"H\":");
+  client.print(dhtHum);
+  client.print(",\"P\":");
+  client.print(PumpStatus);
+  client.print(",\"C\":");
+  client.print(AcsValueF);
+  
+  client.println('}');
+  // The HTTP response ends with another blank line:
+  client.println();
 }
 
-void sendHttpResponse_goRoot(WiFiEspClient client)
+void sendHttpResponse_Settings_JSON(WiFiEspClient client)
 {
-    Serial.println("Redirect response");
-    //HTTP/1.1 301 Moved Permanently 
-    //Location: http://www.example.org/index.asp
-    client.print(
-      "HTTP/1.1 301 Moved Permanently\r\n"
-      "Location: /\r\n"
+  //{"ver":"0.5","ved":"20200505","VWT":100,"MPR":60000}
+  client.print(
+      "HTTP/1.1 200 OK\r\n"
+      "Content-Type: application/json\r\n"
       "Connection: close\r\n"  // the connection will be closed after completion of the response
       "\r\n");
+  client.print('{');
+  client.print("\"ver\":\"");
+  client.print(VERSION);
+  client.print("\",\"ved\":\"");
+  client.print(VERSION_DATE);
+  client.print("\",\"VWT\":");
+  client.print(SOIL_VERYWET_THRESHOLD);
+  client.print(",\"MPR\":");
+  client.print(MAX_PUMP_RUNTIME);
+  
+  client.println('}');
+  // The HTTP response ends with another blank line:
+  client.println();
 }
