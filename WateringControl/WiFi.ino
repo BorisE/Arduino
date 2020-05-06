@@ -3,11 +3,15 @@ void printWifiStatus()
   // print the SSID of the network you're attached to
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
+  Serial.print("RSSI: ");
+  Serial.println(WiFi.RSSI());
 
   // print your WiFi shield's IP address
   IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
+  Serial.print("IP: ");
   Serial.println(ip);
+
+  
   Serial.println();
 }
 

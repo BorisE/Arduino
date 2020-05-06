@@ -76,12 +76,12 @@ void readDHTSensor(float &t, float &h)
       Serial.println("]");
       break;
     case DHT_ERROR_TIMEOUT:
-      Serial.println("DHT Timeout");
+      Serial.println(F("DHT Timeout"));
       break;
     case DHT_ERROR_CRC:
-      Serial.println("DHT CRC");
+      Serial.println(F("DHT CRC"));
       break;
     default:
-      Serial.println("DHT Unknown");
+      Serial.println(F("DHT Unknown"));
   }
 }

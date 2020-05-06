@@ -1,10 +1,22 @@
 /*
   WATERING CONTROL
   (c) 2020 by Boris Emchenko
+
+  usage through web:
+  http://192.168.0.235/ - get JSON status
+  http://192.168.0.235/pumpon - pump on
+  http://192.168.0.235/pumpoff - pump off
+  http://192.168.0.235/set/ - get parameters JSON
+  http://192.168.0.235/set/VWT/400 - set parameter Very Wet Threshold to 400
+
+  add ramdom parameter to bypass cache:
+  http://192.168.0.235/pumpon/1023014
   
  Changes:
-   ver 0.6 2020/05/05 [20026/1155] - moved to JSON responses
+   ver 0.7 2020/05/06 [20158/971] - moved some strings to flash memory
+   ver 0.6 2020/05/06 [19958/1101] - moved to JSON responses
                                    - set param VWT
+                                   - some optimization
    ver 0.5 2020/05/05 [20146/1333] - set params from web
    ver 0.4 2020/05/05 [19386] - optimizing command parsing (to use less readbuffer, because we got into global memory restriction)
                               - restrict pump running: by time and by very wet
@@ -14,24 +26,22 @@
    ver 0.2 2020/05/03 [18872] - web pages with redirect (rnd fix)
    ver 0.1 2020/05/03 [18102] - Starting release (WiFi, DHT wo lib, pump relay)
 */
-#include "WiFiEsp.h"
-#include <avr/pgmspace.h>
-
 //Compile version
-#define VERSION "0.5"
-#define VERSION_DATE "20200505"
+#define VERSION "0.7"
+#define VERSION_DATE "20200506"
 
-// Emulate Serial1 on pins 6/7 if not present
+#include "WiFiEsp.h"
+
+// Emulate Serial1 on pins 6/5 if not present
 #ifndef HAVE_HWSERIAL1
 #include "SoftwareSerial.h"
 SoftwareSerial Serial1(6, 5); // RX, TX
 #endif
-
 char ssid[] = "BATMAJ";          // your network SSID (name)
 char pass[] = "8oknehcmE";       // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
-int reqCount = 0;                // number of requests received
-String readBuffer;
+unsigned int reqCount = 0;       // number of requests received
+String readBuffer;               // current line from HTTP REQUEST
 WiFiEspServer server(80);
 
 #define SOIL_1_PIN A0
@@ -47,29 +57,29 @@ unsigned long _lastReadTime_DHT=0;
 #define DHT_READ_INTERVAL 3000
 
 #define RELAY_PUMP_PIN 7
-byte PumpStatus;
+byte PumpStatus;                        // PumpStatus: 1 - on, 0 - off (digitalPin in fact is inversed: 0 (LOW) - on, 1 (HIGH) - off)
 unsigned long pumpstarttime;
-unsigned long MAX_PUMP_RUNTIME = 60000;
+unsigned long MAX_PUMP_RUNTIME = 60000; // Maximum Pump Runtime in millis
 
 #define AMP_PIN A5
-#define AMP_SAMPLING_NUMBER 150
+#define AMP_SAMPLING_NUMBER 150         // number of consecutive sensor reads to average noise
 float AcsValueF=0.0;
 unsigned long _lastReadTime_AMP=0;
-float AMP_Correction = 0.308;
+float AMP_Correction = 0.308;           // base correction pedestal to set zero
 #define AMP_READ_INTERVAL 1111
 
-unsigned long currenttime;
-
-unsigned int cmd=0;
+unsigned int cmd=0;                     // curren command
 #define CMD_MAIN       0
 #define CMD_PUMP_ON   10
 #define CMD_PUMP_OFF  11
 #define CMD_SETPARAM   2
 
+unsigned long currenttime;              // millis from script start 
+
 void setup()
 {
   Serial.begin(9600);
-  Serial.print("Watering Control v");
+  Serial.print(F("Watering Control v"));
   Serial.print(VERSION);
   Serial.print(" [");
   Serial.print(VERSION_DATE);
@@ -83,29 +93,31 @@ void setup()
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
-    Serial.println("WiFi shield not present");
+    Serial.println(F("WiFi shield not present"));
     // don't continue
     while (true);
   }
 
   // attempt to connect to WiFi network
   while ( status != WL_CONNECTED) {
-    Serial.print("Attempting to connect to WPA SSID: ");
+    Serial.print(F("Connecting to: "));
     Serial.println(ssid);
     // Connect to WPA/WPA2 network
     status = WiFi.begin(ssid, pass);
   }
 
-  Serial.println("You're connected to the network");
+  //Serial.println("Connected.");
   printWifiStatus();
   
   // start the web server on port 80
   server.begin();
   
+  // init relay port and set it to CLOSED
   pinMode(RELAY_PUMP_PIN, OUTPUT);
   digitalWrite(RELAY_PUMP_PIN, HIGH);
 
-  randomSeed(analogRead(A5));
+  // Randomize
+  randomSeed(analogRead(A4));
 }
 
 
@@ -119,8 +131,12 @@ void loop()
   
   // IF ANY CONNECTION, HANDLE IT
   if (client) {
-    Serial.println("[New client]");
+    Serial.print("New request [");
+    Serial.print(client.remoteIP());
+    Serial.println("]");
+
     // an http request ends with a blank line
+
     boolean currentLineIsBlank = true;
     readBuffer="";
     cmd=CMD_MAIN;
@@ -140,11 +156,11 @@ void loop()
           if (readBuffer.indexOf("GET /")>=0)
           {
             Serial.println(readBuffer);
-            if (readBuffer.indexOf("GET /pumpon")>=0)
+            if (readBuffer.indexOf("/pumpon")>=0)
             {
               cmd=CMD_PUMP_ON;
             }
-            else if (readBuffer.indexOf("GET /pumpoff")>=0)
+            else if (readBuffer.indexOf("/pumpoff")>=0)
             {
               cmd=CMD_PUMP_OFF;
             }
@@ -167,7 +183,7 @@ void loop()
               }
               else
               {
-                Serial.print("Param Not Found");
+                Serial.print(F("Param Not Found"));
               }
             }
           }
@@ -212,7 +228,7 @@ void loop()
     delay(30);
     // close the connection:
     client.stop();
-    Serial.println("Sending done.");
+    Serial.println(F("Sending done."));
   }
   else
   {
@@ -231,22 +247,21 @@ void loop()
 
     //Pump Status
     PumpStatus = !digitalRead(RELAY_PUMP_PIN);
-    if (PumpStatus == 1)
+    if (PumpStatus)
     {
       if ((currenttime - pumpstarttime) > MAX_PUMP_RUNTIME)
       {
-        Serial.println("[OFF timer]");
+        Serial.println(F("[OFF timer]"));
         switchOff();
       }
-      else if (PumpStatus == 1 && (Soil_1_Val < SOIL_VERYWET_THRESHOLD))
+      else if (PumpStatus && (Soil_1_Val < SOIL_VERYWET_THRESHOLD))
       {
-        Serial.println("[OFF VERYWET]");
+        Serial.println(F("[OFF VERYWET]"));
         switchOff();
       }
     }
       
  
-
     //Pump current 
     if ((currenttime - _lastReadTime_AMP) > AMP_READ_INTERVAL)
     {
@@ -265,5 +280,5 @@ void loop()
  
 
   // END OF CYCLE
-  delay(10);
+  delay(50);
 }
