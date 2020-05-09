@@ -82,6 +82,7 @@ unsigned long currenttime;              // millis from script start
 #define DATA_READ_INTERVAL 11111
 #define DHT_READ_INTERVAL 30000
 
+bool bOutput=false;
 
 void setup()
 {
@@ -130,6 +131,8 @@ void setup()
 
 void loop()
 {
+  bOutput=false;
+
   // listen for incoming clients
   WiFiEspClient WebClient = server.available();
   
@@ -243,7 +246,7 @@ void loop()
       Serial.write(c);
     }
     WebClient.stop();
-    
+
     currenttime = millis();
 
     //Pump Status
@@ -266,6 +269,7 @@ void loop()
     //Otherwise every given interval
     if (PumpStatus || ((currenttime - _lastReadTime_AMP) > DATA_READ_INTERVAL))
     {
+      bOutput=true;
       //Pump status
       Serial.print("[!Pump:");
       Serial.print(PumpStatus);
@@ -287,6 +291,7 @@ void loop()
     //So read only in given interval
     if ((currenttime - _lastReadTime_DHT) > DHT_READ_INTERVAL)
     {
+      bOutput=true;
       readDHTSensor(dhtTemp, dhtHum);
       _lastReadTime_DHT= currenttime;
     }
@@ -297,6 +302,11 @@ void loop()
       httpRequest_Send(WebClient);
       delay(100);
       _lastTime_HTTPSENT= currenttime;
+    }
+    
+    if (bOutput)
+    {
+      Serial.println(F("[!END]\r\n"));
     }
   }
  
