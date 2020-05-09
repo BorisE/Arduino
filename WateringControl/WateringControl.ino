@@ -13,6 +13,7 @@
   http://192.168.0.235/pumpon/1023014
   
  Changes:
+   ver 0.8 2020/05/09 [22540/1083] - send data by http get
    ver 0.7 2020/05/06 [20158/971] - moved some strings to flash memory
    ver 0.6 2020/05/06 [19958/1101] - moved to JSON responses
                                    - set param VWT
@@ -27,8 +28,8 @@
    ver 0.1 2020/05/03 [18102] - Starting release (WiFi, DHT wo lib, pump relay)
 */
 //Compile version
-#define VERSION "0.7"
-#define VERSION_DATE "20200506"
+#define VERSION "0.8"
+#define VERSION_DATE "20200509"
 
 #include "WiFiEsp.h"
 
@@ -54,7 +55,7 @@ enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN 
 float dhtTemp = -100;
 float dhtHum =0;
 unsigned long _lastReadTime_DHT=0;
-#define DHT_READ_INTERVAL 3000
+#define DHT_READ_INTERVAL 10000
 
 #define RELAY_PUMP_PIN 7
 byte PumpStatus;                        // PumpStatus: 1 - on, 0 - off (digitalPin in fact is inversed: 0 (LOW) - on, 1 (HIGH) - off)
@@ -73,6 +74,11 @@ unsigned int cmd=0;                     // curren command
 #define CMD_PUMP_ON   10
 #define CMD_PUMP_OFF  11
 #define CMD_SETPARAM   2
+
+char ServerName[] = "192.168.0.199";    // for Sending Request
+IPAddress ServerIP(192, 168, 0, 199);   // Sending Server ip address
+unsigned long SEND_DATA_INTERVAL = 60000;
+unsigned long _lastTime_HTTPSENT;
 
 unsigned long currenttime;              // millis from script start 
 
@@ -121,18 +127,16 @@ void setup()
 }
 
 
-
-
-
 void loop()
 {
   // listen for incoming clients
-  WiFiEspClient client = server.available();
+  //WiFiEspClient client = server.available();
+  WiFiEspClient SendClient = server.available();
   
   // IF ANY CONNECTION, HANDLE IT
-  if (client) {
+  if (SendClient && (SendClient.remoteIP() != ServerIP)) {
     Serial.print("New request [");
-    Serial.print(client.remoteIP());
+    Serial.print(SendClient.remoteIP());
     Serial.println("]");
 
     // an http request ends with a blank line
@@ -140,11 +144,11 @@ void loop()
     boolean currentLineIsBlank = true;
     readBuffer="";
     cmd=CMD_MAIN;
-    while (client.connected()) 
+    while (SendClient.connected()) 
     {
-      if (client.available()) 
+      if (SendClient.available()) 
       {
-        char c = client.read();
+        char c = SendClient.read();
         readBuffer += c;
         //Serial.write(c);
     
@@ -199,18 +203,18 @@ void loop()
             {
               case CMD_PUMP_ON:
                 switchOn();
-                sendHttpResponse_JSON(client);
+                sendHttpResponse_JSON(SendClient);
                 break;
               case CMD_PUMP_OFF:
                 switchOff();
-                sendHttpResponse_JSON(client);
+                sendHttpResponse_JSON(SendClient);
                 break;
               case CMD_SETPARAM:
-                sendHttpResponse_Settings_JSON(client);
+                sendHttpResponse_Settings_JSON(SendClient);
                 break;
               default:
                 //Answer to client
-                sendHttpResponse_JSON(client);
+                sendHttpResponse_JSON(SendClient);
             } 
   
             break;
@@ -227,11 +231,18 @@ void loop()
     // give the web browser time to receive the data
     delay(30);
     // close the connection:
-    client.stop();
+    SendClient.stop();
     Serial.println(F("Sending done."));
   }
   else
   {
+    // Если это был не запрос на сервер, то вывести содержимое на экран и остановиться
+    while (SendClient.available()) {
+      char c = SendClient.read();
+      Serial.write(c);
+    }
+    SendClient.stop();
+    
     // IF NO CONNECTIONS, READ SENSOR DATA, MAKE CALCULATIONS, ETC
     currenttime = millis();
 
@@ -276,6 +287,15 @@ void loop()
       Serial.print(Soil_1_Val);
       Serial.println("]");
     }
+
+    //Send data
+    if ((currenttime - _lastTime_HTTPSENT) > SEND_DATA_INTERVAL)
+    {
+      httpRequest_Send(SendClient);
+      _lastTime_HTTPSENT= currenttime;
+      delay(50);
+    }
+    
   }
  
 

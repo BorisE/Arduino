@@ -15,6 +15,33 @@ void printWifiStatus()
   Serial.println();
 }
 
+// this method makes a HTTP connection to the server
+void httpRequest_Send(WiFiEspClient &SendClient)
+{
+  // close any connection before send a new request
+  // this will free the socket on the WiFi shield
+  SendClient.stop();
+
+  // if there's a successful connection
+  if (SendClient.connect(ServerName, 80)) {
+    Serial.println("Connecting...");
+
+    String Params = "GET /putdata.php?T=";
+    String Host = "Host: ";
+   
+    SendClient.println(Params + dhtTemp + "&H=" + dhtHum + "&S=" + Soil_1_Val + "&P=" + PumpStatus + "&C=" + AcsValueF + " HTTP/1.1");
+    SendClient.println(Host + ServerName);
+    SendClient.print(
+      "Connection: close\r\n"  // the connection will be closed after completion of the response
+      "\r\n");
+
+    Serial.println("Sent");
+  }
+  else {
+    // if you couldn't make a connection
+    Serial.println("Connection failed");
+  }
+}
 
 /* JSON repsonse
  * {"ver":"0.5","ved":"20200505","req":1598,"soi":1020,"tem":28.30,"hum":39.80,"pum":0,"pcr":0.43}
