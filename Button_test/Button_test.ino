@@ -39,12 +39,7 @@ void setup() {
 
 void ReadButtonPress()
 {
-  static unsigned long lastread;
-  if ((millis() - lastread) > 1000)
-  {
     buttonState = digitalRead (buttonPin);
-  }
-  lastread = millis(); 
 }
 
 void loop() {
@@ -53,12 +48,15 @@ void loop() {
   // read the state of the pushbutton value:
   //buttonState = digitalRead(buttonPin);
 
+  static unsigned long lastread;
+
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
-  if (buttonState == HIGH) {
+  if (buttonState == HIGH && ((millis() - lastread) > 1500)) {
     // turn LED on:
-  Serial.print("Reading state: ");
-  Serial.println("on");
+    Serial.print("Reading state: ");
+    Serial.println("on");
     buttonState = LOW;
+    lastread = millis(); 
   } else {
     // turn LED off:
     //Serial.println("off");
