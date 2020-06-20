@@ -22,7 +22,7 @@
 
  
  Changes:
-   ver 0.8 2020/05/09 [22542/1073] - send data by http get
+   ver 0.8 2020/05/09 [22582/1074] - send data by http get
    ver 0.7 2020/05/06 [20158/971] - moved some strings to flash memory
    ver 0.6 2020/05/06 [19958/1101] - moved to JSON responses
                                    - set param VWT

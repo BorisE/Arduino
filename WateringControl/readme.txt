@@ -2,16 +2,7 @@ WATERING CONTROL
 (c) 2020 by Boris Emchenko
 
   usage through web:
-  http://192.168.0.235/ - get JSON status
-  http://192.168.0.235/pumpon - pump on
-  http://192.168.0.235/pumpoff - pump off
-  http://192.168.0.235/set/ - get parameters JSON
-  http://192.168.0.235/set/VWT/400 - set parameter Very Wet Threshold to 400
-
-  add ramdom parameter to bypass cache:
-  http://192.168.0.235/pumpon/1023014
-
-
+  http://192.168.0.31/ - get JSON status
 
   JSON Response: {"R":1,"S":358,"T":-100.00,"H":0.00,"P":0,"C":0.47}
   R  1    - requests count
@@ -20,6 +11,26 @@ WATERING CONTROL
   H 0     - Humidity from DHT sensor
   P 0     - Pump status (on|off)
   C 0.47  - Pump current
+
+
+  http://192.168.0.31/pumpon - pump on
+  http://192.168.0.31/pumpoff - pump off
+
+  
+  http://192.168.0.31/set/ - get parameters JSON
+  {"ver":"0.8","ved":"20200509","VWT":100,"MPR":1000}
+  ver, ved - версия и дата прошивки
+  VWT - SOIL_VERYWET_THRESHOLD значение сенсора при котором насос отключается 
+  MPR - MAX_PUMP_RUNTIME максмиальное время работы насоса
+
+  http://192.168.0.31/set/pumprun/10000 -  set MAX_PUMP_RUNTIME parameter to 10000
+  http://192.168.0.31/set/verywet/400 - set parameter Very Wet Threshold to 400
+
+  add ramdom parameter to bypass cache:
+  http://192.168.0.235/pumpon/1023014
+
+
+
 
 
   
