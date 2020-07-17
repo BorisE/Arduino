@@ -11,9 +11,20 @@
 
   add ramdom parameter to bypass cache:
   http://192.168.0.235/pumpon/1023014
-  
+
+  JSON Response: {"R":1,"S":358,"T":-100.00,"H":0.00,"P":0,"C":0.47}
+  R  1    - requests count
+  S 358   - Soil sensor 1 value
+  T -100  - Temperature from DHT sensor
+  H 0     - Humidity from DHT sensor
+  P 0     - Pump status (on|off)
+  C 0.47  - Pump current
+
+ 
  Changes:
-   ver 0.8 2020/05/09 [22542/1073] - send data by http get
+   ver 1.0rc 2020/07/15 [22960/1083] - send data more ofter when pump is on
+   ver 0.9 2020/06/20 [22942/1083] - pushbutton to start/stop pump
+   ver 0.8 2020/05/09 [22582/1074] - send data by http get
    ver 0.7 2020/05/06 [20158/971] - moved some strings to flash memory
    ver 0.6 2020/05/06 [19958/1101] - moved to JSON responses
                                    - set param VWT
@@ -28,8 +39,8 @@
    ver 0.1 2020/05/03 [18102] - Starting release (WiFi, DHT wo lib, pump relay)
 */
 //Compile version
-#define VERSION "0.8"
-#define VERSION_DATE "20200509"
+#define VERSION "1.0"
+#define VERSION_DATE "20200715"
 
 #include "WiFiEsp.h"
 
@@ -65,7 +76,11 @@ unsigned long MAX_PUMP_RUNTIME = 60000; // Maximum Pump Runtime in millis
 #define AMP_SAMPLING_NUMBER 150         // number of consecutive sensor reads to average noise
 float AcsValueF=0.0;
 unsigned long _lastReadTime_AMP=0;
-float AMP_Correction = 0.308;           // base correction pedestal to set zero
+float AMP_Correction = 0;           // base correction pedestal to set zero
+
+#define buttonPin 3                     // the number of the pushbutton pin (UNO: only 2 or 3)
+#define DEBOUNCE_DELAY 300              // delay for button debounce
+volatile byte buttonState = LOW;
 
 unsigned int cmd=0;                     // curren command
 #define CMD_MAIN       0
@@ -78,12 +93,16 @@ IPAddress ServerIP(192, 168, 0, 199);   // Sending Server ip address
 unsigned long _lastTime_HTTPSENT;
 
 unsigned long currenttime;              // millis from script start 
-#define SEND_DATA_INTERVAL 60000
+#define SEND_DATA_INTERVAL_NORMAL 60000
+#define SEND_DATA_INTERVAL_PUMP 10000
 #define DATA_READ_INTERVAL 11111
 #define DHT_READ_INTERVAL 30000
 
 bool bOutput=false;
 
+/********************************************************
+*     SETUP
+ *******************************************************/
 void setup()
 {
   Serial.begin(9600);
@@ -126,12 +145,29 @@ void setup()
 
   // Randomize
   randomSeed(analogRead(A4));
+
+  // Push button
+  pinMode(buttonPin, INPUT);
+  attachInterrupt(digitalPinToInterrupt(buttonPin), ReadButtonPress, RISING);  
 }
 
 
 void loop()
 {
   bOutput=false;
+
+  // check push button
+  if (buttonState == HIGH) {
+    buttonState = LOW;    
+    Serial.print(F("Button pushed, "));
+    if (PumpStatus){
+      Serial.println("off");
+      switchOff();
+    } else {
+      Serial.println("on");
+      switchOn();
+    }
+  }
 
   // listen for incoming clients
   WiFiEspClient WebClient = server.available();
@@ -297,7 +333,8 @@ void loop()
     }
 
     //Send data in given interval of time
-    if ((currenttime - _lastTime_HTTPSENT) > SEND_DATA_INTERVAL)
+    //but if pump is on do it every cycle
+    if ( (!PumpStatus && (currenttime - _lastTime_HTTPSENT) > SEND_DATA_INTERVAL_NORMAL) || (PumpStatus && (currenttime - _lastTime_HTTPSENT) > SEND_DATA_INTERVAL_PUMP))
     {
       httpRequest_Send(WebClient);
       delay(100);
@@ -312,4 +349,16 @@ void loop()
  
   // END OF CYCLE
   delay(50);
+}
+
+
+
+void ReadButtonPress()
+{
+  static unsigned long lastread;
+  if ((millis() - lastread) > DEBOUNCE_DELAY)
+  {
+    buttonState = digitalRead (buttonPin);
+  }
+  lastread = millis(); 
 }
