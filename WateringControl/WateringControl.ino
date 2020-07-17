@@ -11,18 +11,9 @@
 
   add ramdom parameter to bypass cache:
   http://192.168.0.235/pumpon/1023014
-
-  JSON Response: {"R":1,"S":358,"T":-100.00,"H":0.00,"P":0,"C":0.47}
-  R  1    - requests count
-  S 358   - Soil sensor 1 value
-  T -100  - Temperature from DHT sensor
-  H 0     - Humidity from DHT sensor
-  P 0     - Pump status (on|off)
-  C 0.47  - Pump current
-
- 
+  
  Changes:
-   ver 0.8 2020/05/09 [22582/1074] - send data by http get
+   ver 0.8 2020/05/09 [22542/1073] - send data by http get
    ver 0.7 2020/05/06 [20158/971] - moved some strings to flash memory
    ver 0.6 2020/05/06 [19958/1101] - moved to JSON responses
                                    - set param VWT

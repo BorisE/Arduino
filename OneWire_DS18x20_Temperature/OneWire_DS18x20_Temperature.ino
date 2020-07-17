@@ -7,7 +7,7 @@
 // The DallasTemperature library can do all this work for you!
 // https://github.com/milesburton/Arduino-Temperature-Control-Library
 
-OneWire  ds(10);  // on pin 10 (a 4.7K resistor is necessary)
+OneWire  ds(D8);  // on pin 10 (a 4.7K resistor is necessary)
 
 void setup(void) {
   Serial.begin(9600);
@@ -94,6 +94,7 @@ void loop(void) {
       // "count remain" gives full 12 bit resolution
       raw = (raw & 0xFFF0) + 12 - data[6];
     }
+    Serial.println("  old type");    
   } else {
     byte cfg = (data[4] & 0x60);
     // at lower res, the low bits are undefined, so let's zero them
@@ -101,6 +102,7 @@ void loop(void) {
     else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
     else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
     //// default is 12 bit resolution, 750 ms conversion time
+    Serial.println("  new type");    
   }
   celsius = (float)raw / 16.0;
   fahrenheit = celsius * 1.8 + 32.0;
