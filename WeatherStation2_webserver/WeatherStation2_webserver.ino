@@ -1,3 +1,18 @@
+/*
+  WEATHER STATION Mk II
+  (c) 2020 by Boris Emchenko
+
+ Changes:
+   ver 0.1 2020/07/18 - web data sending implemented (as prototype)
+                      - web server implemented 
+                      - DS18B20, DHT22 implemented
+*/
+
+//Compile version
+#define VERSION "0.1"
+#define VERSION_DATE "20200718"
+
+
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -12,6 +27,10 @@ const char* ssid = STASSID;
 const char* password = STAPSK;
 
 ESP8266WebServer server(80);
+
+const char* host = "192.168.1.1";  // IP serveur - Server IP
+const int   port = 80;            // Port serveur - Server Port
+unsigned long _last_HTTP_SEND=0;
 
 /* for Wemos D1 R1
 #define PIN_WIRE_SDA (4)  D14
@@ -68,7 +87,8 @@ unsigned long _lastReadTime_DHT=0;
 
 
 unsigned long currenttime;              // millis from script start 
-#define DHT_READ_INTERVAL 30000
+#define DHT_READ_INTERVAL 10000
+#define POST_DATA_INTERVAL 10000
 
 bool bOutput=false;
 
@@ -80,9 +100,20 @@ void setup(void) {
   digitalWrite(STATUS_LED, LOW);
   Serial.begin(115200);
   
+  // Wait for serial to initialize.
+  while(!Serial) { }
+  Serial.println("");
+
+  Serial.println("WEATHER STATION Mk II");
+  Serial.print ("v");
+  Serial.print (VERSION);
+  Serial.print (" [");
+  Serial.print (VERSION_DATE);
+  Serial.println ("]");
+
+  
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  Serial.println("");
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
@@ -116,16 +147,26 @@ void setup(void) {
   Serial.println("HTTP server started");
 }
 
+/********************************************************
+*     LOOP
+ *******************************************************/
 void loop(void) {
   bOutput=false;
   currenttime = millis();
   
   server.handleClient();
   MDNS.update();
+  
+  // Send data to webserver
+  // Every given interval
+  if ( currenttime - _last_HTTP_SEND > POST_DATA_INTERVAL ) {
+      _last_HTTP_SEND = currenttime;
+      HTTP_SendData();
+  }
 
-   //DHT Read vry time consuming
+  //DHT Read very time consuming
   //So read only in given interval
-  if ((currenttime - _lastReadTime_DHT) > DHT_READ_INTERVAL)
+  if (_lastReadTime_DHT ==0 || (currenttime - _lastReadTime_DHT) > DHT_READ_INTERVAL)
   {
     bOutput=true;
     readDHTSensor(dhtTemp, dhtHum);
@@ -136,5 +177,6 @@ void loop(void) {
   {
     Serial.println(F("[!END]\r\n"));
   }
-  
+
+  //delay(5000);
 }

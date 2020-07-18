@@ -1,7 +1,11 @@
+//
+// Web page template
+//
 const char HTTP_HTML[] PROGMEM = "<!DOCTYPE html>\
 <html>\
 <head>\
   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
+  <title>Weather Station</title>\
   <script>\
     window.setInterval(\"update()\", 2000);\
     function update(){\
@@ -28,6 +32,15 @@ const char HTTP_HTML[] PROGMEM = "<!DOCTYPE html>\
 </body>\
 </html>";
 
+void printRequestData()
+{
+  Serial.print("[HTTP REQUEST] client: ");
+  Serial.println(server.client().remoteIP().toString());
+  Serial.print("[HTTP REQUEST] method: ");
+  Serial.println(server.method());
+  Serial.println("[HTTP REQUEST] uri: " + server.uri());
+}
+
 void handleRoot() {
   digitalWrite(STATUS_LED, HIGH);
 
@@ -37,6 +50,7 @@ void handleRoot() {
   server.send(200, "text/html", page);
   
   //server.send(200, "text/plain", "hello from esp8266!");
+  printRequestData();
   digitalWrite(STATUS_LED, LOW);
 }
 
@@ -60,6 +74,7 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
+  printRequestData();
   digitalWrite(STATUS_LED, LOW);
 }
 
@@ -81,5 +96,6 @@ void handleGIF(){
   
   server.send(200, "image/gif", gif_colored, sizeof(gif_colored));
 
+  printRequestData();
   digitalWrite(STATUS_LED, LOW);
 }
