@@ -47,14 +47,17 @@ static const uint8_t D4   = 4;
 static const uint8_t D5   = 14;
 static const uint8_t D6   = 12;
 static const uint8_t D7   = 13;
-static const uint8_t D8   = 0;
-static const uint8_t D9   = 2;
-static const uint8_t D10  = 15;
+static const uint8_t D8   = 0;  /startup pin.  pulled up to Vcc. Don't use as intput. Special care as output
+static const uint8_t D9   = 2;  /startup pin. LED.  pulled up to Vcc. Don't use as intput. Special care as output
+static const uint8_t D10  = 15; /startup pin. pulled down to GND. Don't use as intput. Special care as output
 static const uint8_t D11  = 13;
 static const uint8_t D12  = 12;
 static const uint8_t D13  = 14;
 static const uint8_t D14  = 4;
 static const uint8_t D15  = 5;
+
+GPIO6-GPIO11 - flash pins
+
 */
 
 /* NODEMCU
