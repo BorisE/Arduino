@@ -13,7 +13,7 @@
  
 ***************************************************************************/
 
-#include "cactus_io_BME280_I2C.h"
+#include "BME280_I2C.h"
 
 #include <math.h>
 #include <Wire.h>
@@ -69,17 +69,33 @@ float BME280_I2C::getHumidity(void) {
     return humidity;
 }
 
+
+// Gets the pressure in pascals
+float BME280_I2C::getPressure_P(void) {
+    
+    return pressure;
+}
+
 // Gets the pressure in millibars
 float BME280_I2C::getPressure_MB(void) {
     
     return pressure / 100.0F;
 }
 
-// Gets the pressure in hectapascals
-float BME280_I2C::getPressure_HP(void) {
+// Gets the pressure in standart atmoshpere
+float BME280_I2C::getPressure_atm(void) {
     
-    return pressure;
+    return pressure / 101325.0F;
 }
+
+// Gets the pressure in mmHg
+float BME280_I2C::getPressure_mmHg(void) {
+    
+    return pressure / 133.322F;
+}
+
+
+
 
 /***************************************************************************
  
@@ -87,6 +103,26 @@ float BME280_I2C::getPressure_HP(void) {
  
  ***************************************************************************/
 
+
+bool BME280_I2C::begin() {
+    
+    Wire.begin();
+    
+    
+    if (read8(BME280_REGISTER_CHIPID) != 0x60)
+        
+        return false;
+    
+    readSensorCoefficients();
+    
+    // Set Humidity oversampling to 1
+    write8(BME280_REGISTER_CONTROLHUMID, 0x01); // Set before CONTROL (DS 5.4.3)
+    
+    write8(BME280_REGISTER_CONTROL, 0x3F);
+    
+    return true;
+    
+}
 
 bool BME280_I2C::begin(uint8_t _SDA, uint8_t _SCK) {
     

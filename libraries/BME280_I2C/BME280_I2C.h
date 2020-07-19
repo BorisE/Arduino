@@ -1,11 +1,21 @@
 
 /***************************************************************************
  
- cactus.io
+ Small optimization of  cactus.io library by Boris
+ 
   
  This is a library for the BME280 humidity, temperature & pressure sensor. It
  only supports the I2C bus. It does not support the SPI bus connection.
+ It supports up to 2 BME280 sensors connected on the I2C bus
+
+ version 1.02
+
+ Changelog (by Boris)
+ 1.02   [19.07.2020]    added getPressure_atm() and getPressure_mmHg() for getting pressure in standart atmoshere/mm Hg respectively
+                        changed getPressure_HP to getPressure_P because of error in naming (pascals not hectopascals)
+ 1.01   [18.07.2020]    added SDA and SCK pins configuration to begin method
  
+ 7/1/18 Bug Fix by Wilhelm  Fixed getTemperature_C and getTemperature_F
  
  ***************************************************************************/
 
@@ -100,7 +110,8 @@ public:
 
     BME280_I2C(uint8_t);						// use when using 0x76 address
     
-    bool  begin(void);
+    bool  begin(uint8_t, uint8_t);
+    bool  begin();
     
 	void setTempCal(float);						// we can set a calibration ofsset for the temperature. 
 												// this offset is in degrees celsius
@@ -110,8 +121,11 @@ public:
     float getTemperature_C(void);
     float getTemperature_F(void);
     float getHumidity(void);
-    float getPressure_HP(void);                 // pressure in hectapascals
+    
+    float getPressure_P(void);                 // pressure in pascals
     float getPressure_MB(void);                 // pressure in millibars
+    float getPressure_atm(void);                 // pressure in standart atmoshere
+    float getPressure_mmHg(void);                 // pressure in millimeters mercury
     
     
 private:
