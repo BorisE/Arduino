@@ -165,8 +165,8 @@ String SensorsJSON()
 void printRequestData()
 {
   Serial.print("[HTTP REQUEST] client: ");
-  Serial.println(server.client().remoteIP().toString());
+  Serial.print(server.client().remoteIP().toString());
   //Serial.print("[HTTP REQUEST] method: ");
   //Serial.println(server.method());
-  Serial.println("[HTTP REQUEST] URI: " + server.uri());
+  Serial.println(" URI: " + server.uri());
 }

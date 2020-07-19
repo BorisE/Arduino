@@ -3,7 +3,7 @@
   (c) 2020 by Boris Emchenko
 
  Changes:
-   ver 0.5 2020/07/19 [331404/28900] 
+   ver 0.5 2020/07/19 [331924/28788] 
                       - json post
                       - bugfixes
    ver 0.4 2020/07/19 - MLX implemented
@@ -255,10 +255,10 @@ void loop(void) {
   }
 
 
-  if (bOutput)
+  /*if (bOutput)
   {
     Serial.println(F("[!END]\r\n"));
   }
-
+  */
   //delay(5000);
 }
