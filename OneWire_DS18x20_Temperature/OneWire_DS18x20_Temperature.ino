@@ -7,10 +7,10 @@
 // The DallasTemperature library can do all this work for you!
 // https://github.com/milesburton/Arduino-Temperature-Control-Library
 
-OneWire  ds(D8);  // on pin 10 (a 4.7K resistor is necessary)
+OneWire  ds(D6);  // on pin 10 (a 4.7K resistor is necessary)
 
 void setup(void) {
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop(void) {

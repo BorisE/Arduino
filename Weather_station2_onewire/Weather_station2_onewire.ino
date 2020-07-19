@@ -1,17 +1,18 @@
 #include <OneWire.h>
 
-#define ONE_WIRE_BUS D8 // Data wire is plugged into this port
+#define ONE_WIRE_BUS D6 // Data wire is plugged into this port
 
 
 OneWire  ds(ONE_WIRE_BUS);  // on pin 10 (a 4.7K resistor is necessary)
-//ROM = 28 6D A3 68 4 0 0 F8
+//ROM = 28 6D A3 68 4 0 0 F8 
+        
 uint8_t OW_Temp1Addr[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
 float OW_Temp1=-100;
 
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
 }
 
