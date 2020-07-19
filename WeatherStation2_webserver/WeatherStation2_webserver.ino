@@ -3,20 +3,27 @@
   (c) 2020 by Boris Emchenko
 
  Changes:
+   ver 0.3 2020/07/19 - onewire implemented
+                      - webpages templates changed
+   ver 0.2 2020/07/19 - i2c and bme280 implemented
    ver 0.1 2020/07/18 - web data sending implemented (as prototype)
                       - web server implemented 
-                      - DS18B20, DHT22 implemented
+                      - DHT22 implemented
 */
 
 //Compile version
-#define VERSION "0.1"
-#define VERSION_DATE "20200718"
+#define VERSION "0.3"
+#define VERSION_DATE "20200719"
 
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+
+#include <Wire.h>
+#include <BME280_I2C.h>
+#include <OneWire.h>
 
 #ifndef STASSID
 #define STASSID "BATMAJ"
@@ -46,7 +53,7 @@ static const uint8_t D3   = 5;
 static const uint8_t D4   = 4;
 static const uint8_t D5   = 14;
 static const uint8_t D6   = 12;
-static const uint8_t D7   = 13;
+static const uint8_t D7   = 13; /не заработал OneWire
 static const uint8_t D8   = 0;  /startup pin.  pulled up to Vcc. Don't use as intput. Special care as output
 static const uint8_t D9   = 2;  /startup pin. LED.  pulled up to Vcc. Don't use as intput. Special care as output
 static const uint8_t D10  = 15; /startup pin. pulled down to GND. Don't use as intput. Special care as output
@@ -89,9 +96,31 @@ float dhtHum =0;
 unsigned long _lastReadTime_DHT=0;
 
 
+// Create BME280 object
+#define SDA_pin D3
+#define SCK_pin D4
+#define MY_BME280_ADDRESS (0x76)
+#define SEALEVELPRESSURE_HPA (1013.25)
+BME280_I2C bme(MY_BME280_ADDRESS);
+float bmePres = 0;
+float bmeTemp = -100;
+float bmeHum = 0;
+unsigned long _lastReadTime_BME=0;
+
+
+#define ONE_WIRE_BUS D6 // Data wire is plugged into this port 
+OneWire  ds(ONE_WIRE_BUS);  // on pin 10 (a 4.7K resistor is necessary)
+//ROM = 28 6D A3 68 4 0 0 F8
+uint8_t OW_Temp1Addr[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
+float OW_Temp1=-100;
+unsigned long _lastReadTime_OW=0;
+
+
 unsigned long currenttime;              // millis from script start 
 #define DHT_READ_INTERVAL 10000
+#define BME_READ_INTERVAL 10000
 #define POST_DATA_INTERVAL 10000
+#define OW_READ_INTERVAL 10000
 
 bool bOutput=false;
 
@@ -148,6 +177,15 @@ void setup(void) {
 
   server.begin();
   Serial.println("HTTP server started");
+
+
+  //init BME280 sensor
+  if (!bme.begin(SDA_pin, SCK_pin)) 
+  {
+    Serial.println("Could not find a valid BME280 sensor, check wiring!");
+  } 
+
+  
 }
 
 /********************************************************
@@ -174,6 +212,24 @@ void loop(void) {
     bOutput=true;
     readDHTSensor(dhtTemp, dhtHum);
     _lastReadTime_DHT= currenttime;
+  }
+  
+  if (_lastReadTime_BME ==0 || (currenttime - _lastReadTime_BME) > BME_READ_INTERVAL)
+  {
+    bOutput=true;
+    getBMEvalues(bmePres, bmeTemp, bmeHum);
+    _lastReadTime_BME= currenttime;
+  }
+
+  if (_lastReadTime_OW ==0 || (currenttime - _lastReadTime_OW) > OW_READ_INTERVAL)
+  {
+    bOutput=true;
+    OW_Temp1 = getOneWireTemp(OW_Temp1Addr);
+    Serial.print("[!OW1:");
+    Serial.print(OW_Temp1);
+    Serial.println("]");
+
+    _lastReadTime_OW= currenttime;
   }
 
   if (bOutput)

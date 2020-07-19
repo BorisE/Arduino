@@ -74,7 +74,6 @@ int dhtCall(byte function)
 
 void readDHTSensor(float &t, float &h)
 {
-  byte* b; // byte pointer for showing raw data
   switch ((dhtCall(DHT22_SAMPLE))) // always request a sample first
   {
     case DHT_OK: // only if DHT_OK is true, get temperature, humidity and possibly raw data

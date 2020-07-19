@@ -23,6 +23,48 @@ const char HTTP_HTML[] PROGMEM = "<!DOCTYPE html>\
     <h1>Weather Station</h1>\
     <font size=\"7\"><span id=\"temp\">{0}</span>&deg;</font><br>\
     <font size=\"7\"><span id=\"hum\">{1}</span>%</font>\
+</body>\
+</html>";
+
+
+const char HTTP_HTML_HEADER[] PROGMEM = "<!DOCTYPE html>\
+<html>\
+<head>\
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
+<title>Weather Station</title>\
+<style>\
+table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: left;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }\
+table td, table th {  border: 1px solid #AAAAAA;  padding: 3px 2px; }\
+table thead {  background: #2672B5;  background: -moz-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: -webkit-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: linear-gradient(to bottom, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);  border-bottom: 1px solid #000000;  font-size: 15px;  font-weight: bold;  color: #FFFFFF; }\
+table tbody td {  font-size: 13px; }\
+</style>\
+</head>\
+<body style=\"text-align:center\">\
+<h1>Weather Station</h1>";
+
+const char HTTP_HTML_FOOTER[] PROGMEM = "{runtime}ms since starting</body></html>";
+
+const char HTTP_HTML_SENSORSTABLE[] PROGMEM = "<table><thead>\
+    <tr><th>Sensor</th><th>Value</th></tr>\
+    </thead><tbody>\
+      <tr><td>Pressure</td><td>{BMP} mmHg</td></tr>\
+      <tr><td>Temperature BME280</td><td>{BMT} &deg;</td></tr>\
+      <tr><td>Humidity BME280</td><td>{BMH} %</td></tr>\
+      <tr><td>Temperature DHT22</td><td>{Temp} &deg;</td></tr>\
+      <tr><td>Humidity DHT22</td><td>{Hum} %</td></tr>\
+      <tr><td>Temperature OneWire</td><td>{OW1} &deg;</td></tr>\
+    </tbody></table>";
+//
+// Web page settings template
+//
+const char HTTP_HTML_SETTINGS[] PROGMEM = "<!DOCTYPE html>\
+<html>\
+<head>\
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
+  <title>Weather Station</title>\
+</head>\
+<body style=\"text-align:center\">\
+    <h1>Weather Station settings</h1>\
     <p>\
     <form method=\"post\">\
         Set to: <input type=\"text\" name=\"sp\" value=\"{2}\" style=\"width:50px\"><br/><br/>\
@@ -31,6 +73,8 @@ const char HTTP_HTML[] PROGMEM = "<!DOCTYPE html>\
     </p>\
 </body>\
 </html>";
+
+
 
 void printRequestData()
 {
@@ -44,9 +88,21 @@ void printRequestData()
 void handleRoot() {
   digitalWrite(STATUS_LED, HIGH);
 
-  String page = FPSTR(HTTP_HTML);
-  page.replace("{0}", String(dhtTemp));
-  page.replace("{1}", String(dhtHum)); 
+  String page, page1;
+  page = FPSTR(HTTP_HTML_HEADER);
+  page1 = FPSTR(HTTP_HTML_SENSORSTABLE);
+  page +=page1;
+  page1 = FPSTR(HTTP_HTML_FOOTER);
+  page +=page1;
+
+  page.replace("{BMP}", String(bmePres));
+  page.replace("{BMH}", String(bmeHum));
+  page.replace("{BMT}", String(bmeTemp));
+  page.replace("{Temp}", String(dhtTemp));
+  page.replace("{Hum}", String(dhtHum)); 
+  page.replace("{OW1}", String(OW_Temp1));
+  page.replace("{runtime}", String(currenttime));
+  
   server.send(200, "text/html", page);
   
   //server.send(200, "text/plain", "hello from esp8266!");
@@ -55,9 +111,9 @@ void handleRoot() {
 }
 
 void handleGetTemp() {
-  digitalWrite(BUILTIN_LED, 1); 
+  digitalWrite(STATUS_LED, 1); 
   server.send(200, "text/plain", String(dhtTemp));
-  digitalWrite(BUILTIN_LED, 0);
+  digitalWrite(STATUS_LED, 0);
 }
 
 void handleNotFound() {
