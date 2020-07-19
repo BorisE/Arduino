@@ -3,6 +3,9 @@
   (c) 2020 by Boris Emchenko
 
  Changes:
+   ver 0.4 2020/07/19 - MLX implemented
+                      - return json data
+                      - webpage js update 
    ver 0.3 2020/07/19 - onewire implemented
                       - webpages templates changed
    ver 0.2 2020/07/19 - i2c and bme280 implemented
@@ -12,7 +15,7 @@
 */
 
 //Compile version
-#define VERSION "0.3"
+#define VERSION "0.4"
 #define VERSION_DATE "20200719"
 
 
@@ -24,6 +27,7 @@
 #include <Wire.h>
 #include <BME280_I2C.h>
 #include <OneWire.h>
+#include <MLX90614.h>
 
 #ifndef STASSID
 #define STASSID "BATMAJ"
@@ -98,7 +102,7 @@ unsigned long _lastReadTime_DHT=0;
 
 // Create BME280 object
 #define SDA_pin D3
-#define SCK_pin D4
+#define SCL_pin D4
 #define MY_BME280_ADDRESS (0x76)
 #define SEALEVELPRESSURE_HPA (1013.25)
 BME280_I2C bme(MY_BME280_ADDRESS);
@@ -115,12 +119,20 @@ uint8_t OW_Temp1Addr[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
 float OW_Temp1=-100;
 unsigned long _lastReadTime_OW=0;
 
+// MLX90614 part
+MLX90614 mlx = MLX90614();
+float mlxAmb = -100;
+float mlxObj = -100;
+unsigned long _lastReadTime_MLX=0;
+
 
 unsigned long currenttime;              // millis from script start 
-#define DHT_READ_INTERVAL 10000
-#define BME_READ_INTERVAL 10000
-#define POST_DATA_INTERVAL 10000
-#define OW_READ_INTERVAL 10000
+#define POST_DATA_INTERVAL  10000
+#define JS_UPDATEDATA_INTERVAL  10000
+#define DHT_READ_INTERVAL   10000
+#define BME_READ_INTERVAL   10000
+#define OW_READ_INTERVAL    10000
+#define MLX_READ_INTERVAL   10000
 
 bool bOutput=false;
 
@@ -166,13 +178,7 @@ void setup(void) {
   }
 
   server.on("/", handleRoot);
-  server.on("/temp", handleGetTemp);  
-
-  server.on("/inline", []() {
-    server.send(200, "text/plain", "this works as well");
-  });
-  server.on("/gif", handleGIF);
-
+  server.on("/json", handleJSON);
   server.onNotFound(handleNotFound);
 
   server.begin();
@@ -180,12 +186,13 @@ void setup(void) {
 
 
   //init BME280 sensor
-  if (!bme.begin(SDA_pin, SCK_pin)) 
+  if (!bme.begin(SDA_pin, SCL_pin)) 
   {
     Serial.println("Could not find a valid BME280 sensor, check wiring!");
   } 
 
-  
+  //MLX
+  mlx.begin(SDA_pin, SCL_pin);  
 }
 
 /********************************************************
@@ -231,6 +238,17 @@ void loop(void) {
 
     _lastReadTime_OW= currenttime;
   }
+
+  if (_lastReadTime_MLX ==0 || (currenttime - _lastReadTime_MLX) > MLX_READ_INTERVAL)
+  {
+    bOutput=true;
+    ReadMLXvalues(mlxAmb, mlxObj);
+
+    _lastReadTime_MLX= currenttime;
+  }
+
+
+
 
   if (bOutput)
   {
