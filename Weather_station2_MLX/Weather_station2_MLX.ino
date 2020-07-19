@@ -17,18 +17,18 @@
  ****************************************************/
 
 #include <Wire.h>
-#include <Adafruit_MLX90614.h>
+#include <MLX90614.h>
 
 #define SDA_pin D3
 #define SCL_pin D4
 
-Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+MLX90614 mlx = MLX90614();
 
 
 void setup() {
   Serial.begin(115200);
 
-  Serial.println("Adafruit MLX90614 test");  
+  Serial.println("MLX90614 test");  
 
   mlx.begin(SDA_pin, SCL_pin);  
 }
