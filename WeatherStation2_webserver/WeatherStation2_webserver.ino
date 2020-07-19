@@ -3,8 +3,9 @@
   (c) 2020 by Boris Emchenko
 
  Changes:
-   ver 0.5 2020/07/19 [331404/28900] - bugfixes
-                      - json post (not working?)
+   ver 0.5 2020/07/19 [331404/28900] 
+                      - json post
+                      - bugfixes
    ver 0.4 2020/07/19 - MLX implemented
                       - return json data
                       - webpage js update 
@@ -44,7 +45,9 @@ ESP8266WebServer server(80);
 
 const char* host = "192.168.1.1";  // IP serveur - Server IP
 const int   port = 80;            // Port serveur - Server Port
+const char* POST_URL = "http://192.168.0.199/weather/adddata.php";
 unsigned long _last_HTTP_SEND=0;
+
 
 /* for Wemos D1 R1
 #define PIN_WIRE_SDA (4)  D14
@@ -130,7 +133,7 @@ unsigned long _lastReadTime_MLX=0;
 
 
 unsigned long currenttime;              // millis from script start 
-#define POST_DATA_INTERVAL  10000
+#define POST_DATA_INTERVAL  120000
 #define JS_UPDATEDATA_INTERVAL  10000
 #define DHT_READ_INTERVAL   10000
 #define BME_READ_INTERVAL   10000

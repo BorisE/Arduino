@@ -135,6 +135,16 @@ void handleNotFound() {
 void handleJSON(){
   digitalWrite(STATUS_LED, HIGH);
 
+  String page = SensorsJSON();
+  
+  server.send(200, "application/json", page);
+
+  printRequestData();
+  digitalWrite(STATUS_LED, LOW);
+}
+
+String SensorsJSON()
+{
   String page = "{";
   
   page += "\"BMP\": " + String(bmePres) + ", ";
@@ -148,13 +158,9 @@ void handleJSON(){
   page += "\"RT\": " + String(currenttime) + "";
 
   page +="}";
-  
-  server.send(200, "application/json", page);
 
-  printRequestData();
-  digitalWrite(STATUS_LED, LOW);
+  return page;
 }
-
 
 void printRequestData()
 {
@@ -162,5 +168,5 @@ void printRequestData()
   Serial.println(server.client().remoteIP().toString());
   //Serial.print("[HTTP REQUEST] method: ");
   //Serial.println(server.method());
-  Serial.println("[HTTP REQUEST] uri: " + server.uri());
+  Serial.println("[HTTP REQUEST] URI: " + server.uri());
 }
