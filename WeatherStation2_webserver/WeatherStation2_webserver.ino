@@ -3,6 +3,8 @@
   (c) 2020 by Boris Emchenko
 
  Changes:
+   ver 0.5 2020/07/19 [331404/28900] - bugfixes
+                      - json post (not working?)
    ver 0.4 2020/07/19 - MLX implemented
                       - return json data
                       - webpage js update 
@@ -15,7 +17,7 @@
 */
 
 //Compile version
-#define VERSION "0.4"
+#define VERSION "0.5"
 #define VERSION_DATE "20200719"
 
 
@@ -23,6 +25,7 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <ESP8266HTTPClient.h>
 
 #include <Wire.h>
 #include <BME280_I2C.h>
@@ -209,7 +212,8 @@ void loop(void) {
   // Every given interval
   if ( currenttime - _last_HTTP_SEND > POST_DATA_INTERVAL ) {
       _last_HTTP_SEND = currenttime;
-      HTTP_SendData();
+      //HTTP_SendData();
+      HTTP_sendJSON();
   }
 
   //DHT Read very time consuming
@@ -246,8 +250,6 @@ void loop(void) {
 
     _lastReadTime_MLX= currenttime;
   }
-
-
 
 
   if (bOutput)

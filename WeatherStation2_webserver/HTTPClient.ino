@@ -7,8 +7,8 @@ void HTTP_SendData()
       return;
     }
 
-    String url = "/watchdog?command=watchdog&uptime=";
-    url += String(millis());
+    String url = "/adddata.php?uptime=";
+    url += String(currenttime);
     url += "&ip=";
     url += WiFi.localIP().toString();
 
@@ -35,4 +35,22 @@ void HTTP_SendData()
    }
    
    Serial.println();
+}
+
+
+const char* POST_URL = "http://192.168.0.199/weather/adddata.php";
+
+void HTTP_sendJSON()
+{
+  HTTPClient http;    //Declare object of class HTTPClient
+ 
+  http.begin(POST_URL);      
+  http.addHeader("Content-Type", "application/json");  
+  int httpCode = http.POST("{Temp: 101.0, Hum: 44.2}");
+  String payload = http.getString();
+  
+  Serial.println("[HTTP response] httpCode: " + httpCode);   //Print HTTP return code
+  Serial.println("[HTTP response] payload: " + payload);    //Print request response payload
+  
+  http.end();  //Close connection
 }

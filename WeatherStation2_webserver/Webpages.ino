@@ -46,10 +46,12 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
       xhr.onreadystatechange = function () {\
         if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) return;\
         var getData = JSON.parse(xhr.responseText);\
+        document.getElementById('BMP').innerHTML=getData.BMP;\
+        document.getElementById('BMT').innerHTML=getData.BMT;\
+        document.getElementById('BMH').innerHTML=getData.BMH;\
         document.getElementById('Temp').innerHTML=getData.Temp;\
-        document.getElementById('Temp').innerHTML=getData.Temp;\
-        document.getElementById('Temp').innerHTML=getData.Temp;\
-        document.getElementById('Temp').innerHTML=getData.Temp;\
+        document.getElementById('Hum').innerHTML=getData.Hum;\
+        document.getElementById('OW1').innerHTML=getData.OW1;\
         document.getElementById('OBJ').innerHTML=getData.OBJ;\
         document.getElementById('AMB').innerHTML=getData.AMB;\
         document.getElementById('RT').innerHTML=getData.RT;\
