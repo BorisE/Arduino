@@ -2,6 +2,14 @@
   WEATHER STATION Mk II
   (c) 2020 by Boris Emchenko
 
+  TODO:
+  - WiFi Server|Access point (WiFi manager library?) or find other way not to store WiFi parameters
+  - OAT web update
+  - BH1750
+  - Capacitive sensor
+  - UV sensor?
+  - Deepsleep mode?
+
  Changes:
    ver 0.5 2020/07/19 [331924/28788] 
                       - json post
@@ -43,15 +51,14 @@ const char* password = STAPSK;
 
 ESP8266WebServer server(80);
 
-const char* host = "192.168.1.1";  // IP serveur - Server IP
-const int   port = 80;            // Port serveur - Server Port
-const char* POST_URL = "http://192.168.0.199/weather/adddata.php";
+const char* POST_URL = "http://192.168.0.199/weather/adddata.php"; //Where to post data
 unsigned long _last_HTTP_SEND=0;
 
 
 /* for Wemos D1 R1
-#define PIN_WIRE_SDA (4)  D14
-#define PIN_WIRE_SCL (5)  D15
+ *  
+#define PIN_WIRE_SDA (4)  D14   (by default, but I redefined, see below)
+#define PIN_WIRE_SCL (5)  D15   (by default, but I redefined, see below)
 
 //new ESP-12E GPIO2
 #define LED_BUILTIN 2       D9
@@ -59,15 +66,15 @@ unsigned long _last_HTTP_SEND=0;
 static const uint8_t D0   = 3;
 static const uint8_t D1   = 1;
 static const uint8_t D2   = 16;
-static const uint8_t D3   = 5;
-static const uint8_t D4   = 4;
+static const uint8_t D3   = 5;                --> SDA
+static const uint8_t D4   = 4;                --> SCL
 static const uint8_t D5   = 14;
-static const uint8_t D6   = 12;
+static const uint8_t D6   = 12;               --> OneWire bus
 static const uint8_t D7   = 13; /не заработал OneWire
 static const uint8_t D8   = 0;  /startup pin.  pulled up to Vcc. Don't use as intput. Special care as output
-static const uint8_t D9   = 2;  /startup pin. LED.  pulled up to Vcc. Don't use as intput. Special care as output
+static const uint8_t D9   = 2;  /startup pin. LED.  pulled up to Vcc. Don't use as intput. Special care as output         -->Used as LED
 static const uint8_t D10  = 15; /startup pin. pulled down to GND. Don't use as intput. Special care as output
-static const uint8_t D11  = 13;
+static const uint8_t D11  = 13;               --> DHT11
 static const uint8_t D12  = 12;
 static const uint8_t D13  = 14;
 static const uint8_t D14  = 4;
