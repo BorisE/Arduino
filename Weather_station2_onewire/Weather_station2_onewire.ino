@@ -1,6 +1,8 @@
 #include <OneWire.h>
+#include <DallasTemperature.h>
 
-#define ONE_WIRE_BUS D6 // Data wire is plugged into this port
+
+#define ONE_WIRE_BUS D8 // Data wire is plugged into this port
 
 
 OneWire  ds(ONE_WIRE_BUS);  // on pin 10 (a 4.7K resistor is necessary)
@@ -9,10 +11,14 @@ OneWire  ds(ONE_WIRE_BUS);  // on pin 10 (a 4.7K resistor is necessary)
 uint8_t OW_Temp1Addr[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
 float OW_Temp1=-100;
 
-
+// Pass our oneWire reference to Dallas Temperature sensor 
+DallasTemperature sensors(&ds);
 
 void setup() {
   Serial.begin(115200);
+
+  // Start the DS18B20 sensor
+  sensors.begin();
 
 }
 
@@ -67,6 +73,13 @@ void loop() {
   Serial.print(OW_Temp1);
   Serial.println(" C");
 
+  delay(1000);
+  sensors.requestTemperatures(); 
+  float temperatureC = sensors.getTempCByIndex(0);
+  Serial.print(temperatureC);
+  Serial.println("ºC");
+  delay(1000);
+
 }
 
 
@@ -109,9 +122,22 @@ float getOneWireTemp(uint8_t addr[8])
   byte cfg = (data[4] & 0x60);
   
   // at lower res, the low bits are undefined, so let's zero them
-  if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
-  else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
-  else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
+  if (cfg == 0x00){
+    raw = raw & ~7;  // 9 bit resolution, 93.75 ms
+    Serial.print (" 9b ");
+  }
+  else if (cfg == 0x20){
+    raw = raw & ~3; // 10 bit res, 187.5 ms
+    Serial.print (" 10b ");
+  }
+  else if (cfg == 0x40){
+    raw = raw & ~1; // 11 bit res, 375 ms
+    Serial.print (" 11b ");
+  }
+  else
+  {
+    Serial.print (" 12b ");
+  }
   //// default is 12 bit resolution, no zeroing needed, 750 ms conversion time
 
   return (float)raw / 16.0;
