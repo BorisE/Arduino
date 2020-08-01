@@ -11,6 +11,8 @@
   - Deepsleep mode?
 
  Changes:
+   ver 0.6 2020/08/01 [333456/28808] 
+                      - moving to DallasTemperature lib because local hangs sensor
    ver 0.5 2020/07/19 [331924/28788] 
                       - json post
                       - bugfixes
@@ -26,8 +28,8 @@
 */
 
 //Compile version
-#define VERSION "0.5"
-#define VERSION_DATE "20200719"
+#define VERSION "0.6"
+#define VERSION_DATE "20200801"
 
 
 #include <ESP8266WiFi.h>
@@ -40,6 +42,7 @@
 #include <BME280_I2C.h>
 #include <OneWire.h>
 #include <MLX90614.h>
+#include <DallasTemperature.h>
 
 #ifndef STASSID
 #define STASSID "BATMAJ"
@@ -125,12 +128,14 @@ float bmeHum = 0;
 unsigned long _lastReadTime_BME=0;
 
 
-#define ONE_WIRE_BUS D6 // Data wire is plugged into this port 
-OneWire  ds(ONE_WIRE_BUS);  // on pin 10 (a 4.7K resistor is necessary)
+#define ONE_WIRE_BUS_PIN D6 // Data wire is plugged into this port 
+OneWire  OneWireBus(ONE_WIRE_BUS_PIN);  // on pin 10 (a 4.7K resistor is necessary)
 //ROM = 28 6D A3 68 4 0 0 F8
 uint8_t OW_Temp1Addr[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
 float OW_Temp1=-100;
 unsigned long _lastReadTime_OW=0;
+
+DallasTemperature ds18b20(&OneWireBus);
 
 // MLX90614 part
 MLX90614 mlx = MLX90614();
@@ -206,6 +211,9 @@ void setup(void) {
 
   //MLX
   mlx.begin(SDA_pin, SCL_pin);  
+
+  //Dallas Sensors
+  ds18b20.begin();
 }
 
 /********************************************************
@@ -245,7 +253,9 @@ void loop(void) {
   if (_lastReadTime_OW ==0 || (currenttime - _lastReadTime_OW) > OW_READ_INTERVAL)
   {
     bOutput=true;
-    OW_Temp1 = getOneWireTemp(OW_Temp1Addr);
+    //OW_Temp1 = getOneWireTemp(OW_Temp1Addr);
+    ds18b20.requestTemperatures(); 
+    OW_Temp1 = ds18b20.getTempCByIndex(0);
     Serial.print("[!OW1:");
     Serial.print(OW_Temp1);
     Serial.println("]");
