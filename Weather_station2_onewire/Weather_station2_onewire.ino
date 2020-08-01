@@ -2,7 +2,7 @@
 #include <DallasTemperature.h>
 
 
-#define ONE_WIRE_BUS D8 // Data wire is plugged into this port
+#define ONE_WIRE_BUS D6 // Data wire is plugged into this port
 
 
 OneWire  ds(ONE_WIRE_BUS);  // on pin 10 (a 4.7K resistor is necessary)
