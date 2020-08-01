@@ -3,14 +3,16 @@
   (c) 2020 by Boris Emchenko
 
   TODO:
-  - WiFi Server|Access point (WiFi manager library?) or find other way not to store WiFi parameters
-  - OAT web update
   - BH1750
-  - Capacitive sensor
+  - Capacitive rain sensor
   - UV sensor?
+  - CO2 sensor?
+  - OTA web update
   - Deepsleep mode?
 
  Changes:
+   ver 0.7 2020/08/02 [381012/31212] 
+                      - WiFiManager lib to configure WiFi connection
    ver 0.6 2020/08/01 [333456/28808] 
                       - moving to DallasTemperature lib because local hangs sensor
    ver 0.5 2020/07/19 [331924/28788] 
@@ -28,10 +30,10 @@
 */
 
 //Compile version
-#define VERSION "0.6"
-#define VERSION_DATE "20200801"
+#define VERSION "0.7"
+#define VERSION_DATE "20200802"
 
-
+#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -44,13 +46,13 @@
 #include <MLX90614.h>
 #include <DallasTemperature.h>
 
-#ifndef STASSID
-#define STASSID "BATMAJ"
-#define STAPSK  "8oknehcmE"
-#endif
-
-const char* ssid = STASSID;
-const char* password = STAPSK;
+//#ifndef STASSID
+//#define STASSID "BATMAJ"
+//#define STAPSK  ""
+//#endif
+//const char* ssid = STASSID;
+//const char* password = STAPSK;
+const char* ssid = "WeatherStation";
 
 ESP8266WebServer server(80);
 
@@ -73,7 +75,7 @@ static const uint8_t D3   = 5;                --> SDA
 static const uint8_t D4   = 4;                --> SCL
 static const uint8_t D5   = 14;
 static const uint8_t D6   = 12;               --> OneWire bus
-static const uint8_t D7   = 13; /не заработал OneWire
+static const uint8_t D7   = 13;               /не заработал OneWire
 static const uint8_t D8   = 0;  /startup pin.  pulled up to Vcc. Don't use as intput. Special care as output
 static const uint8_t D9   = 2;  /startup pin. LED.  pulled up to Vcc. Don't use as intput. Special care as output         -->Used as LED
 static const uint8_t D10  = 15; /startup pin. pulled down to GND. Don't use as intput. Special care as output
@@ -160,6 +162,7 @@ bool bOutput=false;
 void setup(void) {
   pinMode(STATUS_LED, OUTPUT);
   digitalWrite(STATUS_LED, LOW);
+
   Serial.begin(115200);
   
   // Wait for serial to initialize.
@@ -173,9 +176,21 @@ void setup(void) {
   Serial.print (VERSION_DATE);
   Serial.println ("]");
 
-  
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  //WiFi.begin(ssid, password);
+
+  WiFiManager wm;
+  //wm.resetSettings(); //reset settings - wipe credentials for testing
+
+  bool res;
+  res = wm.autoConnect(ssid); // password protected ap
+  if(!res) {
+      Serial.println("Failed to connect");
+  } 
+  else {
+      //if you get here you have connected to the WiFi    
+      Serial.println("Connected");
+  }
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
@@ -187,7 +202,7 @@ void setup(void) {
   }
   Serial.println("");
   Serial.print("Connected to ");
-  Serial.println(ssid);
+  Serial.println(WiFi.SSID());
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
