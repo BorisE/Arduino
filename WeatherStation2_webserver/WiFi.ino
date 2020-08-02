@@ -60,3 +60,20 @@ void WiFi_CheckConnection()
     }
   }
 }
+
+void startConfigPortal()
+{
+  if (!wm.startConfigPortal(ssid)) {
+    Serial.println("Failed to connect or hit timeout");
+    // ESP.restart();
+  }
+
+  if (WiFi.status() == WL_CONNECTED) 
+  {
+    Serial.println("");
+    Serial.print("Connected to ");
+    Serial.println(WiFi.SSID());
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+  }
+}

@@ -20,7 +20,14 @@ table tbody td {  font-size: 13px; }\
 /*
  * TEMPLATE FOOTER
  */
-const char HTTP_HTML_FOOTER[] PROGMEM = "<span id='RT'>{RT}</span> ms since starting</body></html>";
+const char HTTP_HTML_FOOTER[] PROGMEM = "<br><br>WEATHER STATION Mk II v{Ver} [{VDate}]<br>\
+<span id='RT'>{RT}</span> ms since starting<br>\
+</body></html>";
+
+/*
+ * TEMPLATE MENU
+ */
+const char HTTP_HTML_MENU[] PROGMEM = "<a href='/configmode' onclick=\"return confirm('Station would stop gathering data and will enter config mode. Are you sure? If Yes connect by WiFi to AP [{ConfigAP}] to change configuration')\">Enter config mode</a>";
 
 /*
  SENSOR TABLE TEMPLATE
@@ -60,7 +67,10 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
     }\
   </script>";
 
-
+/*
+ * CONFIG MODE MESSAGE
+ */
+const char HTTP_HTML_CONFIGMODE[] PROGMEM = "WeatherStation entered <b>Config Mode</b>. To configure, please connect through WiFi to station using access point name <b>{ConfigAP}</b> (without password), enter URL http://192.168.4.1 and follow instructions.<br><a href='/'>Go to main page</a> when done.";
 
 
 //
@@ -84,12 +94,18 @@ const char HTTP_HTML_SETTINGS[] PROGMEM = "<!DOCTYPE html>\
 </html>";
 
 
+
+/*
+ * ROOT PAGE
+ */
 void handleRoot() {
   digitalWrite(STATUS_LED, HIGH);
 
   String page, page1;
   page = FPSTR(HTTP_HTML_HEADER);
   page1 = FPSTR(HTTP_HTML_SENSORSTABLE);
+  page +=page1;
+  page1 = FPSTR(HTTP_HTML_MENU);
   page +=page1;
   page1 = FPSTR(HTTP_HTML_FOOTER);
   page +=page1;
@@ -102,7 +118,11 @@ void handleRoot() {
   page.replace("{OW1}", String(OW_Temp1));
   page.replace("{OBJ}", String(mlxObj));
   page.replace("{AMB}", String(mlxAmb));
+  
   page.replace("{RT}", String(currenttime));
+  page.replace("{Ver}", String(VERSION));
+  page.replace("{VDate}", String(VERSION_DATE));
+  page.replace("{ConfigAP}", String(ssid));
 
   page.replace("<script></script>", FPSTR(HTTP_HTML_UPDATE));
   page.replace("{update}", String(JS_UPDATEDATA_INTERVAL));
@@ -113,6 +133,9 @@ void handleRoot() {
   digitalWrite(STATUS_LED, LOW);
 }
 
+/*
+ * NOT FOUND PAGE
+ */
 void handleNotFound() {
   digitalWrite(STATUS_LED, HIGH);
   String message = "File Not Found\n\n";
@@ -132,6 +155,9 @@ void handleNotFound() {
   digitalWrite(STATUS_LED, LOW);
 }
 
+/*
+ * JSON Sensor Status Page
+ */
 void handleJSON(){
   digitalWrite(STATUS_LED, HIGH);
 
@@ -141,6 +167,30 @@ void handleJSON(){
 
   printRequestData();
   digitalWrite(STATUS_LED, LOW);
+}
+
+/*
+ * Enter Config Mode Wait Page
+ */
+void handleConfigMode(){
+  digitalWrite(STATUS_LED, HIGH);
+
+  String page, page1;
+  page = FPSTR(HTTP_HTML_HEADER);
+  page1 = FPSTR(HTTP_HTML_CONFIGMODE);
+  page +=page1;
+  page1 = FPSTR(HTTP_HTML_FOOTER);
+  page +=page1;
+
+  page.replace("{RT}", String(currenttime));
+  page.replace("{Ver}", String(VERSION));
+  page.replace("{VDate}", String(VERSION_DATE));
+  page.replace("{ConfigAP}", String(ssid));
+
+  server.send(200, "text/html", page);
+
+  delay(2000);
+  startConfigPortal();
 }
 
 String SensorsJSON()

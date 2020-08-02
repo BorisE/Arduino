@@ -14,6 +14,9 @@
   - Deepsleep mode?
 
  Changes:
+   ver 0.9 2020/08/02 [383396/31808] 
+                      - Enter config mode from web interface (strange behaviour) 
+                      - Some HTML correction
    ver 0.8 2020/08/02 [381360/31752] 
                       - Regular reconnect attempts if WiFi credentials was specified earlier (useful after house power loss startup - WiFi Router need can't load before ESP boot up)
                       - WiFi regular check in loop
@@ -36,7 +39,7 @@
 */
 
 //Compile version
-#define VERSION "0.8"
+#define VERSION "0.9"
 #define VERSION_DATE "20200802"
 
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -59,6 +62,7 @@
 //const char* ssid = STASSID;
 //const char* password = STAPSK;
 const char* ssid = "WeatherStation";
+const char* host = "weather";
 
 unsigned long _lastWiFi_checkattempt = 0;
 #define WIFI_CHECK_CONNECTION_INTERVAL  120000
@@ -199,12 +203,18 @@ void setup(void) {
     WiFi_CheckConnection();
   }
 
-  if (MDNS.begin("esp8266")) {
-    Serial.println("MDNS responder started");
+  ////////////////////////////////
+  // MDNS INIT
+  if (MDNS.begin(host)) {
+    MDNS.addService("http", "tcp", 80);
+    Serial.print(F("Open http://"));
+    Serial.print(host);
+    Serial.println(F(".local to access WeatherStation interface"));
   }
 
   server.on("/", handleRoot);
   server.on("/json", handleJSON);
+  server.on("/configmode", handleConfigMode);
   server.onNotFound(handleNotFound);
 
   server.begin();
