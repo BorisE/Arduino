@@ -3,6 +3,8 @@
   (c) 2020 by Boris Emchenko
 
   TODO:
+  - call config page
+  - save parameters useing SPIFFS (upload url, maybe other parameters?)
   - BH1750
   - Capacitive rain sensor
   - UV sensor?
@@ -11,6 +13,9 @@
   - Deepsleep mode?
 
  Changes:
+   ver 0.8 2020/08/02 [381360/31752] 
+                      - Regular reconnect attempts if WiFi credentials was specified earlier (useful after house power loss startup - WiFi Router need can't load before ESP boot up)
+                      - WiFi regular check in loop
    ver 0.7 2020/08/02 [381012/31212] 
                       - WiFiManager lib to configure WiFi connection
    ver 0.6 2020/08/01 [333456/28808] 
@@ -30,7 +35,7 @@
 */
 
 //Compile version
-#define VERSION "0.7"
+#define VERSION "0.8"
 #define VERSION_DATE "20200802"
 
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -53,6 +58,10 @@
 //const char* ssid = STASSID;
 //const char* password = STAPSK;
 const char* ssid = "WeatherStation";
+
+unsigned long _lastWiFi_checkattempt = 0;
+#define WIFI_CHECK_CONNECTION_INTERVAL  120000
+#define WIFI_CONFIG_PORTAL_WAITTIME  60
 
 ESP8266WebServer server(80);
 
@@ -164,6 +173,7 @@ void setup(void) {
   digitalWrite(STATUS_LED, LOW);
 
   Serial.begin(115200);
+  //Serial.setDebugOutput(true);  
   
   // Wait for serial to initialize.
   while(!Serial) { }
@@ -176,35 +186,17 @@ void setup(void) {
   Serial.print (VERSION_DATE);
   Serial.println ("]");
 
+
+  //WiFI managent part
   WiFi.mode(WIFI_STA);
   //WiFi.begin(ssid, password);
-
-  WiFiManager wm;
+  WiFi_init();
   //wm.resetSettings(); //reset settings - wipe credentials for testing
-
-  bool res;
-  res = wm.autoConnect(ssid); // password protected ap
-  if(!res) {
-      Serial.println("Failed to connect");
-  } 
-  else {
-      //if you get here you have connected to the WiFi    
-      Serial.println("Connected");
+  //stop until connection wouldn't be established
+  while (WiFi.status() != WL_CONNECTED) 
+  {
+    WiFi_CheckConnection();
   }
-
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    digitalWrite(STATUS_LED, HIGH);
-    Serial.print(".");
-    delay(400);
-    digitalWrite(STATUS_LED, LOW);
-    delay(100);
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(WiFi.SSID());
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
 
   if (MDNS.begin("esp8266")) {
     Serial.println("MDNS responder started");
@@ -283,9 +275,14 @@ void loop(void) {
     bOutput=true;
     ReadMLXvalues(mlxAmb, mlxObj);
 
-    _lastReadTime_MLX= currenttime;
+    _lastReadTime_MLX = currenttime;
   }
 
+  if ((currenttime - _lastWiFi_checkattempt) > WIFI_CHECK_CONNECTION_INTERVAL)
+  {
+    WiFi_CheckConnection();
+    _lastWiFi_checkattempt = currenttime;
+  }
 
   /*if (bOutput)
   {
