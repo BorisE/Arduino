@@ -5,6 +5,7 @@
   TODO:
   - call config page
   - save parameters useing SPIFFS (upload url, maybe other parameters?)
+  - data loggins using SPIFFS
   - BH1750
   - Capacitive rain sensor
   - UV sensor?
