@@ -7,10 +7,11 @@ const char HTTP_HTML_HEADER[] PROGMEM = "<!DOCTYPE html>\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
 <title>Weather Station</title>\
 <style>\
-table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: left;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }\
+table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: left;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }\n\
 table td, table th {  border: 1px solid #AAAAAA;  padding: 3px 2px; }\
 table thead {  background: #2672B5;  background: -moz-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: -webkit-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: linear-gradient(to bottom, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);  border-bottom: 1px solid #000000;  font-size: 15px;  font-weight: bold;  color: #FFFFFF; }\
 table tbody td {  font-size: 13px; }\
+.footer { font-size:10px }\
 </style>\
 <script></script>\
 </head>\
@@ -20,9 +21,8 @@ table tbody td {  font-size: 13px; }\
 /*
  * TEMPLATE FOOTER
  */
-const char HTTP_HTML_FOOTER[] PROGMEM = "<br><br>WEATHER STATION Mk II v{Ver} [{VDate}]<br>\
-<span id='RT'>{RT}</span> ms since starting<br>\
-</body></html>";
+const char HTTP_HTML_FOOTER[] PROGMEM = "<p class='footer'>WEATHER STATION MkII v{Ver} [{VDate}]. Passed since start: <span class='footer'><span id='RT'>{RT}</span> ms</p>";
+const char HTTP_HTML_END[] PROGMEM = "</body></html>";
 
 /*
  * TEMPLATE MENU
@@ -105,10 +105,13 @@ void handleRoot() {
   page = FPSTR(HTTP_HTML_HEADER);
   page1 = FPSTR(HTTP_HTML_SENSORSTABLE);
   page +=page1;
-  page1 = FPSTR(HTTP_HTML_MENU);
-  page +=page1;
   page1 = FPSTR(HTTP_HTML_FOOTER);
   page +=page1;
+  page1 = FPSTR(HTTP_HTML_MENU);
+  page +=page1;
+  page1 = FPSTR(HTTP_HTML_END);
+  page +=page1;
+  
 
   page.replace("{BMP}", String(bmePres));
   page.replace("{BMH}", String(bmeHum));
@@ -181,6 +184,8 @@ void handleConfigMode(){
   page +=page1;
   page1 = FPSTR(HTTP_HTML_FOOTER);
   page +=page1;
+  page1 = FPSTR(HTTP_HTML_END);
+  page +=page1;
 
   page.replace("{RT}", String(currenttime));
   page.replace("{Ver}", String(VERSION));
@@ -190,7 +195,11 @@ void handleConfigMode(){
   server.send(200, "text/html", page);
 
   delay(2000);
+  
+  server.stop(); // stop web server because of conflict with WiFi manager
   startConfigPortal();
+
+  server.begin();
 }
 
 String SensorsJSON()

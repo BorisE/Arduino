@@ -1,9 +1,7 @@
-WiFiManager wm;
-
 /*
  * init WiFiManager data
  */
-void WiFi_init()
+void WiFi_init(WiFiManager* wm, int WaitTime = 0 )
 {
   // custom menu via array or vector
   // 
@@ -11,18 +9,29 @@ void WiFi_init()
   // const char* menu[] = {"wifi","info","param","sep","restart","exit"}; 
   // wm.setMenu(menu,6);
   std::vector<const char *> menu = {"wifi","param","sep","info","sep","restart","exit"};
-  wm.setMenu(menu);
+  wm->setMenu(menu);
 
+  // if there was saved credentials
+  // then there is can be no connection to WiFi at controller start
+  // so it is wise to try again in some time interval
+  //if (WiFi.SSID().length() != 0) -make this permanent
+  {
+    if (WaitTime ==0) WaitTime = WIFI_CONFIG_PORTAL_WAITTIME;
+    wm->setConfigPortalTimeout( WaitTime ); // auto close configportal after n seconds
+  }
 }
 
 /*
  *  WiFi Manager COnnection Procedure
  */
-void WiFi_CheckConnection()
+void WiFi_CheckConnection(int WaitTime)
 {
   // Wait for connection
   if (WiFi.status() != WL_CONNECTED) 
   {
+    WiFiManager wm;
+    WiFi_init(&wm, WaitTime);
+    
     if (WiFi.SSID().length() != 0)
     {
       Serial.println("There is saved AP credentials. So will give them a try after timeout");
@@ -31,11 +40,6 @@ void WiFi_CheckConnection()
       Serial.print("PSK: ");
       if (WiFi.psk().length() != 0)
         Serial.println("********");
-      
-      // if there was saved credentials
-      // then there is can be no connection to WiFi at controller start
-      // so it is wise to try again in some time interval
-      wm.setConfigPortalTimeout( WIFI_CONFIG_PORTAL_WAITTIME ); // auto close configportal after n seconds
     }
 
     digitalWrite(STATUS_LED, HIGH);
@@ -63,6 +67,9 @@ void WiFi_CheckConnection()
 
 void startConfigPortal()
 {
+  WiFiManager wm;
+  WiFi_init(&wm);
+
   if (!wm.startConfigPortal(ssid)) {
     Serial.println("Failed to connect or hit timeout");
     // ESP.restart();

@@ -3,9 +3,9 @@
   (c) 2020 by Boris Emchenko
 
   TODO:
-  - call config page
   - save parameters useing SPIFFS (upload url, maybe other parameters?)
-  - data loggins using SPIFFS
+  - NTP server
+  - data logging using SPIFFS
   - BH1750
   - Capacitive rain sensor
   - UV sensor?
@@ -14,6 +14,12 @@
   - Deepsleep mode?
 
  Changes:
+   ver 0.92 2020/08/03 [383448/31388] 
+                      - more WiFi connectivity optimization
+   ver 0.91 2020/08/03 [383416/31388] 
+                      - Solve issue with entering ConfigPortal in the middle on running
+                      - Optimizing WiFi connectivity checking
+                      - Webpages correction
    ver 0.9 2020/08/02 [383396/31808] 
                       - Enter config mode from web interface (strange behaviour) 
                       - Some HTML correction
@@ -39,8 +45,8 @@
 */
 
 //Compile version
-#define VERSION "0.9"
-#define VERSION_DATE "20200802"
+#define VERSION "0.92"
+#define VERSION_DATE "20200803"
 
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 #include <ESP8266WiFi.h>
@@ -64,9 +70,8 @@
 const char* ssid = "WeatherStation";
 const char* host = "weather";
 
-unsigned long _lastWiFi_checkattempt = 0;
-#define WIFI_CHECK_CONNECTION_INTERVAL  120000
-#define WIFI_CONFIG_PORTAL_WAITTIME  60
+#define WIFI_CONFIG_PORTAL_WAITTIME  30
+#define WIFI_CONFIG_PORTAL_WAITTIME_STARTUP  60
 
 ESP8266WebServer server(80);
 
@@ -195,12 +200,12 @@ void setup(void) {
   //WiFI managent part
   WiFi.mode(WIFI_STA);
   //WiFi.begin(ssid, password);
-  WiFi_init();
+  //WiFi_init();
   //wm.resetSettings(); //reset settings - wipe credentials for testing
   //stop until connection wouldn't be established
-  while (WiFi.status() != WL_CONNECTED) 
+  //while (WiFi.status() != WL_CONNECTED) <- don't block after timeout. Measure and then try again (in loop cycle)
   {
-    WiFi_CheckConnection();
+    WiFi_CheckConnection(WIFI_CONFIG_PORTAL_WAITTIME_STARTUP);
   }
 
   ////////////////////////////////
@@ -247,9 +252,15 @@ void loop(void) {
   // Send data to webserver
   // Every given interval
   if ( currenttime - _last_HTTP_SEND > POST_DATA_INTERVAL ) {
+      /* try to send data. test ret status. 
+       * if no connection start CheckConnection procedure  */
+      if (!HTTP_sendJSON())
+      {
+        server.stop(); // stop web server because of conflict with WiFi manager
+        WiFi_CheckConnection(WIFI_CONFIG_PORTAL_WAITTIME);
+        server.begin(); // start again
+      }
       _last_HTTP_SEND = currenttime;
-      //HTTP_SendData();
-      HTTP_sendJSON();
   }
 
   //DHT Read very time consuming
@@ -289,11 +300,7 @@ void loop(void) {
     _lastReadTime_MLX = currenttime;
   }
 
-  if ((currenttime - _lastWiFi_checkattempt) > WIFI_CHECK_CONNECTION_INTERVAL)
-  {
-    WiFi_CheckConnection();
-    _lastWiFi_checkattempt = currenttime;
-  }
+
 
   /*if (bOutput)
   {
