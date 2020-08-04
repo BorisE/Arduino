@@ -45,6 +45,10 @@ const char HTTP_HTML_SENSORSTABLE[] PROGMEM = "<table><thead>\
       <tr><td>Ambient MLX90614</td><td><span id='AMB'>{AMB}</span> &deg;</td></tr>\
     </tbody></table>";
 
+
+/*
+ * AUTOUPDATE DATA
+ */
 const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
     window.setInterval(\"update()\", {update});\
     function update(){\
@@ -62,6 +66,23 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         document.getElementById('OBJ').innerHTML=getData.OBJ;\
         document.getElementById('AMB').innerHTML=getData.AMB;\
         document.getElementById('RT').innerHTML=getData.RT;\
+      };\
+      xhr.send();\
+    }\
+  </script>";
+
+/*
+ * PING DATA
+ */
+const char HTTP_HTML_PINGANDRETURN[] PROGMEM = "<script>\
+    window.setInterval(\"update()\", {update});\
+    function update(){\
+      var xhr=new XMLHttpRequest();\
+      xhr.open(\"GET\", \"/ping\", true);\
+      xhr.onreadystatechange = function () {\
+        if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) return;\
+        var getData = xhr.responseText;\
+        if (getData == 'OK') {window.history.back();}\
       };\
       xhr.send();\
     }\
@@ -191,6 +212,9 @@ void handleConfigMode(){
   page.replace("{Ver}", String(VERSION));
   page.replace("{VDate}", String(VERSION_DATE));
   page.replace("{ConfigAP}", String(ssid));
+
+  page.replace("<script></script>", FPSTR(HTTP_HTML_PINGANDRETURN));
+  page.replace("{update}", String(JS_UPDATEDATA_INTERVAL));
 
   server.send(200, "text/html", page);
 

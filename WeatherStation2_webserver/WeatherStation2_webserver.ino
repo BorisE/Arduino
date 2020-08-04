@@ -14,6 +14,8 @@
   - Deepsleep mode?
 
  Changes:
+   ver 0.93
+                      - custom pararmeters to wificonfig (POST_URL and OneWirePin)
    ver 0.92 2020/08/03 [383448/31388] 
                       - more WiFi connectivity optimization
    ver 0.91 2020/08/03 [383416/31388] 
@@ -45,7 +47,7 @@
 */
 
 //Compile version
-#define VERSION "0.92"
+#define VERSION "0.93"
 #define VERSION_DATE "20200803"
 
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -75,7 +77,7 @@ const char* host = "weather";
 
 ESP8266WebServer server(80);
 
-const char* POST_URL = "http://192.168.0.199/weather/adddata.php"; //Where to post data
+char POST_URL[101] = "http://192.168.0.199/weather/adddata.php"; //Where to post data
 unsigned long _last_HTTP_SEND=0;
 
 
@@ -149,8 +151,11 @@ float bmeHum = 0;
 unsigned long _lastReadTime_BME=0;
 
 
-#define ONE_WIRE_BUS_PIN D6 // Data wire is plugged into this port 
-OneWire  OneWireBus(ONE_WIRE_BUS_PIN);  // on pin 10 (a 4.7K resistor is necessary)
+#define ONE_WIRE_BUS_PIN_DEFAULT D6 // Data wire is plugged into this port 
+uint8_t ONE_WIRE_BUS_PIN = ONE_WIRE_BUS_PIN_DEFAULT;
+char ONE_WIRE_BUS_PIN_ST[4];
+OneWire  OneWireBus;  
+
 //ROM = 28 6D A3 68 4 0 0 F8
 uint8_t OW_Temp1Addr[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
 float OW_Temp1=-100;
@@ -189,15 +194,19 @@ void setup(void) {
   while(!Serial) { }
   Serial.println("");
 
-  Serial.println("WEATHER STATION Mk II");
+  // Greeting message
+  Serial.println(F("WEATHER STATION Mk II"));
   Serial.print ("v");
   Serial.print (VERSION);
   Serial.print (" [");
   Serial.print (VERSION_DATE);
   Serial.println ("]");
 
+  //Load config data
+  LoadConfigData();
 
-  //WiFI managent part
+  ////////////////////////////////
+  // WiFI managent part
   WiFi.mode(WIFI_STA);
   //WiFi.begin(ssid, password);
   //WiFi_init();
@@ -217,14 +226,22 @@ void setup(void) {
     Serial.println(F(".local to access WeatherStation interface"));
   }
 
+  ////////////////////////////////
+  // WebServer INIT
   server.on("/", handleRoot);
   server.on("/json", handleJSON);
   server.on("/configmode", handleConfigMode);
+  server.on("/ping", []() {
+    server.send(200, "text/plain", "OK");
+  });
   server.onNotFound(handleNotFound);
 
   server.begin();
   Serial.println("HTTP server started");
 
+  ////////////////////////////////
+  // START HARDWARE
+  OneWireBus.begin(ONE_WIRE_BUS_PIN);
 
   //init BME280 sensor
   if (!bme.begin(SDA_pin, SCL_pin)) 
