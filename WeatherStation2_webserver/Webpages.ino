@@ -88,10 +88,18 @@ const char HTTP_HTML_PINGANDRETURN[] PROGMEM = "<script>\
     }\
   </script>";
 
+
+const char HTTP_HTML_REDIRECT[] PROGMEM = "<script>\
+    window.setTimeout(\"update()\", {update});\
+    function update(){\
+        window.location.href = 'http://{self_url}/';\
+    }\
+  </script>";
+
 /*
  * CONFIG MODE MESSAGE
  */
-const char HTTP_HTML_CONFIGMODE[] PROGMEM = "WeatherStation entered <b>Config Mode</b>. To configure, please connect through WiFi to station using access point name <b>{ConfigAP}</b> (without password), enter URL http://192.168.4.1 and follow instructions.<br><a href='/'>Go to main page</a> when done.";
+const char HTTP_HTML_CONFIGMODE[] PROGMEM = "WeatherStation entering to <b>Config Mode</b>. You can change there:<br><br> <li>WiFi settings<li>hardware pins <li> and so on";
 
 
 //
@@ -213,15 +221,17 @@ void handleConfigMode(){
   page.replace("{VDate}", String(VERSION_DATE));
   page.replace("{ConfigAP}", String(ssid));
 
-  page.replace("<script></script>", FPSTR(HTTP_HTML_PINGANDRETURN));
+  page.replace("<script></script>", FPSTR(HTTP_HTML_REDIRECT));
   page.replace("{update}", String(JS_UPDATEDATA_INTERVAL));
+  page.replace("{self_url}", WiFi.localIP().toString());
 
   server.send(200, "text/html", page);
 
   delay(2000);
   
   server.stop(); // stop web server because of conflict with WiFi manager
-  startConfigPortal();
+  
+  runConfigPortal();
 
   server.begin();
 }

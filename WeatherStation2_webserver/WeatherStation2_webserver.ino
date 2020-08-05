@@ -14,8 +14,10 @@
   - Deepsleep mode?
 
  Changes:
-   ver 0.93
+   ver 1.00a1 2020/08/05 [385764/31596]
+                      - config portal is working!
                       - custom pararmeters to wificonfig (POST_URL and OneWirePin)
+                      - WiFiManager lib customized (on 2.0.3-alpha_0.1): back redirect, WiFiManagerParameter->init method made public
    ver 0.92 2020/08/03 [383448/31388] 
                       - more WiFi connectivity optimization
    ver 0.91 2020/08/03 [383416/31388] 
@@ -47,8 +49,8 @@
 */
 
 //Compile version
-#define VERSION "0.93"
-#define VERSION_DATE "20200803"
+#define VERSION "1.00a1"
+#define VERSION_DATE "20200805"
 
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 #include <ESP8266WiFi.h>
@@ -172,7 +174,7 @@ unsigned long _lastReadTime_MLX=0;
 
 unsigned long currenttime;              // millis from script start 
 #define POST_DATA_INTERVAL  120000
-#define JS_UPDATEDATA_INTERVAL  10000
+#define JS_UPDATEDATA_INTERVAL  2000
 #define DHT_READ_INTERVAL   10000
 #define BME_READ_INTERVAL   10000
 #define OW_READ_INTERVAL    10000

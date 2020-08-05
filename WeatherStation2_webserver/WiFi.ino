@@ -1,8 +1,14 @@
 
 //callback notifying us of the need to save config
-void saveConfigCallback () {
-  Serial.println(F("Should save config"));
+void saveConfigWiFICallback () {
+  Serial.println(F("Should save WiFi config"));
   shouldSaveConfig = true;
+}
+
+//callback notifying us of the need to save config
+void saveParamsCallback () {
+  Serial.println(F("Should save parameters"));
+  shouldSaveParameters = true;
 }
 
 /*
@@ -12,16 +18,25 @@ void WiFi_init(WiFiManager* wm, int WaitTime = 0 )
 {
   wm->setDebugOutput(true);
   wm->setShowPassword(false);
+
+  //void init(const char *id, const char *label, const char *defaultValue, int length, const char *custom, int labelPlacement);
+  //WiFiManagerParameter custom_post_url("post_url_id", "POST URL", POST_URL, 40);
+  //WiFiManagerParameter custom_OneWirePin("OneWirePinId", "OneWire pin", ONE_WIRE_BUS_PIN_ST, 2);
+  custom_post_url.init("post_url_id", "POST URL", POST_URL, 40, "", WFM_LABEL_BEFORE);
+  custom_OneWirePin.init("OneWirePinId", "OneWire pin", ONE_WIRE_BUS_PIN_ST, 2, "", WFM_LABEL_BEFORE);
+  wm->addParameter(&custom_post_url);
+  wm->addParameter(&custom_OneWirePin);
   
   // custom menu via array or vector
   // 
   // menu tokens, "wifi","wifinoscan","info","param","close","sep","erase","restart","exit" (sep is seperator) (if param is in menu, params will not show up in wifi page!)
   // const char* menu[] = {"wifi","info","param","sep","restart","exit"}; 
   // wm.setMenu(menu,6);
-  std::vector<const char *> menu = {"wifi","sep","info","sep","restart","exit"};
+  std::vector<const char *> menu = {"wifi","param","sep","info","sep","restart","exit"};
   wm->setMenu(menu);
 
-  wm->setSaveConfigCallback(saveConfigCallback);
+  wm->setSaveConfigCallback(saveConfigWiFICallback); //when wifi credentials are saved
+  wm->setSaveParamsCallback(saveParamsCallback); //when parameters are saved
 
 
   // if there was saved credentials
@@ -54,10 +69,6 @@ void WiFi_CheckConnection(int WaitTime)
   {
     WiFiManager wm;
     WiFi_init(&wm, WaitTime);
-    WiFiManagerParameter custom_post_url("post_url_id", "POST URL", POST_URL, 40);
-    WiFiManagerParameter custom_OneWirePin("OneWirePinId", "OneWire pin", ONE_WIRE_BUS_PIN_ST, 2);
-    wm.addParameter(&custom_post_url);
-    wm.addParameter(&custom_OneWirePin);
     
 //    if (WiFi.SSID().length() != 0)
 //    {
@@ -75,18 +86,13 @@ void WiFi_CheckConnection(int WaitTime)
     } 
 
     //save parameters before wm object unloaded
-    if (shouldSaveConfig) {
-      //read updated parameters
-      strcpy(POST_URL, custom_post_url.getValue());
-      strcpy(ONE_WIRE_BUS_PIN_ST, custom_OneWirePin.getValue());
-
+    if (shouldSaveConfig || shouldSaveParameters) {
       SaveParameters();
-      
       //end save
       shouldSaveConfig = false;
+      shouldSaveParameters = false;
     }
 
-    
     if (WiFi.status() == WL_CONNECTED) 
     {
       Serial.println("");
@@ -102,31 +108,23 @@ void WiFi_CheckConnection(int WaitTime)
  * Call ConfigPortal and set ESP to AP mode
  * without even connection attempt
  */
-void startConfigPortal()
+void runConfigPortal()
 {
   WiFiManager wm;
   WiFi_init(&wm);
-//  WiFiManagerParameter custom_post_url("post_url_id", "POST URL", POST_URL, 40);
-//  WiFiManagerParameter custom_OneWirePin("OneWirePinId", "OneWire pin", ONE_WIRE_BUS_PIN_ST, 2);
-//  wm.addParameter(&custom_post_url);
-//  wm.addParameter(&custom_OneWirePin);
 
   if (!wm.startConfigPortal(ssid)) {
     Serial.println(F("Failed to connect or hit timeout"));
     // ESP.restart();
   }
   
-  //save parameters before wm object unloaded
-  if (shouldSaveConfig) {
-    //read updated parameters
-//    strcpy(POST_URL, custom_post_url.getValue());
-//    strcpy(ONE_WIRE_BUS_PIN_ST, custom_OneWirePin.getValue());
-    
-//    SaveParameters();
-
-    //end save
-    shouldSaveConfig = false;
-  }
+    //save parameters before wm object unloaded
+    if (shouldSaveConfig || shouldSaveParameters) {
+      SaveParameters();
+      //end save
+      shouldSaveConfig = false;
+      shouldSaveParameters = false;
+    }
 
   if (WiFi.status() == WL_CONNECTED) 
   {
