@@ -1,5 +1,6 @@
 /**
  * WiFiManager.cpp
+ * Modified by BorisE 
  * 
  * WiFiManager, a library for the ESP8266/Arduino platform
  * for configuration of WiFi credentials using a Captive Portal
@@ -658,11 +659,15 @@ uint8_t WiFiManager::processConfigPortal(){
       DEBUG_WM(DEBUG_VERBOSE,F("processing save"));
       if(_enableCaptivePortal) delay(_cpclosedelay); // keeps the captiveportal from closing to fast.
 
+      DEBUG_WM("!!! processConfigPortal / connect ");
+
       // skip wifi if no ssid
       if(_ssid == ""){
         DEBUG_WM(DEBUG_VERBOSE,F("No ssid, skipping wifi save"));
       }
       else{
+        DEBUG_WM("!!! processConfigPortal / connect ");
+
         // attempt sta connection to submitted _ssid, _pass
         if (connectWifi(_ssid, _pass) == WL_CONNECTED) {
           
@@ -670,9 +675,12 @@ uint8_t WiFiManager::processConfigPortal(){
           DEBUG_WM(F("Got IP Address:"));
           DEBUG_WM(WiFi.localIP());
 
+          DEBUG_WM("!!! connect / ssid !='' / connectWifi ");
+          
           if ( _savewificallback != NULL) {
             _savewificallback();
           }
+          
           shutdownConfigPortal();
           return WL_CONNECTED; // CONNECT SUCCESS
         }
@@ -688,6 +696,8 @@ uint8_t WiFiManager::processConfigPortal(){
           DEBUG_WM(DEBUG_VERBOSE,F("WiFi/Param save callback"));
           _savewificallback();
         }
+        DEBUG_WM("!!! _shouldBreakAfterConfig ");
+        
         shutdownConfigPortal();
         return WL_CONNECT_FAILED; // CONNECT FAIL
       }
@@ -1412,6 +1422,13 @@ void WiFiManager::handleWifiSave() {
   }
   page += FPSTR(HTTP_END);
 
+  //added by BorisE
+  String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
+  page.replace("</script>", page_incl + "</script>");
+  page.replace("{timeout}", "10000"); //wait for wifi connection and move to the root of site
+  
+  //end of inclusion
+
   server->sendHeader(FPSTR(HTTP_HEAD_CL), String(page.length()));
   server->sendHeader(FPSTR(HTTP_HEAD_CORS), FPSTR(HTTP_HEAD_CORS_ALLOW_ALL));
   server->send(200, FPSTR(HTTP_HEAD_CT), page);
@@ -1432,6 +1449,13 @@ void WiFiManager::handleParamSave() {
   String page = getHTTPHead(FPSTR(S_titleparamsaved)); // @token titleparamsaved
   page += FPSTR(HTTP_PARAMSAVED);
   page += FPSTR(HTTP_END);
+  
+  //added by BorisE
+  String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
+  page.replace("</script>", page_incl + "</script>");
+  page.replace("{timeout}", "2000"); //move to root of ConfigPortal (need to press Exit)
+  //end of inclusion
+
 
   server->sendHeader(FPSTR(HTTP_HEAD_CL), String(page.length()));
   server->send(200, FPSTR(HTTP_HEAD_CT), page);
@@ -1764,6 +1788,14 @@ void WiFiManager::handleExit() {
   handleRequest();
   String page = getHTTPHead(FPSTR(S_titleexit)); // @token titleexit
   page += FPSTR(S_exiting); // @token exiting
+  
+  //added by BorisE
+  String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
+  page.replace("</script>", page_incl + "</script>");
+  page.replace("{timeout}", "2000");
+
+  //end of inclusion
+
   server->sendHeader(FPSTR(HTTP_HEAD_CL), String(page.length()));
   server->send(200, FPSTR(HTTP_HEAD_CT), page);
   abort = true;
@@ -1778,6 +1810,12 @@ void WiFiManager::handleReset() {
   String page = getHTTPHead(FPSTR(S_titlereset)); //@token titlereset
   page += FPSTR(S_resetting); //@token resetting
   page += FPSTR(HTTP_END);
+
+  //added by BorisE
+  String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
+  page.replace("</script>", page_incl + "</script>");
+  page.replace("{timeout}", "5000");
+  //end of inclusion
 
   server->sendHeader(FPSTR(HTTP_HEAD_CL), String(page.length()));
   server->send(200, FPSTR(HTTP_HEAD_CT), page);
