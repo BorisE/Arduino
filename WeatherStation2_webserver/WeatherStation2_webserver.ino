@@ -14,8 +14,8 @@
   - Deepsleep mode?
 
  Changes:
-   ver 1.01 2020/08/06 [427368/32176]
-                      - added SDA,SCL,DHT22 pin to config (DHT22 not working)
+   ver 1.01 2020/08/06 [427400/32176]
+                      - added SDA,SCL,DHT22 pin to config
                       - needs custom WiFiManager v2.0.3-alpha_0.3
    ver 1.00 2020/08/06 [426688/32000]
                       - store settings in special structure
@@ -162,7 +162,7 @@ static const uint8_t D10  = 1;
 Ticker ticker;
 const int STATUS_LED = LED_BUILTIN;
 
-#define DHT_PIN D11
+#define DHT_PINold D11
 #define DHT_PIN_DEFAULT D11
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
 enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};  // DHT error codes enumerated

@@ -24,35 +24,35 @@ int dhtCall(byte function)
       yield();
 
       // First set data line low for a period according to sensor type
-      pinMode(DHT_PIN, OUTPUT);
-      digitalWrite(DHT_PIN, LOW);
+      pinMode(config.DHT22Pin, OUTPUT);
+      digitalWrite(config.DHT22Pin, LOW);
       //delayMicroseconds(1000);  // data sheet says "at least 1ms"
       delay(1);
       
-      pinMode(DHT_PIN, INPUT_PULLUP);
+      pinMode(config.DHT22Pin, INPUT_PULLUP);
       
       loopCnt = DHT_LOOPS;
-      while (digitalRead(DHT_PIN) == HIGH) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT; //55 ms?!
+      while (digitalRead(config.DHT22Pin) == HIGH) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT; //55 ms?!
 
       
       loopCnt = DHT_LOOPS;
-      while (digitalRead(DHT_PIN) == LOW) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT;
+      while (digitalRead(config.DHT22Pin) == LOW) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT;
       
       loopCnt = DHT_LOOPS;
-      while (digitalRead(DHT_PIN) == HIGH) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT;
+      while (digitalRead(config.DHT22Pin) == HIGH) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT;
       
       for (byte bitNum = 0; bitNum < 40; bitNum++) // try reading 40 bits
       {
         loopCnt = DHT_LOOPS;
-        while (digitalRead(DHT_PIN) == LOW) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT;
+        while (digitalRead(config.DHT22Pin) == LOW) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT;
         
         delayMicroseconds(32);
         
-        boolean dhtBit = digitalRead(DHT_PIN);
+        boolean dhtBit = digitalRead(config.DHT22Pin);
         bitWrite(data[bitNum / 8], 7 - bitNum % 8, dhtBit);
         
         loopCnt = DHT_LOOPS;
-        while (digitalRead(DHT_PIN) == HIGH) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT;
+        while (digitalRead(config.DHT22Pin) == HIGH) if (loopCnt-- == 0) return DHT_ERROR_TIMEOUT;
       }
       sum = data[0] + data[1] + data[2] + data[3];
       if (data[4] != sum) return DHT_ERROR_CRC;
