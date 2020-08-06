@@ -17,7 +17,7 @@ int HTTP_sendJSON()
 
     Serial.print("[HTTP POST] begin...\n");
     // configure traged server and url
-    http.begin(client, POST_URL); //HTTP
+    http.begin(client, config.POST_URL); //HTTP
     http.addHeader("Content-Type", "application/json");
 
     Serial.print("[HTTP POST] POST...\n");

@@ -1,1 +1,1 @@
-test string
+{"POST_URL":"http://192.168.0.199/weather/adddata.php","OneWirePin":12}

@@ -16,14 +16,17 @@ void saveParamsCallback () {
  */
 void WiFi_init(WiFiManager* wm, int WaitTime = 0 )
 {
+  digitalWrite(STATUS_LED, HIGH);
+
   wm->setDebugOutput(true);
   wm->setShowPassword(false);
 
   //void init(const char *id, const char *label, const char *defaultValue, int length, const char *custom, int labelPlacement);
   //WiFiManagerParameter custom_post_url("post_url_id", "POST URL", POST_URL, 40);
   //WiFiManagerParameter custom_OneWirePin("OneWirePinId", "OneWire pin", ONE_WIRE_BUS_PIN_ST, 2);
-  custom_post_url.init("post_url_id", "POST URL", POST_URL, 40, "", WFM_LABEL_BEFORE);
-  custom_OneWirePin.init("OneWirePinId", "OneWire pin", ONE_WIRE_BUS_PIN_ST, 2, "", WFM_LABEL_BEFORE);
+  custom_post_url.init("post_url_id", "POST URL", config.POST_URL, 101, "", WFM_LABEL_BEFORE);
+  char onewirepinst[3];  itoa(config.OneWirePin,onewirepinst,10);
+  custom_OneWirePin.init("OneWirePinId", "OneWire pin",onewirepinst , 2, "", WFM_LABEL_BEFORE);
   wm->addParameter(&custom_post_url);
   wm->addParameter(&custom_OneWirePin);
   
@@ -48,13 +51,46 @@ void WiFi_init(WiFiManager* wm, int WaitTime = 0 )
     wm->setConfigPortalTimeout( WaitTime ); // auto close configportal after n seconds
   }
 
-  //blink led
-  digitalWrite(STATUS_LED, HIGH);
-  Serial.print(".");
-  delay(400);
+  wm->setAPCallback(configModeCallback);
+
+//  //blink led
+//  digitalWrite(STATUS_LED, HIGH);
+//  Serial.print(".");
+//  delay(400);
+//  digitalWrite(STATUS_LED, LOW);
+//  delay(200);
+//  digitalWrite(STATUS_LED, HIGH);
+}
+
+/*
+ * Finilize WiFi manager data
+ */
+void WiFi_deinit()
+{
+  // stop blinking
+  ticker.detach();
+  //keep LED on
   digitalWrite(STATUS_LED, LOW);
-  delay(200);
-  digitalWrite(STATUS_LED, HIGH);
+
+  //save parameters before wm object unloaded
+  if (shouldSaveConfig || shouldSaveParameters) {
+    SaveParameters();
+    //end save
+    shouldSaveConfig = false;
+    shouldSaveParameters = false;
+    
+    //reboot to account hardware changes
+    ESP.restart();
+  }
+
+  if (WiFi.status() == WL_CONNECTED) 
+  {
+    Serial.println("");
+    Serial.print("Connected to ");
+    Serial.println(WiFi.SSID());
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+  }
 }
 
 
@@ -84,23 +120,8 @@ void WiFi_CheckConnection(int WaitTime)
     if(!res) {
         Serial.println(F("Failed to connect or hit timeout"));
     } 
-
-    //save parameters before wm object unloaded
-    if (shouldSaveConfig || shouldSaveParameters) {
-      SaveParameters();
-      //end save
-      shouldSaveConfig = false;
-      shouldSaveParameters = false;
-    }
-
-    if (WiFi.status() == WL_CONNECTED) 
-    {
-      Serial.println("");
-      Serial.print("Connected to ");
-      Serial.println(WiFi.SSID());
-      Serial.print("IP address: ");
-      Serial.println(WiFi.localIP());
-    }
+    
+    WiFi_deinit();
   }
 }
 
@@ -118,20 +139,22 @@ void runConfigPortal()
     // ESP.restart();
   }
   
-    //save parameters before wm object unloaded
-    if (shouldSaveConfig || shouldSaveParameters) {
-      SaveParameters();
-      //end save
-      shouldSaveConfig = false;
-      shouldSaveParameters = false;
-    }
+  WiFi_deinit();
+}
 
-  if (WiFi.status() == WL_CONNECTED) 
-  {
-    Serial.println("");
-    Serial.print("Connected to ");
-    Serial.println(WiFi.SSID());
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-  }
+//for led blinking 
+void tick()
+{
+  //toggle state
+  digitalWrite(STATUS_LED, !digitalRead(STATUS_LED));     // set pin to the opposite state
+}
+
+//gets called when WiFiManager enters configuration mode
+void configModeCallback (WiFiManager *myWiFiManager) {
+  Serial.println("Entered config mode");
+  Serial.println(WiFi.softAPIP());
+  //if you used auto generated SSID, print it
+  Serial.println(myWiFiManager->getConfigPortalSSID());
+  //entered config mode, make led toggle faster
+  ticker.attach(0.2, tick);
 }

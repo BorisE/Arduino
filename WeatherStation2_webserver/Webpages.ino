@@ -222,12 +222,12 @@ void handleConfigMode(){
   page.replace("{ConfigAP}", String(ssid));
 
   page.replace("<script></script>", FPSTR(HTTP_HTML_REDIRECT));
-  page.replace("{update}", String(JS_UPDATEDATA_INTERVAL));
+  page.replace("{update}", "6000"); //timeout before redirecting page
   page.replace("{self_url}", WiFi.localIP().toString());
 
   server.send(200, "text/html", page);
 
-  delay(2000);
+  delay(1000);
   
   server.stop(); // stop web server because of conflict with WiFi manager
   
@@ -235,6 +235,19 @@ void handleConfigMode(){
 
   server.begin();
 }
+
+
+/*
+ * Enter Config Mode Wait Page
+ */
+void handlePingRequest(){
+  digitalWrite(STATUS_LED, HIGH);
+  String page = "OK"; //returned data
+  server.send(200, "text/plain", page);
+  printRequestData();
+  digitalWrite(STATUS_LED, LOW);
+}
+
 
 String SensorsJSON()
 {

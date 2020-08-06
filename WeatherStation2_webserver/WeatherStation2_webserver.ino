@@ -14,6 +14,14 @@
   - Deepsleep mode?
 
  Changes:
+   ver 1.00 2020/08/06 [426688/32000]
+                      - store settings in special structure
+                      - convert config to JSON format
+                      - load / store json config on SPIFFS
+                      - restart ESP on config chage (to take hardware settings into account)
+   ver 1.00a2 2020/08/06 [385944/31656]
+                      - blinking led (using ticker.h) during config mode
+                      - some optimization
    ver 1.00a1 2020/08/05 [385764/31596]
                       - config portal is working!
                       - custom pararmeters to wificonfig (POST_URL and OneWirePin)
@@ -49,21 +57,25 @@
 */
 
 //Compile version
-#define VERSION "1.00a1"
-#define VERSION_DATE "20200805"
+#define VERSION "1.00"
+#define VERSION_DATE "20200806"
 
+#include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPClient.h>
+#include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
 
 #include <Wire.h>
 #include <BME280_I2C.h>
 #include <OneWire.h>
 #include <MLX90614.h>
 #include <DallasTemperature.h>
+
+#include <Ticker.h>//for LED status
 
 //#ifndef STASSID
 //#define STASSID "BATMAJ"
@@ -74,12 +86,21 @@
 const char* ssid = "WeatherStation";
 const char* host = "weather";
 
+struct Config {
+  char POST_URL[101];
+  uint8_t OneWirePin;
+};
+const char *configFilename = "/config.txt";  
+Config config;                              // <- global configuration object
+
+
 #define WIFI_CONFIG_PORTAL_WAITTIME  30
 #define WIFI_CONFIG_PORTAL_WAITTIME_STARTUP  60
 
 ESP8266WebServer server(80);
 
-char POST_URL[101] = "http://192.168.0.199/weather/adddata.php"; //Where to post data
+#define DEFAULT_POST_URL "http://192.168.0.199/weather/adddata.php"
+//char POST_URL[101] = "http://192.168.0.199/weather/adddata.php"; //Where to post data
 unsigned long _last_HTTP_SEND=0;
 
 
@@ -131,6 +152,8 @@ static const uint8_t D8   = 15;
 static const uint8_t D9   = 3;
 static const uint8_t D10  = 1;
 */
+
+Ticker ticker;
 const int STATUS_LED = LED_BUILTIN;
 
 #define DHT_PIN D11
@@ -154,8 +177,8 @@ unsigned long _lastReadTime_BME=0;
 
 
 #define ONE_WIRE_BUS_PIN_DEFAULT D6 // Data wire is plugged into this port 
-uint8_t ONE_WIRE_BUS_PIN = ONE_WIRE_BUS_PIN_DEFAULT;
-char ONE_WIRE_BUS_PIN_ST[4];
+//uint8_t ONE_WIRE_BUS_PIN = ONE_WIRE_BUS_PIN_DEFAULT;
+//char ONE_WIRE_BUS_PIN_ST[4];
 OneWire  OneWireBus;  
 
 //ROM = 28 6D A3 68 4 0 0 F8
@@ -174,7 +197,7 @@ unsigned long _lastReadTime_MLX=0;
 
 unsigned long currenttime;              // millis from script start 
 #define POST_DATA_INTERVAL  120000
-#define JS_UPDATEDATA_INTERVAL  2000
+#define JS_UPDATEDATA_INTERVAL  10000
 #define DHT_READ_INTERVAL   10000
 #define BME_READ_INTERVAL   10000
 #define OW_READ_INTERVAL    10000
@@ -197,7 +220,7 @@ void setup(void) {
   Serial.println("");
 
   // Greeting message
-  Serial.println(F("WEATHER STATION Mk II"));
+  Serial.println(F("WEATHER STATION MkII"));
   Serial.print ("v");
   Serial.print (VERSION);
   Serial.print (" [");
@@ -205,6 +228,7 @@ void setup(void) {
   Serial.println ("]");
 
   //Load config data
+  LoadDefaults();
   LoadConfigData();
 
   ////////////////////////////////
@@ -233,9 +257,7 @@ void setup(void) {
   server.on("/", handleRoot);
   server.on("/json", handleJSON);
   server.on("/configmode", handleConfigMode);
-  server.on("/ping", []() {
-    server.send(200, "text/plain", "OK");
-  });
+  server.on("/ping", handlePingRequest);
   server.onNotFound(handleNotFound);
 
   server.begin();
@@ -243,7 +265,7 @@ void setup(void) {
 
   ////////////////////////////////
   // START HARDWARE
-  OneWireBus.begin(ONE_WIRE_BUS_PIN);
+  OneWireBus.begin(config.OneWirePin);
 
   //init BME280 sensor
   if (!bme.begin(SDA_pin, SCL_pin)) 
