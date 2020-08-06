@@ -1,9 +1,9 @@
 /**
  * WiFiManager.h
  *
- * v 2.0.3-alpha_0.2
+ * v 2.0.3-alpha_0.3
  * Modified by BorisE 
-  * based on 2.0.3-alpha
+ * based on 2.0.3-alpha
  *
  * WiFiManager, a library for the ESP8266/Arduino platform
  * for configuration of WiFi credentials using a Captive Portal
@@ -13,6 +13,8 @@
  * @version 0.0.0
  * @license MIT
  *
+ * 2.0.3-alpha_0.3 [2020/08/06]
+ *                  - init overload with int default value
  * 2.0.3-alpha_0.2 [2020/08/06]
  *                  - timeout constants set in header
  * 2.0.3-alpha_0.1 [2020/08/05]
@@ -145,6 +147,7 @@ class WiFiManagerParameter {
     void        setValue(const char *defaultValue, int length);
 
     void init(const char *id, const char *label, const char *defaultValue, int length, const char *custom, int labelPlacement);
+    void init(const char *id, const char *label, int defaultValue, int length, const char *custom, int labelPlacement);
 
   protected:
 

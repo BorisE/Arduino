@@ -62,6 +62,21 @@ void WiFiManagerParameter::init(const char *id, const char *label, const char *d
   setValue(defaultValue,length);
 }
 
+// Overload of init with int defaultValue 
+// added by BorisE
+void WiFiManagerParameter::init(const char *id, const char *label, int defaultValue, int length, const char *custom, int labelPlacement) {
+  _id             = id;
+  _label          = label;
+  _labelPlacement = labelPlacement;
+  _customHTML     = custom;
+  
+  char defaultValueSt[7];  //7 for int[-32768,32767] + \0
+  itoa(defaultValue, defaultValueSt, 10);
+  
+  setValue(defaultValueSt,length);
+}
+
+
 WiFiManagerParameter::~WiFiManagerParameter() {
   if (_value != NULL) {
     delete[] _value;
@@ -1421,7 +1436,7 @@ void WiFiManager::handleWifiSave() {
   //added by BorisE
   String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
   page.replace("</script>", page_incl + "</script>");
-  page.replace("{timeout}", String(handleWifiSave_goroot_timeout)); //wait for wifi connection and move to the root of site
+  page.replace("{timeout}", String(handleWifiSave_GOROOT_TIMEOUT)); //wait for wifi connection and move to the root of site
   
   //end of inclusion
 
@@ -1449,7 +1464,7 @@ void WiFiManager::handleParamSave() {
   //added by BorisE
   String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
   page.replace("</script>", page_incl + "</script>");
-  page.replace("{timeout}", String(handleParamSave_goroot_timeout)); //move to root of ConfigPortal (need to press Exit)
+  page.replace("{timeout}", String(handleParamSave_GOROOT_TIMEOUT)); //move to root of ConfigPortal (need to press Exit)
   //end of inclusion
 
 

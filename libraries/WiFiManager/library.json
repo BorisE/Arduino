@@ -12,6 +12,11 @@
         "name": "tablatronix",
         "url": "https://github.com/tablatronix",
         "maintainer": true
+    },
+    {
+        "name": "BorisE",
+        "url": "https://github.com/BorisE/Arduino",
+        "maintainer": false
     }
 ],
 "repository":
@@ -25,5 +30,5 @@
     "espressif8266",
     "espressif32"
   ],
-  "version": "2.0.3-alpha"
+  "version": "customized 2.0.3-alpha_0.3"
 }
