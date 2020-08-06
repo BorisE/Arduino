@@ -1,10 +1,9 @@
 /**
  * WiFiManager.h
  *
+ * v 2.0.3-alpha_0.2
  * Modified by BorisE 
- * based on 2.0.3-alpha
- *
- *
+  * based on 2.0.3-alpha
  *
  * WiFiManager, a library for the ESP8266/Arduino platform
  * for configuration of WiFi credentials using a Captive Portal
@@ -13,7 +12,9 @@
  * @author tablatronix
  * @version 0.0.0
  * @license MIT
- * 
+ *
+ * 2.0.3-alpha_0.2 [2020/08/06]
+ *                  - timeout constants set in header
  * 2.0.3-alpha_0.1 [2020/08/05]
  *                  - go to root (through javascript) after executing Exit (WiFiManager::handleExit()), Reboot (WiFiManager::handleReset()), WiFiManager::handleParamSave(), WiFiManager::handleWifiSave()
  *                  - WiFiManagerParameter.init method made public
@@ -112,6 +113,12 @@
 #define WFM_LABEL_BEFORE 1
 #define WFM_LABEL_AFTER 2
 #define WFM_NO_LABEL 0
+
+//Added by BorisE: autoredirect to root page after some timeout
+#define handleReset_GOROOT_TIMEOUT      5000
+#define handleExit_GOROOT_TIMEOUT       5000
+#define handleWifiSave_GOROOT_TIMEOUT   10000
+#define handleParamSave_GOROOT_TIMEOUT  2000
 
 class WiFiManagerParameter {
   public:

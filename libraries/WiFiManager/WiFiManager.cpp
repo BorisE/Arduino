@@ -659,14 +659,12 @@ uint8_t WiFiManager::processConfigPortal(){
       DEBUG_WM(DEBUG_VERBOSE,F("processing save"));
       if(_enableCaptivePortal) delay(_cpclosedelay); // keeps the captiveportal from closing to fast.
 
-      DEBUG_WM("!!! processConfigPortal / connect ");
 
       // skip wifi if no ssid
       if(_ssid == ""){
         DEBUG_WM(DEBUG_VERBOSE,F("No ssid, skipping wifi save"));
       }
       else{
-        DEBUG_WM("!!! processConfigPortal / connect ");
 
         // attempt sta connection to submitted _ssid, _pass
         if (connectWifi(_ssid, _pass) == WL_CONNECTED) {
@@ -675,8 +673,6 @@ uint8_t WiFiManager::processConfigPortal(){
           DEBUG_WM(F("Got IP Address:"));
           DEBUG_WM(WiFi.localIP());
 
-          DEBUG_WM("!!! connect / ssid !='' / connectWifi ");
-          
           if ( _savewificallback != NULL) {
             _savewificallback();
           }
@@ -1425,7 +1421,7 @@ void WiFiManager::handleWifiSave() {
   //added by BorisE
   String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
   page.replace("</script>", page_incl + "</script>");
-  page.replace("{timeout}", "10000"); //wait for wifi connection and move to the root of site
+  page.replace("{timeout}", String(handleWifiSave_goroot_timeout)); //wait for wifi connection and move to the root of site
   
   //end of inclusion
 
@@ -1453,7 +1449,7 @@ void WiFiManager::handleParamSave() {
   //added by BorisE
   String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
   page.replace("</script>", page_incl + "</script>");
-  page.replace("{timeout}", "2000"); //move to root of ConfigPortal (need to press Exit)
+  page.replace("{timeout}", String(handleParamSave_goroot_timeout)); //move to root of ConfigPortal (need to press Exit)
   //end of inclusion
 
 
@@ -1792,7 +1788,7 @@ void WiFiManager::handleExit() {
   //added by BorisE
   String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
   page.replace("</script>", page_incl + "</script>");
-  page.replace("{timeout}", "2000");
+  page.replace("{timeout}", String(handleExit_GOROOT_TIMEOUT));
 
   //end of inclusion
 
@@ -1814,7 +1810,7 @@ void WiFiManager::handleReset() {
   //added by BorisE
   String page_incl= FPSTR(HTTP_SCRIPT_GO_ROOT);
   page.replace("</script>", page_incl + "</script>");
-  page.replace("{timeout}", "5000");
+  page.replace("{timeout}", String(handleReset_GOROOT_TIMEOUT));
   //end of inclusion
 
   server->sendHeader(FPSTR(HTTP_HEAD_CL), String(page.length()));
