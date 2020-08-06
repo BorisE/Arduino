@@ -3,7 +3,7 @@
   (c) 2020 by Boris Emchenko
 
   TODO:
-  - save parameters useing SPIFFS (upload url, maybe other parameters?)
+  - mobile layout with cards
   - NTP server
   - data logging using SPIFFS
   - BH1750
@@ -14,6 +14,9 @@
   - Deepsleep mode?
 
  Changes:
+   ver 1.01 2020/08/06 [427368/32176]
+                      - added SDA,SCL,DHT22 pin to config (DHT22 not working)
+                      - needs custom WiFiManager v2.0.3-alpha_0.3
    ver 1.00 2020/08/06 [426688/32000]
                       - store settings in special structure
                       - convert config to JSON format
@@ -57,7 +60,7 @@
 */
 
 //Compile version
-#define VERSION "1.00"
+#define VERSION "1.01"
 #define VERSION_DATE "20200806"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
@@ -89,6 +92,9 @@ const char* host = "weather";
 struct Config {
   char POST_URL[101];
   uint8_t OneWirePin;
+  uint8_t I2CSDAPin;
+  uint8_t I2CSCLPin;
+  uint8_t DHT22Pin;
 };
 const char *configFilename = "/config.txt";  
 Config config;                              // <- global configuration object
@@ -157,6 +163,7 @@ Ticker ticker;
 const int STATUS_LED = LED_BUILTIN;
 
 #define DHT_PIN D11
+#define DHT_PIN_DEFAULT D11
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
 enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};  // DHT error codes enumerated
 float dhtTemp = -100;
@@ -165,8 +172,8 @@ unsigned long _lastReadTime_DHT=0;
 
 
 // Create BME280 object
-#define SDA_pin D3
-#define SCL_pin D4
+#define SDA_PIN_DEFAULT D3
+#define SCL_PIN_DEFAULT D4
 #define MY_BME280_ADDRESS (0x76)
 #define SEALEVELPRESSURE_HPA (1013.25)
 BME280_I2C bme(MY_BME280_ADDRESS);
@@ -268,13 +275,13 @@ void setup(void) {
   OneWireBus.begin(config.OneWirePin);
 
   //init BME280 sensor
-  if (!bme.begin(SDA_pin, SCL_pin)) 
+  if (!bme.begin(config.I2CSDAPin, config.I2CSCLPin)) 
   {
     Serial.println("Could not find a valid BME280 sensor, check wiring!");
   } 
 
   //MLX
-  mlx.begin(SDA_pin, SCL_pin);  
+  mlx.begin(config.I2CSDAPin, config.I2CSCLPin);  
 
   //Dallas Sensors
   ds18b20.begin();

@@ -24,11 +24,17 @@ void WiFi_init(WiFiManager* wm, int WaitTime = 0 )
   //void init(const char *id, const char *label, const char *defaultValue, int length, const char *custom, int labelPlacement);
   //WiFiManagerParameter custom_post_url("post_url_id", "POST URL", POST_URL, 40);
   //WiFiManagerParameter custom_OneWirePin("OneWirePinId", "OneWire pin", ONE_WIRE_BUS_PIN_ST, 2);
-  custom_post_url.init("post_url_id", "POST URL", config.POST_URL, 101, "", WFM_LABEL_BEFORE);
-  char onewirepinst[3];  itoa(config.OneWirePin,onewirepinst,10);
-  custom_OneWirePin.init("OneWirePinId", "OneWire pin",onewirepinst , 2, "", WFM_LABEL_BEFORE);
+  custom_post_url.init  ("post_url_id",   "POST URL",    config.POST_URL, 101, "", WFM_LABEL_BEFORE);
+  custom_OneWirePin.init("OneWirePinId",  "OneWire pin", config.OneWirePin, 2, "", WFM_LABEL_BEFORE);
+  custom_I2CSDAPin.init ("I2CSDAPinId",   "I2C SDA pin", config.I2CSDAPin,  2, "", WFM_LABEL_BEFORE);
+  custom_I2CSCLPin.init ("I2CSCLPinId",   "I2C SCL pin", config.I2CSCLPin,  2, "", WFM_LABEL_BEFORE);
+  custom_DHT22Pin.init  ("DHT22PinId",    "DHT22 pin",   config.DHT22Pin,   2, "", WFM_LABEL_BEFORE);
+
   wm->addParameter(&custom_post_url);
   wm->addParameter(&custom_OneWirePin);
+  wm->addParameter(&custom_I2CSDAPin);
+  wm->addParameter(&custom_I2CSCLPin);
+  wm->addParameter(&custom_DHT22Pin);
   
   // custom menu via array or vector
   // 

@@ -1,7 +1,22 @@
-const int capacity=JSON_OBJECT_SIZE(2)+150; //calc here https://arduinojson.org/v6/assistant/        
+/*
+ * How to add new parameter 
+ * 1. Add Config structure element:                             <-- config.parameter
+ * 2. Make empty WiFiManagerParameter custom_parameter object
+ * 3. Make constant with default value
+ * 4. Add to LoadDefaults():                                    <-- config.parameter = strlcpy / = DEFAULT_VALUE
+ * 4. Add to LoadConfigData():                                  <-- json["..."] | DEFAULT_VALUE;
+ * 5. Add to SaveParameters():                                  <-- strcpy()/atoi() from custom_parameter & json["custom_parameter"] = config.parameter
+ * 6. Add to PrintConfig()
+ * 7. recalculate capacity fo JSON object
+ * 8. Add to WiFi_init:                                         <-- custom_parameter.init & wm->addParameter()
+ */
+const int capacity=JSON_OBJECT_SIZE(5)+150; //calc here https://arduinojson.org/v6/assistant/        
 
 WiFiManagerParameter custom_post_url;
 WiFiManagerParameter custom_OneWirePin;
+WiFiManagerParameter custom_I2CSDAPin;
+WiFiManagerParameter custom_I2CSCLPin;
+WiFiManagerParameter custom_DHT22Pin;
 
 //flag for saving data
 bool shouldSaveConfig = false;
@@ -10,10 +25,13 @@ bool shouldSaveParameters = false;
 
 void LoadDefaults()
 {
-  Serial.println(F("[CONFIG] Load default values..."));
+  Serial.println(F("[CONFIG] Loading default values..."));
   strlcpy (config.POST_URL, DEFAULT_POST_URL, sizeof(config.POST_URL));
   config.OneWirePin     = ONE_WIRE_BUS_PIN_DEFAULT;
-
+  config.I2CSDAPin      = SDA_PIN_DEFAULT;
+  config.I2CSCLPin      = SCL_PIN_DEFAULT;
+  config.DHT22Pin       = DHT_PIN_DEFAULT;
+  
   PrintConfig();
 }
 
@@ -54,8 +72,11 @@ void LoadConfigData()
           Serial.println();        
 
           // Copy values from the JsonDocument to the Config
-          config.OneWirePin = json["OneWirePin"] | ONE_WIRE_BUS_PIN_DEFAULT;
           strlcpy (config.POST_URL, json["POST_URL"] | DEFAULT_POST_URL, sizeof(config.POST_URL));         // <- destination // <- source // <- destination's capacity
+          config.OneWirePin = json["OneWirePin"]  | ONE_WIRE_BUS_PIN_DEFAULT;
+          config.I2CSDAPin  = json["I2CSDAPin"]   | SDA_PIN_DEFAULT;
+          config.I2CSCLPin  = json["I2CSCLPin"]   | SCL_PIN_DEFAULT;
+          config.DHT22Pin   = json["DHT22Pin"]    | DHT_PIN_DEFAULT;
 
           // Close the file (Curiously, File's destructor doesn't close the file)
           configFile.close();
@@ -72,19 +93,11 @@ void LoadConfigData()
   }
   //end read
   PrintConfig();
- 
-//  
-//  //Load OneWire Bus pin number
-//
-//  //1. Load from somewhere to ONE_WIRE_BUS_PIN_ST as char*
-//  itoa(ONE_WIRE_BUS_PIN_DEFAULT, ONE_WIRE_BUS_PIN_ST,10);
-//  Serial.println(ONE_WIRE_BUS_PIN_ST);
-//  //2. Convert from char* to int if needed
-//  ONE_WIRE_BUS_PIN = atoi(ONE_WIRE_BUS_PIN_ST);
-//  Serial.println(ONE_WIRE_BUS_PIN);
 }
 
-
+/*
+ * Save current configuration to SPIFFS
+ */
 void SaveParameters()
 {
   PrintConfig();
@@ -92,11 +105,17 @@ void SaveParameters()
   //read updated parameters
   strcpy(config.POST_URL, custom_post_url.getValue());
   config.OneWirePin = atoi(custom_OneWirePin.getValue());
+  config.I2CSDAPin  = atoi(custom_I2CSDAPin.getValue());
+  config.I2CSCLPin  = atoi(custom_I2CSCLPin.getValue());
+  config.DHT22Pin   = atoi(custom_DHT22Pin.getValue());
 
   StaticJsonDocument<capacity> json;
 
-  json["POST_URL"]              = config.POST_URL;
-  json["OneWirePin"]            = config.OneWirePin;
+  json["POST_URL"]            = config.POST_URL;
+  json["OneWirePin"]          = config.OneWirePin;
+  json["I2CSDAPin"]           = config.I2CSDAPin;
+  json["I2CSCLPin"]           = config.I2CSCLPin;
+  json["DHT22Pin"]            = config.DHT22Pin;
 
   //Print config object
   Serial.print(F("[CONFIG] saving JSON: "));
@@ -138,11 +157,22 @@ void SaveParameters()
 
 void PrintConfig()
 {
-  Serial.print("[CONFIG] POST_URL: ");
+  Serial.println(F("[CONFIG] Current config: "));
+  
+  Serial.print("[CONFIG]    POST_URL: ");
   Serial.println( config.POST_URL );
 
-  Serial.print("[CONFIG] OneWirePin: ");
+  Serial.print("[CONFIG]    OneWirePin: ");
   Serial.println( config.OneWirePin );
+  Serial.print("[CONFIG]    I2CSDAPin: ");
+  Serial.println( config.I2CSDAPin );
+  Serial.print("[CONFIG]    I2CSCLPin: ");
+  Serial.println( config.I2CSCLPin );
+  Serial.print("[CONFIG]    DHT22Pin: ");
+  Serial.println( config.DHT22Pin );
+
+  Serial.println(F("[CONFIG] end of current config"));
+  
 }
 
 void listAllFiles()
