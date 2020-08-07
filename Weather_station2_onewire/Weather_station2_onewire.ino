@@ -5,10 +5,14 @@
 #define ONE_WIRE_BUS D6 // Data wire is plugged into this port
 
 
+#define NONVALID_TEMPERATURE -100
+
+
 OneWire  ds(ONE_WIRE_BUS);  // on pin 10 (a 4.7K resistor is necessary)
 //ROM = 28 6D A3 68 4 0 0 F8 
         
 uint8_t OW_Temp1Addr[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
+uint8_t OW_Temp1Addr2[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
 float OW_Temp1=-100;
 
 // Pass our oneWire reference to Dallas Temperature sensor 
@@ -74,8 +78,29 @@ void loop() {
   Serial.println(" C");
 
   delay(1000);
-  sensors.requestTemperatures(); 
+  //sensors.requestTemperatures(); 
   float temperatureC = sensors.getTempCByIndex(0);
+  Serial.print("Using Dallas lib: ");
+  Serial.print(temperatureC);
+  Serial.println("ºC");
+
+  Serial.print("Using Dallas lib2: count=");
+  Serial.println(sensors.getDeviceCount());
+  sensors.getAddress(OW_Temp1Addr2,0);
+  printAddress(OW_Temp1Addr2);
+  Serial.println();
+  
+  float OW_Temp1=NONVALID_TEMPERATURE;
+  if (sensors.getAddress(OW_Temp1Addr2, 0))
+  {
+    Serial.println(" here ");
+    OW_Temp1 = sensors.getTempC(OW_Temp1Addr2);
+  }else{
+     OW_Temp1 = NONVALID_TEMPERATURE;
+  }
+  Serial.print(OW_Temp1);
+  Serial.println("ºC");
+  
   Serial.print(temperatureC);
   Serial.println("ºC");
   delay(1000);
@@ -141,4 +166,13 @@ float getOneWireTemp(uint8_t addr[8])
   //// default is 12 bit resolution, no zeroing needed, 750 ms conversion time
 
   return (float)raw / 16.0;
+}
+
+void printAddress(uint8_t addr[8])
+{
+  for ( uint8_t i = 0; i < 8; i++) {           // we need 8 bytes
+    Serial.print(addr[i], HEX);
+    Serial.print(" ");
+}
+
 }
