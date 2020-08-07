@@ -1,3 +1,5 @@
 WemosD1_HelloServer/
 WemosD1test/
 Button_test/
+libraries/Adafruit_Circuit_Playground/
+libraries/Arduino_Cloud_Provider_Examples/
