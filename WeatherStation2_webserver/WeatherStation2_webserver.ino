@@ -14,6 +14,8 @@
   - Deepsleep mode?
 
  Changes:
+   ver 1.02 2020/08/07 [427520/32200]
+                      - ds18b20 connection tests to pass OOS values
    ver 1.01 2020/08/06 [427400/32176]
                       - added SDA,SCL,DHT22 pin to config
                       - needs custom WiFiManager v2.0.3-alpha_0.3
@@ -60,8 +62,8 @@
 */
 
 //Compile version
-#define VERSION "1.01"
-#define VERSION_DATE "20200806"
+#define VERSION "1.02"
+#define VERSION_DATE "20200807"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -159,6 +161,10 @@ static const uint8_t D9   = 3;
 static const uint8_t D10  = 1;
 */
 
+#define NONVALID_TEMPERATURE -100
+#define NONVALID_PRESSURE 0
+#define NONVALID_HUMIDITY 0
+
 Ticker ticker;
 const int STATUS_LED = LED_BUILTIN;
 
@@ -166,7 +172,7 @@ const int STATUS_LED = LED_BUILTIN;
 #define DHT_PIN_DEFAULT D11
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
 enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};  // DHT error codes enumerated
-float dhtTemp = -100;
+float dhtTemp = NONVALID_TEMPERATURE;
 float dhtHum =0;
 unsigned long _lastReadTime_DHT=0;
 
@@ -177,9 +183,9 @@ unsigned long _lastReadTime_DHT=0;
 #define MY_BME280_ADDRESS (0x76)
 #define SEALEVELPRESSURE_HPA (1013.25)
 BME280_I2C bme(MY_BME280_ADDRESS);
-float bmePres = 0;
-float bmeTemp = -100;
-float bmeHum = 0;
+float bmePres = NONVALID_PRESSURE;
+float bmeTemp = NONVALID_TEMPERATURE;
+float bmeHum  = NONVALID_HUMIDITY;
 unsigned long _lastReadTime_BME=0;
 
 
@@ -190,15 +196,15 @@ OneWire  OneWireBus;
 
 //ROM = 28 6D A3 68 4 0 0 F8
 uint8_t OW_Temp1Addr[8] = { 0x28, 0x6D, 0xA3, 0x68, 0x4, 0x0, 0x0, 0xF8 };
-float OW_Temp1=-100;
+float OW_Temp1=NONVALID_TEMPERATURE;
 unsigned long _lastReadTime_OW=0;
 
 DallasTemperature ds18b20(&OneWireBus);
 
 // MLX90614 part
 MLX90614 mlx = MLX90614();
-float mlxAmb = -100;
-float mlxObj = -100;
+float mlxAmb = NONVALID_TEMPERATURE;
+float mlxObj = NONVALID_TEMPERATURE;
 unsigned long _lastReadTime_MLX=0;
 
 
@@ -285,6 +291,9 @@ void setup(void) {
 
   //Dallas Sensors
   ds18b20.begin();
+  Serial.print("OneWire devices: ");
+  Serial.println(ds18b20.getDeviceCount());
+  ds18b20.getAddress(OW_Temp1Addr, 0); //try to read address for device 0
 }
 
 /********************************************************
@@ -331,8 +340,14 @@ void loop(void) {
   {
     bOutput=true;
     //OW_Temp1 = getOneWireTemp(OW_Temp1Addr);
-    ds18b20.requestTemperatures(); 
-    OW_Temp1 = ds18b20.getTempCByIndex(0);
+    ds18b20.requestTemperatures();
+    if (ds18b20.isConnected(OW_Temp1Addr))
+    {
+      OW_Temp1 = ds18b20.getTempC(OW_Temp1Addr);
+    }else{
+      OW_Temp1 = NONVALID_TEMPERATURE;
+    }
+    
     Serial.print("[!OW1:");
     Serial.print(OW_Temp1);
     Serial.println("]");
