@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WeatherStation</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/responsive-tiles.css?1221">
+        <link rel="stylesheet" href="css/weather-icons.min.css?aaa1121">
+        <script>
+        function replacePlaceholders()
+        {
+            document.getElementById('BMP').innerHTML="744.4";
+            document.getElementById('BMT').innerHTML="27.5";
+            document.getElementById('BMH').innerHTML="57.5";
+            document.getElementById('Temp').innerHTML="26.3";
+            document.getElementById('Hum').innerHTML="65.3";
+            document.getElementById('OW1').innerHTML="26.2";
+            document.getElementById('OBJ').innerHTML="-5.1";
+            document.getElementById('AMB').innerHTML="27.6";
+            document.getElementById('RT').innerHTML="112332";
+        }
+        </script>
+    </head>
+    <body onload="replacePlaceholders()">
+        <div class="container">
+          <section class="cms-boxes">
+            <div class="container-fluid">
+            
+              <div class="row">
+              
+                <div class="col-md-4 cms-boxes-outer">
+                  <div class="cms-boxes-items cms-temp">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Temperature</h2>
+                        <i class="wi wi-thermometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="OW1">24</i><i class="wi wi-celsius wi-2x">&nbsp;</i>
+                        <p>Current temperature, measured by ds18b20 sensor</p>
+                        Additional readings:
+                        <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
+                        <tr><td><span id="BMT">24.1</span><i class="wi wi-celsius">&nbsp;</i></td><td class="tdcomment">by BME280</td>
+                        </tr>
+                        <tr><td><span id="Temp">25.2</span><i class="wi wi-celsius">&nbsp;</i></</td><td class="tdcomment">by DHT22</td>
+                        </tr>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 cms-boxes-outer">
+                  <div class="cms-boxes-items cms-humidity">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Humidity</h2>
+                        <i class="wi wi-humidity wi-4x">&nbsp;</i><i class="wi wi-4x" id="Hum">59.2</i><i class="wi wi-2x">&nbsp;%</i>
+                        <h6><small>Current humidity, measured by DHT22 sensor</small></h6>
+                        Additional readings:
+                        <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
+                        <tr><td><span id="BMH">54.1</span><i class="wi">%&nbsp;</i></td><td class="tdcomment">by BME280</td>
+                        </tr>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 cms-boxes-outer">
+                  <div class="cms-boxes-items cms-pressure">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Pressure</h2>
+                        <i class="wi wi-barometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="BMP">744</i><i class="wi wi-2x">&nbsp;mmHg</i>
+                        <p>Current pressure, measured by BME280 sensor</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              
+              </div>
+              
+              <div class="row">
+                <div class="col-md-4 cms-boxes-outersmall">
+                  <div class="cms-boxes-items cms-astro">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Sun</h2>
+                        <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
+                        <tr><td rowspan=2>
+                            <i class="wi wi-sunrise wi-2x">&nbsp;</i>
+                        </td>
+                        <td>3:30&nbsp;</td><td class="tdcomment"></td>
+                        </tr>
+                        <tr><td>19:54&nbsp;</i></</td><td class="tdcomment"></td>
+                        </tr>
+                        </table>
+                        <p>Current temperature, measured by DHT22 sensor</p>
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 cms-boxes-outersmall">
+                  <div class="cms-boxes-items cms-moon">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Moon</h2>
+                        <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
+                        <tr><td><i class="wi wi-moonrise wi-2x">&nbsp;</i></td>
+                        <td>1:10&nbsp;</td>
+                        <td rowspan=2>&nbsp;<i class="wi wi-moon-alt-waning-gibbous-6 wi-4x">&nbsp;</i></td>
+                        </tr>
+                        <tr><td><i class="wi wi-moonset wi-2x">&nbsp;</i></td>
+                        <td>10:21&nbsp;</td>
+                        </tr>
+                        </table>
+                        <p>Current humidity, measured by BME280 sensor</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 cms-boxes-outersmall">
+                  <div class="cms-boxes-items cms-misc">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Config</h2>
+                        <i class="wi wi-refresh wi-2x">&nbsp;<span class="wi wi-na normal-color"></span></i>
+                        <p>Current pressure, measured by BME280 sensor</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                            
+
+
+              </div>
+            </div>
+          </section>
+        </div>
+    </body>
+ </html>

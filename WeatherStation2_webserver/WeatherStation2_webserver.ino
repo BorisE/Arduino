@@ -1,12 +1,11 @@
 /*
-  WEATHER STATION Mk II
+  WEATHER STATION MkII
   (c) 2020 by Boris Emchenko
 
   TODO:
   - mobile layout with cards
   - NTP server
   - data logging using SPIFFS
-  - BH1750
   - Capacitive rain sensor
   - UV sensor?
   - CO2 sensor?
@@ -14,8 +13,12 @@
   - Deepsleep mode?
 
  Changes:
+   ver 1.1 2020/08/09 [430424/32244]
+                      - added BH1750FVI (lux) sensor
+                      - prepared (but not moved yet!) new HTML templates
    ver 1.02 2020/08/07 [427520/32200]
-                      - ds18b20 connection tests to pass OOS values
+                      - ds18b20 connection tests to pass out of scale values
+                      - config file changed to config.cfg
    ver 1.01 2020/08/06 [427400/32176]
                       - added SDA,SCL,DHT22 pin to config
                       - needs custom WiFiManager v2.0.3-alpha_0.3
@@ -62,8 +65,8 @@
 */
 
 //Compile version
-#define VERSION "1.02"
-#define VERSION_DATE "20200807"
+#define VERSION "1.1"
+#define VERSION_DATE "20200809"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -79,6 +82,7 @@
 #include <OneWire.h>
 #include <MLX90614.h>
 #include <DallasTemperature.h>
+#include <BH1750.h>
 
 #include <Ticker.h>//for LED status
 
@@ -98,7 +102,7 @@ struct Config {
   uint8_t I2CSCLPin;
   uint8_t DHT22Pin;
 };
-const char *configFilename = "/config.txt";  
+const char *configFilename = "/config.cfg";  
 Config config;                              // <- global configuration object
 
 
@@ -164,6 +168,7 @@ static const uint8_t D10  = 1;
 #define NONVALID_TEMPERATURE -100
 #define NONVALID_PRESSURE 0
 #define NONVALID_HUMIDITY 0
+#define NONVALID_LUX -100
 
 Ticker ticker;
 const int STATUS_LED = LED_BUILTIN;
@@ -176,13 +181,14 @@ float dhtTemp = NONVALID_TEMPERATURE;
 float dhtHum =0;
 unsigned long _lastReadTime_DHT=0;
 
-
-// Create BME280 object
+//I2C wire
 #define SDA_PIN_DEFAULT D3
 #define SCL_PIN_DEFAULT D4
+
+// Create BME280 object
 #define MY_BME280_ADDRESS (0x76)
-#define SEALEVELPRESSURE_HPA (1013.25)
 BME280_I2C bme(MY_BME280_ADDRESS);
+#define SEALEVELPRESSURE_HPA (1013.25)
 float bmePres = NONVALID_PRESSURE;
 float bmeTemp = NONVALID_TEMPERATURE;
 float bmeHum  = NONVALID_HUMIDITY;
@@ -207,14 +213,20 @@ float mlxAmb = NONVALID_TEMPERATURE;
 float mlxObj = NONVALID_TEMPERATURE;
 unsigned long _lastReadTime_MLX=0;
 
+//BH1750FVI light sensor part
+#define BH1750_ADDR 0x23        // if ADD pin to GROUND, 0x23; if to VCC - 0x5C
+BH1750 lightMeter (BH1750_ADDR);
+float bh1750Lux = NONVALID_LUX;
+unsigned long _lastReadTime_BH1750=0;
 
 unsigned long currenttime;              // millis from script start 
-#define POST_DATA_INTERVAL  120000
+#define POST_DATA_INTERVAL    120000
 #define JS_UPDATEDATA_INTERVAL  10000
-#define DHT_READ_INTERVAL   10000
-#define BME_READ_INTERVAL   10000
-#define OW_READ_INTERVAL    10000
-#define MLX_READ_INTERVAL   10000
+#define DHT_READ_INTERVAL     10000
+#define BME_READ_INTERVAL     10000
+#define OW_READ_INTERVAL      10000
+#define MLX_READ_INTERVAL     10000
+#define BH1750_READ_INTERVAL  10000
 
 bool bOutput=false;
 
@@ -278,7 +290,7 @@ void setup(void) {
 
   ////////////////////////////////
   // START HARDWARE
-  OneWireBus.begin(config.OneWirePin);
+  Wire.begin(config.I2CSDAPin, config.I2CSCLPin);
 
   //init BME280 sensor
   if (!bme.begin(config.I2CSDAPin, config.I2CSCLPin)) 
@@ -290,10 +302,14 @@ void setup(void) {
   mlx.begin(config.I2CSDAPin, config.I2CSCLPin);  
 
   //Dallas Sensors
+  OneWireBus.begin(config.OneWirePin);
   ds18b20.begin();
   Serial.print("OneWire devices: ");
   Serial.println(ds18b20.getDeviceCount());
   ds18b20.getAddress(OW_Temp1Addr, 0); //try to read address for device 0
+
+  //BH1750
+  lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
 }
 
 /********************************************************
@@ -361,6 +377,14 @@ void loop(void) {
     ReadMLXvalues(mlxAmb, mlxObj);
 
     _lastReadTime_MLX = currenttime;
+  }
+
+  if (_lastReadTime_BH1750 ==0 || (currenttime - _lastReadTime_BH1750) > BH1750_READ_INTERVAL)
+  {
+    bOutput=true;
+    bh1750Lux  = measureLight();
+
+    _lastReadTime_BH1750 = currenttime;
   }
 
 

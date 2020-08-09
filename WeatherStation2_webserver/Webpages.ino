@@ -43,6 +43,7 @@ const char HTTP_HTML_SENSORSTABLE[] PROGMEM = "<table><thead>\
       <tr><td>Temperature OneWire</td><td><span id='OW1'>{OW1}</span> &deg;</td></tr>\
       <tr><td>Object MLX90614</td><td><span id='OBJ'>{OBJ}</span> &deg;</td></tr>\
       <tr><td>Ambient MLX90614</td><td><span id='AMB'>{AMB}</span> &deg;</td></tr>\
+      <tr><td>Luminance BH1750FVI</td><td><span id='BHV'>{BHV}</span> lx</td></tr>\
     </tbody></table>";
 
 
@@ -65,6 +66,7 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         document.getElementById('OW1').innerHTML=getData.OW1;\
         document.getElementById('OBJ').innerHTML=getData.OBJ;\
         document.getElementById('AMB').innerHTML=getData.AMB;\
+        document.getElementById('BHV').innerHTML=getData.BHV;\
         document.getElementById('RT').innerHTML=getData.RT;\
       };\
       xhr.send();\
@@ -150,6 +152,7 @@ void handleRoot() {
   page.replace("{OW1}", String(OW_Temp1));
   page.replace("{OBJ}", String(mlxObj));
   page.replace("{AMB}", String(mlxAmb));
+  page.replace("{BHV}", String(bh1750Lux));
   
   page.replace("{RT}", String(currenttime));
   page.replace("{Ver}", String(VERSION));
@@ -261,6 +264,7 @@ String SensorsJSON()
   page += "\"OW1\": " + String(OW_Temp1) + ", ";
   page += "\"OBJ\": " + String(mlxObj) + ", ";
   page += "\"AMB\": " + String(mlxAmb) + ", ";
+  page += "\"BHV\": " + String(bh1750Lux) + ", ";
   page += "\"RT\": " + String(currenttime) + "";
 
   page +="}";
