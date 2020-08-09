@@ -43,7 +43,7 @@ const char HTTP_HTML_SENSORSTABLE[] PROGMEM = "<table><thead>\
       <tr><td>Temperature OneWire</td><td><span id='OW1'>{OW1}</span> &deg;</td></tr>\
       <tr><td>Object MLX90614</td><td><span id='OBJ'>{OBJ}</span> &deg;</td></tr>\
       <tr><td>Ambient MLX90614</td><td><span id='AMB'>{AMB}</span> &deg;</td></tr>\
-      <tr><td>Luminance BH1750FVI</td><td><span id='BHV'>{BHV}</span> lx</td></tr>\
+      <tr><td>Illuminance BH1750FVI</td><td><span id='BHV'>{BHV}</span> lx</td></tr>\
     </tbody></table>";
 
 
