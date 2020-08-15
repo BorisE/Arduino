@@ -92,9 +92,9 @@ void WiFi_deinit()
   if (WiFi.status() == WL_CONNECTED) 
   {
     Serial.println("");
-    Serial.print("Connected to ");
+    Serial.print(F("Connected to "));
     Serial.println(WiFi.SSID());
-    Serial.print("IP address: ");
+    Serial.print(F("IP address: "));
     Serial.println(WiFi.localIP());
   }
 }
@@ -157,7 +157,7 @@ void tick()
 
 //gets called when WiFiManager enters configuration mode
 void configModeCallback (WiFiManager *myWiFiManager) {
-  Serial.println("Entered config mode");
+  Serial.println(F("Entered config mode"));
   Serial.println(WiFi.softAPIP());
   //if you used auto generated SSID, print it
   Serial.println(myWiFiManager->getConfigPortalSSID());

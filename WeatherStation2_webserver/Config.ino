@@ -159,16 +159,16 @@ void PrintConfig()
 {
   Serial.println(F("[CONFIG] Current config: "));
   
-  Serial.print("[CONFIG]    POST_URL: ");
+  Serial.print(F("[CONFIG]    POST_URL: "));
   Serial.println( config.POST_URL );
 
-  Serial.print("[CONFIG]    OneWirePin: ");
+  Serial.print(F("[CONFIG]    OneWirePin: "));
   Serial.println( config.OneWirePin );
-  Serial.print("[CONFIG]    I2CSDAPin: ");
+  Serial.print(F("[CONFIG]    I2CSDAPin: "));
   Serial.println( config.I2CSDAPin );
-  Serial.print("[CONFIG]    I2CSCLPin: ");
+  Serial.print(F("[CONFIG]    I2CSCLPin: "));
   Serial.println( config.I2CSCLPin );
-  Serial.print("[CONFIG]    DHT22Pin: ");
+  Serial.print(F("[CONFIG]    DHT22Pin: "));
   Serial.println( config.DHT22Pin );
 
   Serial.println(F("[CONFIG] end of current config"));
@@ -189,17 +189,17 @@ void listAllFiles()
   FSInfo fs_info;
   SPIFFS.info(fs_info);
 
-  Serial.print("fs_info.totalBytes = ");
+  Serial.print(F("fs_info.totalBytes = "));
   Serial.println(fs_info.totalBytes);
-  Serial.print("fs_info.usedBytes = ");
+  Serial.print(F("fs_info.usedBytes = "));
   Serial.println(fs_info.usedBytes);
-  Serial.print("fs_info.blockSize = ");
+  Serial.print(F("fs_info.blockSize = "));
   Serial.println(fs_info.blockSize);
-  Serial.print("fs_info.pageSize = ");
+  Serial.print(F("fs_info.pageSize = "));
   Serial.println(fs_info.pageSize);
-  Serial.print("fs_info.maxOpenFiles = ");
+  Serial.print(F("fs_info.maxOpenFiles = "));
   Serial.println(fs_info.maxOpenFiles);
-  Serial.print("fs_info.maxPathLength = ");
+  Serial.print(F("fs_info.maxPathLength = "));
   Serial.println(fs_info.maxPathLength);  
 }
 

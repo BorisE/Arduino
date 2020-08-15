@@ -173,7 +173,7 @@ void handleRoot() {
  */
 void handleNotFound() {
   digitalWrite(STATUS_LED, HIGH);
-  String message = "File Not Found\n\n";
+  String message = F("File Not Found\n\n");
   message += "URI: ";
   message += server.uri();
   message += "\nMethod: ";
@@ -274,7 +274,7 @@ String SensorsJSON()
 
 void printRequestData()
 {
-  Serial.print("[HTTP REQUEST] client: ");
+  Serial.print(F("[HTTP REQUEST] client: "));
   Serial.print(server.client().remoteIP().toString());
   //Serial.print("[HTTP REQUEST] method: ");
   //Serial.println(server.method());

@@ -15,12 +15,12 @@ int HTTP_sendJSON()
     WiFiClient client;
     HTTPClient http;    //Declare object of class HTTPClient
 
-    Serial.print("[HTTP POST] begin...\n");
+    Serial.print(F("[HTTP POST] begin...\n"));
     // configure traged server and url
     http.begin(client, config.POST_URL); //HTTP
     http.addHeader("Content-Type", "application/json");
 
-    Serial.print("[HTTP POST] POST...\n");
+    Serial.print(F("[HTTP POST] POST...\n"));
 
     String json = SensorsJSON();
     
@@ -35,7 +35,7 @@ int HTTP_sendJSON()
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
         const String& payload = http.getString();
-        Serial.println("[HTTP POST] received payload:\n<<");
+        Serial.println(F("[HTTP POST] received payload:\n<<"));
         Serial.println(payload);
         Serial.println(">>");
         ret = HTTP_SEND_RES_OK;

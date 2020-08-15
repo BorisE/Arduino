@@ -13,6 +13,8 @@
   - Deepsleep mode?
 
  Changes:
+   ver 1.11 2020/08/15 [430436/31744]
+                      - memory (F(..)) optimization
    ver 1.1 2020/08/09 [430424/32244]
                       - added BH1750FVI (lux) sensor
                       - prepared (but not moved yet!) new HTML templates
@@ -65,8 +67,8 @@
 */
 
 //Compile version
-#define VERSION "1.1"
-#define VERSION_DATE "20200809"
+#define VERSION "1.11"
+#define VERSION_DATE "20200815"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -286,7 +288,7 @@ void setup(void) {
   server.onNotFound(handleNotFound);
 
   server.begin();
-  Serial.println("HTTP server started");
+  Serial.println(F("HTTP server started"));
 
   ////////////////////////////////
   // START HARDWARE
@@ -295,7 +297,7 @@ void setup(void) {
   //init BME280 sensor
   if (!bme.begin(config.I2CSDAPin, config.I2CSCLPin)) 
   {
-    Serial.println("Could not find a valid BME280 sensor, check wiring!");
+    Serial.println(F("Could not find a valid BME280 sensor, check wiring!"));
   } 
 
   //MLX
@@ -304,7 +306,7 @@ void setup(void) {
   //Dallas Sensors
   OneWireBus.begin(config.OneWirePin);
   ds18b20.begin();
-  Serial.print("OneWire devices: ");
+  Serial.print(F("OneWire devices: "));
   Serial.println(ds18b20.getDeviceCount());
   ds18b20.getAddress(OW_Temp1Addr, 0); //try to read address for device 0
 
