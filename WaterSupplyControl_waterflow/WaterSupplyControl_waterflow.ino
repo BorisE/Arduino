@@ -1,4 +1,4 @@
-#define WATERFLOW_PIN D8
+#define WATERFLOW_PIN D3
 
 volatile int flow_frequency; // variable to store the “rise ups” from the flowmeter pulses
 unsigned int flow_l_min; // Calculated litres/hour
