@@ -25,9 +25,9 @@ const char HTTP_HTML_FOOTER[] PROGMEM = "<p class='footer'>WaterSupplyControl v{
 const char HTTP_HTML_END[] PROGMEM = "</body></html>";
 
 /*
- SENSOR TABLE TEMPLATE
+ RELAY TABLE TEMPLATE
  */
-const char HTTP_HTML_SENSORSTABLE[] PROGMEM = "<table><thead>\
+const char HTTP_HTML_RELAYTABLE[] PROGMEM = "<table><thead>\
         <tr><th>Relay 1</th><th>Relay 2</th><th>Relay 3</th><th>Relay 4</th></tr>\
     </thead><tbody>\n\
       <tr>\
@@ -44,11 +44,24 @@ const char HTTP_HTML_SENSORSTABLE[] PROGMEM = "<table><thead>\
       </tr>\n\
     </tbody></table>\n";
 
+/*
+ WATER SENSOR TABLE TEMPLATE
+ */
+const char HTTP_HTML_WSTABLE[] PROGMEM = "<br><table><tbody>\n\
+      <tr>\
+        <td id='WS3'>{WS3}</td>\
+      </tr>\n\
+      <tr>\
+        <td id='WS2'>{WS2}</td>\
+      </tr>\n\
+      <tr>\
+        <td id='WS1'>{WS1}</td>\
+      </tr>\n\
+    </tbody></table>\n";
 
 /*
  * AUTOUPDATE DATA
  */
-        //document.getElementById('relay4').innerHTML=getData.relay4;
 const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
     window.setInterval(\"update()\", {update});\
     function update(){\
@@ -61,13 +74,16 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         displayrelaystat(2,getData.relay2);\
         displayrelaystat(3,getData.relay3);\
         displayrelaystat(4,getData.relay4);\
+        displaywsens(1,getData.WS1);\
+        displaywsens(2,getData.WS2);\
+        displaywsens(3,getData.WS3);\
         document.getElementById('RT').innerHTML=getData.RT;\
       };\
       xhr.send();\
     }\n\
     function displayrelaystat(rnum, rstat) {\
       document.getElementById('relay'+rnum).innerHTML=rstat;\
-      document.getElementById('relay'+rnum).style.backgroundColor = (rstat == 'ON'? 'green' :'red');\
+      document.getElementById('relay'+rnum).style.backgroundColor = (rstat == 'ON'? '#26b569' :'#b5262b');\
     }\n\
     function relaysend(rnum, rstat) {\
       var xhr=new XMLHttpRequest();\
@@ -80,7 +96,11 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
       };\
       xhr.send();\
     }\n\
-  </script>";
+    function displaywsens(rnum, wstat) {\
+      document.getElementById('WS'+rnum).innerHTML=wstat;\
+      document.getElementById('WS'+rnum).style.backgroundColor = (wstat == '+'? '#26b5b1' :'');\
+    }\n\
+    </script>";
 
 
 const char HTTP_HTML_REDIRECT[] PROGMEM = "<script>\
@@ -100,7 +120,9 @@ void handleRoot() {
 
   String page, page1;
   page = FPSTR(HTTP_HTML_HEADER);
-  page1 = FPSTR(HTTP_HTML_SENSORSTABLE);
+  page1 = FPSTR(HTTP_HTML_RELAYTABLE);
+  page +=page1;
+  page1 = FPSTR(HTTP_HTML_WSTABLE);
   page +=page1;
   page1 = FPSTR(HTTP_HTML_FOOTER);
   page +=page1;
@@ -112,6 +134,11 @@ void handleRoot() {
   page.replace("{relay2}", String(getRelayStatusString(config.H1_2_PIN)));
   page.replace("{relay3}", String(getRelayStatusString(config.H2_1_PIN)));
   page.replace("{relay4}", String(getRelayStatusString(config.H2_2_PIN)));
+
+  page.replace("{WS1}", String(getSensorStatusString(config.WS1_PIN)));
+  page.replace("{WS2}", String(getSensorStatusString(config.WS2_PIN)));
+  page.replace("{WS3}", String(getSensorStatusString(config.WS3_PIN)));
+
   
   page.replace("{RT}", String(currenttime));
   page.replace("{Ver}", String(VERSION));
@@ -123,28 +150,6 @@ void handleRoot() {
 
   server.send(200, "text/html", page);
 
-  printRequestData();
-  digitalWrite(STATUS_LED, LOW);
-}
-
-/*
- * NOT FOUND PAGE
- */
-void handleNotFound() {
-  digitalWrite(STATUS_LED, HIGH);
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-  
   printRequestData();
   digitalWrite(STATUS_LED, LOW);
 }
@@ -163,6 +168,30 @@ void handleJSON(){
   digitalWrite(STATUS_LED, LOW);
 }
 
+String SensorsJSON()
+{
+  String page = "{";
+  
+  page += "\"relay1\": \"" + String(getRelayStatusString(config.H1_1_PIN)) + "\",";
+  page += "\"relay2\": \"" + String(getRelayStatusString(config.H1_2_PIN)) + "\",";
+  page += "\"relay3\": \"" + String(getRelayStatusString(config.H2_1_PIN)) + "\",";
+  page += "\"relay4\": \"" + String(getRelayStatusString(config.H2_2_PIN)) + "\",";
+
+  page += "\"WS1\": \"" + String(getSensorStatusString(config.WS1_PIN)) + "\",";
+  page += "\"WS2\": \"" + String(getSensorStatusString(config.WS2_PIN)) + "\",";
+  page += "\"WS3\": \"" + String(getSensorStatusString(config.WS3_PIN)) + "\",";
+  
+  page += "\"RT\": " + String(currenttime) + "";
+
+  page +="}";
+
+  return page;
+}
+
+
+/*
+ * Relay Switch Handler
+ */
 void handleRelaySwitch() {
 
   digitalWrite(STATUS_LED, HIGH);
@@ -195,6 +224,7 @@ void handleRelaySwitch() {
   
 }
 
+
 /*
  * Respond with OK
  */
@@ -206,23 +236,31 @@ void handlePingRequest(){
   digitalWrite(STATUS_LED, LOW);
 }
 
-
-String SensorsJSON()
-{
-  String page = "{";
+/*
+ * NOT FOUND PAGE
+ */
+void handleNotFound() {
+  digitalWrite(STATUS_LED, HIGH);
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server.uri();
+  message += "\nMethod: ";
+  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += server.args();
+  message += "\n";
+  for (uint8_t i = 0; i < server.args(); i++) {
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+  }
+  server.send(404, "text/plain", message);
   
-  page += "\"relay1\": \"" + String(getRelayStatusString(config.H1_1_PIN)) + "\",";
-  page += "\"relay2\": \"" + String(getRelayStatusString(config.H1_2_PIN)) + "\",";
-  page += "\"relay3\": \"" + String(getRelayStatusString(config.H2_1_PIN)) + "\",";
-  page += "\"relay4\": \"" + String(getRelayStatusString(config.H2_2_PIN)) + "\",";
-  page += "\"RT\": " + String(currenttime) + "";
-
-  page +="}";
-
-  return page;
+  printRequestData();
+  digitalWrite(STATUS_LED, LOW);
 }
 
-
+/*
+ *  Print HTTP request data
+ */
 void printRequestData()
 {
   Serial.print("[HTTP REQUEST] client: ");

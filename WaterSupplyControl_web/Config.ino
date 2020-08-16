@@ -20,7 +20,11 @@ void LoadDefaults()
   config.H1_2_PIN=H1_2_PIN_DEFAULT;
   config.H2_1_PIN=H2_1_PIN_DEFAULT;
   config.H2_2_PIN=H2_2_PIN_DEFAULT;
-  
+
+  config.WS1_PIN=WS1_PIN_DEFAULT;
+  config.WS2_PIN=WS2_PIN_DEFAULT;
+  config.WS3_PIN=WS3_PIN_DEFAULT;
+    
   PrintConfig();
 }
 
@@ -37,6 +41,13 @@ void PrintConfig()
   Serial.println( config.H2_1_PIN );
   Serial.print("[CONFIG]    H2_2_PIN: ");
   Serial.println( config.H2_2_PIN );
+
+  Serial.print("[CONFIG]    WS1_PIN: ");
+  Serial.println( config.WS1_PIN );
+  Serial.print("[CONFIG]    WS2_PIN: ");
+  Serial.println( config.WS2_PIN );
+  Serial.print("[CONFIG]    WS3_PIN: ");
+  Serial.println( config.WS3_PIN );
 
   Serial.println(F("[CONFIG] end of current config"));
  

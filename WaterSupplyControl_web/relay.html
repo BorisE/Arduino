@@ -18,8 +18,8 @@ table td, table th {  border: 1px solid #AAAAAA;  padding: 3px 2px; }table thead
         xhr.send();    
     }  
     function relaysend(relaynum, status) {
-        document.getElementById("relay"+relaynum).innerHTML=status;
-        document.getElementById("relay"+relaynum).style.backgroundColor = (status == "on"? "green" :"red");
+        document.getElementById('relay'+relaynum).innerHTML=status;
+        document.getElementById('relay'+relaynum).style.backgroundColor = (status == 'on'? '#26b569' :'#b5262b');
     }
     
 </script>
@@ -48,6 +48,22 @@ table td, table th {  border: 1px solid #AAAAAA;  padding: 3px 2px; }table thead
         <td><button onclick="relaysend(2,'on');">ON</button><button onclick="relaysend(2,'off');">OFF</button></td>
         <td><button onclick="relaysend(3,'on');">ON</button><button onclick="relaysend(3,'off');">OFF</button></td>
         <td><button onclick="relaysend(4,'on');">ON</button><button onclick="relaysend(4,'off');">OFF</button></td>
+    </tbody>
+</table>
+
+<br>
+
+<table>
+    <tbody>      
+      <tr>
+        <td id="WS3">-</td>
+      </tr>      
+      <tr>
+        <td id="WS2" style="background-color:#26b5b1">+</td>
+      </tr>      
+      <tr>
+        <td id="WS1" style="background-color:#26b5b1">+</td>
+      </tr>      
     </tbody>
 </table>
 

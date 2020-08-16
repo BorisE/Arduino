@@ -2,10 +2,11 @@
   WATER SUPPLY CONTROL
   (c) 2020 by Boris Emchenko
 
+   ver 0.2 2020/08/16 [320304/28124] - 3 water sensor added
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.1"
+#define VERSION "0.2"
 #define VERSION_DATE "20200816"
 
 #include <ESP8266WiFi.h>
@@ -53,11 +54,18 @@ const int STATUS_LED = LED_BUILTIN;
 #define H2_1_PIN_DEFAULT D5 
 #define H2_2_PIN_DEFAULT D0
 
+#define WS1_PIN_DEFAULT D1
+#define WS2_PIN_DEFAULT D2
+#define WS3_PIN_DEFAULT D8 
+
 struct Config {
   uint8_t H1_1_PIN;
   uint8_t H1_2_PIN;
   uint8_t H2_1_PIN;
   uint8_t H2_2_PIN;
+  uint8_t WS1_PIN;
+  uint8_t WS2_PIN;
+  uint8_t WS3_PIN;
 };
 Config config;      
 
