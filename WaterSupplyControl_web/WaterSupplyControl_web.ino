@@ -2,11 +2,20 @@
   WATER SUPPLY CONTROL
   (c) 2020 by Boris Emchenko
 
+  TODO:
+  - WiFi manager
+  - Config saving in SPIFFS
+  - more asbtracted waterflow control
+  - AUTOMATION
+
+   ver 0.5 2020/08/16 [322776/28536] - fully working device with: 2 relays, 3 water level sensors and waterflow sensor
+   ver 0.4 2020/08/16                - waterflow sensor counting
+   ver 0.3 2020/08/16                - relay/wsensors status to serial output
    ver 0.2 2020/08/16 [320304/28124] - 3 water sensor added
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.2"
+#define VERSION "0.5"
 #define VERSION_DATE "20200816"
 
 #include <ESP8266WiFi.h>
@@ -58,6 +67,8 @@ const int STATUS_LED = LED_BUILTIN;
 #define WS2_PIN_DEFAULT D2
 #define WS3_PIN_DEFAULT D8 
 
+#define WATERFLOW_PIN_DEFAULT D3
+
 struct Config {
   uint8_t H1_1_PIN;
   uint8_t H1_2_PIN;
@@ -66,13 +77,27 @@ struct Config {
   uint8_t WS1_PIN;
   uint8_t WS2_PIN;
   uint8_t WS3_PIN;
+  uint8_t WATERFLOW_PIN;  
 };
 Config config;      
 
+volatile int flow_count; // variable to store the “rise ups” from the flowmeter pulses
+unsigned int flow_l_min; // Calculated litres/min
+#define WATERFLOW_COUNT_FREQUENCY 1000    //millis
 
+unsigned long currenttime=0;              // millis from script start 
+unsigned long _lastReadTime_Relay=0;
+unsigned long _lastReadTime_WS=0;
+unsigned long _lastReadTime_WaterFlow=0;
 
-unsigned long currenttime;              // millis from script start 
+#define RELAY_READ_INTERVAL     10000
+#define WSENSORS_READ_INTERVAL  10000
 #define JS_UPDATEDATA_INTERVAL  10000
+
+//Interrupt function, so that the counting of pulse “rise ups” dont interfere with the rest of the code  (attachInterrupt)
+void ICACHE_RAM_ATTR flow_ISR(){   
+  flow_count++;
+}
 
 /********************************************************
 *     SETUP
@@ -139,9 +164,12 @@ void setup() {
 
   ////////////////////////////////
   // START HARDWARE
-
-  //Set relay ping
   initRelays ();
+  
+  pinMode(config.WATERFLOW_PIN, INPUT_PULLUP);
+  // Attach an interrupt to the ISR vector
+  attachInterrupt(digitalPinToInterrupt(config.WATERFLOW_PIN), flow_ISR, RISING);
+  sei(); // Enable interrupts  
 }
 
 /********************************************************
@@ -153,4 +181,23 @@ void loop() {
   server.handleClient();
   MDNS.update();
 
+   // Every second, calculate and print litres/hour
+   if(currenttime >= (_lastReadTime_WaterFlow + WATERFLOW_COUNT_FREQUENCY))
+   {
+      calcWaterFlow();
+      _lastReadTime_WaterFlow = currenttime;
+   }
+
+  //Print relay status
+  if (_lastReadTime_Relay ==0 || (currenttime - _lastReadTime_Relay) > RELAY_READ_INTERVAL)
+  {
+    printRelayStatus();
+    _lastReadTime_Relay= currenttime;
+  }
+  //Print relay status
+  if (_lastReadTime_WS ==0 || (currenttime - _lastReadTime_WS) > WSENSORS_READ_INTERVAL)
+  {
+    printWSensorStatus();
+    _lastReadTime_WS= currenttime;
+  }
 }

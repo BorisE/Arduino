@@ -7,7 +7,7 @@ const char HTTP_HTML_HEADER[] PROGMEM = "<!DOCTYPE html>\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
 <title>Water Supply Control System</title>\n\
 <style>\
-table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: left;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }\n\
+table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: center;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }\n\
 table td, table th {  border: 1px solid #AAAAAA;  padding: 3px 2px; }\
 table thead {  background: #2672B5;  background: -moz-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: -webkit-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: linear-gradient(to bottom, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);  border-bottom: 1px solid #000000;  font-size: 15px;  font-weight: bold;  color: #FFFFFF; }\
 table tbody td {  font-size: 13px; }\
@@ -59,6 +59,28 @@ const char HTTP_HTML_WSTABLE[] PROGMEM = "<br><table><tbody>\n\
       </tr>\n\
     </tbody></table>\n";
 
+
+/*
+ WATERFLOW TABLE TEMPLATE
+ */
+const char HTTP_HTML_WFLOWTABLE[] PROGMEM = "<br><table><tbody>\n\
+      <tr><td colspan=10><span id='WFval'>{WFval}</span> L/min</td></tr>\n\
+      <tr>\
+        <td id='WF1'></td>\
+        <td id='WF2'></td>\
+        <td id='WF3'></td>\
+        <td id='WF4'></td>\
+        <td id='WF5'></td>\
+        <td id='WF6'></td>\
+        <td id='WF7'></td>\
+        <td id='WF8'></td>\
+        <td id='WF9'></td>\
+        <td id='WF10'></td>\
+      </tr>\n\
+    </tbody></table>\n";
+
+
+
 /*
  * AUTOUPDATE DATA
  */
@@ -77,6 +99,7 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         displaywsens(1,getData.WS1);\
         displaywsens(2,getData.WS2);\
         displaywsens(3,getData.WS3);\
+        waterflowdraw(getData.WF);\
         document.getElementById('RT').innerHTML=getData.RT;\
       };\
       xhr.send();\
@@ -99,6 +122,16 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
     function displaywsens(rnum, wstat) {\
       document.getElementById('WS'+rnum).innerHTML=wstat;\
       document.getElementById('WS'+rnum).style.backgroundColor = (wstat == '+'? '#26b5b1' :'');\
+    }\n\
+    function waterflowdraw(waterflow) {\
+        document.getElementById('WFval').innerHTML=waterflow;\n\
+        var calcWF=waterflow/100*10;\n\
+        for (var i=1; i <= calcWF; i++) {\
+            document.getElementById('WF'+i).style.backgroundColor = '#26b569';\
+        }\
+        for (var i=calcWF+1; i <= 10; i++) {\
+            document.getElementById('WF'+i).style.backgroundColor = '';\
+        }\
     }\n\
     </script>";
 
@@ -124,6 +157,9 @@ void handleRoot() {
   page +=page1;
   page1 = FPSTR(HTTP_HTML_WSTABLE);
   page +=page1;
+  page1 = FPSTR(HTTP_HTML_WFLOWTABLE);
+  page +=page1;
+
   page1 = FPSTR(HTTP_HTML_FOOTER);
   page +=page1;
   page1 = FPSTR(HTTP_HTML_END);
@@ -139,6 +175,7 @@ void handleRoot() {
   page.replace("{WS2}", String(getSensorStatusString(config.WS2_PIN)));
   page.replace("{WS3}", String(getSensorStatusString(config.WS3_PIN)));
 
+  page.replace("{WFval}", String(flow_l_min));
   
   page.replace("{RT}", String(currenttime));
   page.replace("{Ver}", String(VERSION));
@@ -180,7 +217,9 @@ String SensorsJSON()
   page += "\"WS1\": \"" + String(getSensorStatusString(config.WS1_PIN)) + "\",";
   page += "\"WS2\": \"" + String(getSensorStatusString(config.WS2_PIN)) + "\",";
   page += "\"WS3\": \"" + String(getSensorStatusString(config.WS3_PIN)) + "\",";
-  
+
+  page += "\"WF\": \"" + String(flow_l_min) + "\",";
+
   page += "\"RT\": " + String(currenttime) + "";
 
   page +="}";

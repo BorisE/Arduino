@@ -24,7 +24,9 @@ void LoadDefaults()
   config.WS1_PIN=WS1_PIN_DEFAULT;
   config.WS2_PIN=WS2_PIN_DEFAULT;
   config.WS3_PIN=WS3_PIN_DEFAULT;
-    
+
+  config.WATERFLOW_PIN=WATERFLOW_PIN_DEFAULT;
+
   PrintConfig();
 }
 
@@ -48,6 +50,9 @@ void PrintConfig()
   Serial.println( config.WS2_PIN );
   Serial.print("[CONFIG]    WS3_PIN: ");
   Serial.println( config.WS3_PIN );
+
+  Serial.print("[CONFIG]    WATERFLOW_PIN: ");
+  Serial.println( config.WATERFLOW_PIN );
 
   Serial.println(F("[CONFIG] end of current config"));
  

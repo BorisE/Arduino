@@ -61,3 +61,19 @@ int convertReyalyStatusToInt(String stat) {
   else 
     return -1;
 }
+
+
+void printRelayStatus() {
+  Serial.print("[H1_1: ");
+  Serial.print(digitalRead(config.H1_1_PIN));
+  Serial.println("]");
+  Serial.print("[H1_2: ");
+  Serial.print(digitalRead(config.H1_2_PIN));
+  Serial.println("]");
+  Serial.print("[H2_1: ");
+  Serial.print(digitalRead(config.H2_1_PIN));
+  Serial.println("]");
+  Serial.print("[H2_2: ");
+  Serial.print(digitalRead(config.H2_2_PIN));
+  Serial.println("]");
+}

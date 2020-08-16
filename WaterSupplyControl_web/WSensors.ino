@@ -24,3 +24,16 @@ int getSensorPinByName(String WSen) {
   else
       return -1;
 }
+
+
+void printWSensorStatus() {
+  Serial.print("[WS1: ");
+  Serial.print(digitalRead(config.WS1_PIN));
+  Serial.println("]");
+  Serial.print("[WS2: ");
+  Serial.print(digitalRead(config.WS2_PIN));
+  Serial.println("]");
+  Serial.print("[WS3: ");
+  Serial.print(digitalRead(config.WS3_PIN));
+  Serial.println("]");
+}
