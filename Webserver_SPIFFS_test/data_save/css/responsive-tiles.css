@@ -1,0 +1,98 @@
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;line-height:1.42857143;color:#333;background-color:#fff}
+h2,.h3,h1,.h2,h3{margin-top:0px;margin-bottom:10px}
+.h6 .small {color: #333}
+section.cms-boxes .cms-boxes-outer, section.cms-boxes .cms-boxes-outersmall {
+    text-align: left;
+    margin-bottom: 6px;
+    padding: 0 3px;
+}
+section.cms-boxes .cms-boxes-outer .cms-boxes-items{
+    height: 200px;
+    display: table;
+    width: 100%;
+}
+section.cms-boxes .cms-boxes-outersmall .cms-boxes-items{
+    height: 150px;
+    display: table;
+    width: 100%;
+}
+section.cms-boxes .cms-boxes-outersmall h2{
+    font-size:18px
+}
+section.cms-boxes .boxes-align {
+    display: table-cell;
+    vertical-align: middle;
+}
+section.cms-boxes .small-box, section.cms-boxes .large-box, section.cms-boxes .verysmall-box, .small-box {
+    max-width: 350px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+section.cms-boxes .cms-boxes-items:hover {
+  opacity: .2;
+  cursor: pointer;
+}
+
+section.cms-boxes .cms-boxes-items{
+    box-shadow:0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+}
+
+
+
+section.cms-boxes .cms-boxes-items h3 {
+    font-size: 35px;
+    color: #fff;
+    font-weight: 400;
+    line-height: 37px;
+    text-align: center;
+    margin: 20px 0 10px;
+    text-transform: uppercase;
+}
+section.cms-boxes .cms-boxes-outer .cms-boxes-items p, section.cms-boxes .cms-boxes-outersmall .cms-boxes-items p{
+    sscolor: #fff;
+    margin-top:10px;margin-bottom:00px
+}
+
+section.cms-boxes .cms-temp {
+    background-color: #2196F3; /*blue*/
+    background-size: cover;
+}
+section.cms-boxes .cms-humidity {
+    background-color: #ff9800;  /*Orange*/
+}
+section.cms-boxes .cms-pressure {
+    background: #4CAF50;    /*green*/
+}
+section.cms-boxes .cms-misc {
+    background: #9e9e9e;    /*green*/
+}
+/*
+red #f44336
+green #4CAF50
+blue #2196F3
+yellow #ffeb3b
+Grey #9e9e9e
+Indigo #3f51b5
+Orange #ff9800
+Teal 009688
+Cyan 00bcd4
+*/
+
+/* section.cms-boxes .cms-pressure .wi{
+    color: #ff0000;
+}
+ */
+.amber-text{
+    color: #ffff00;    
+}
+.normal-color{
+ color: #333;
+}
+.table .tcenter { 
+    margin-left:auto; 
+    margin-right:auto;
+
+}
+.tdspace{ width: 30%}
+.tdcomment{ text-align: left;}
