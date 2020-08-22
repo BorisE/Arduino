@@ -8,21 +8,30 @@
         <link rel="stylesheet" href="css/responsive-tiles.css?1221">
         <link rel="stylesheet" href="css/weather-icons.min.css?aaa1121">
         <script>
-        function replacePlaceholders()
-        {
-            document.getElementById('BMP').innerHTML="744.4";
-            document.getElementById('BMT').innerHTML="27.5";
-            document.getElementById('BMH').innerHTML="57.5";
-            document.getElementById('Temp').innerHTML="26.3";
-            document.getElementById('Hum').innerHTML="65.3";
-            document.getElementById('OW1').innerHTML="26.2";
-            document.getElementById('OBJ').innerHTML="-5.1";
-            document.getElementById('AMB').innerHTML="27.6";
-            document.getElementById('RT').innerHTML="112332";
-        }
+            window.setInterval("update()", 10000);    
+            function update(){      
+                var xhr=new XMLHttpRequest();      
+                xhr.open("GET", "/json", true);      
+                xhr.onreadystatechange = function () {        
+                    if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) 
+                        return;        
+                    var getData = JSON.parse(xhr.responseText);        
+                    document.getElementById('BMP').innerHTML=getData.BMP;        
+                    document.getElementById('BMT').innerHTML=getData.BMT;        
+                    document.getElementById('BMH').innerHTML=getData.BMH;        
+                    document.getElementById('Temp').innerHTML=getData.Temp;        
+                    document.getElementById('Hum').innerHTML=getData.Hum;        
+                    document.getElementById('OW1').innerHTML=getData.OW1;        
+                    document.getElementById('OBJ').innerHTML=getData.OBJ;        
+                    document.getElementById('AMB').innerHTML=getData.AMB;        
+                    document.getElementById('BHV').innerHTML=getData.BHV;        
+                    document.getElementById('RT').innerHTML=getData.RT;      
+                };      
+                xhr.send();    
+            }
         </script>
     </head>
-    <body onload="replacePlaceholders()">
+    <body onload="update()">
         <div class="container">
           <section class="cms-boxes">
             <div class="container-fluid">

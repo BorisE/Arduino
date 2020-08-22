@@ -1,32 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Weather Station</title>
-<style>table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: left;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }table td, table th {  border: 1px solid #AAAAAA;  padding: 3px 2px; }table thead {  background: #2672B5;  background: -moz-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: -webkit-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: linear-gradient(to bottom, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);  border-bottom: 1px solid #000000;  font-size: 15px;  font-weight: bold;  color: #FFFFFF; }table tbody td {  font-size: 13px; }
-.footer {font-size:10px}
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>Weather Station</title>
+<style>
+table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: left;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }
+table td, table th {  border: 1px solid #AAAAAA;  padding: 3px 2px; }table thead {  background: #2672B5;  background: -moz-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: -webkit-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: linear-gradient(to bottom, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);  border-bottom: 1px solid #000000;  font-size: 15px;  font-weight: bold;  color: #FFFFFF; }table tbody td {  font-size: 13px; }.footer { font-size:10px }
 </style>
-<script>    window.setInterval("update()", 10000);    function update(){      var xhr=new XMLHttpRequest();      xhr.open("GET", "/json", true);      xhr.onreadystatechange = function () {        if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) return;        var getData = JSON.parse(xhr.responseText);        document.getElementById('BMP').innerHTML=getData.BMP;        document.getElementById('BMT').innerHTML=getData.BMT;        document.getElementById('BMH').innerHTML=getData.BMH;        document.getElementById('Temp').innerHTML=getData.Temp;        document.getElementById('Hum').innerHTML=getData.Hum;        document.getElementById('OW1').innerHTML=getData.OW1;        document.getElementById('OBJ').innerHTML=getData.OBJ;        document.getElementById('AMB').innerHTML=getData.AMB;        document.getElementById('RT').innerHTML=getData.RT;      };      xhr.send();    }  </script>
+<script>    
+    window.setInterval("update()", 10000);    
+    function update(){      
+        var xhr=new XMLHttpRequest();      
+        xhr.open("GET", "/json", true);      
+        xhr.onreadystatechange = function () {        
+            if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) 
+                return;        
+            var getData = JSON.parse(xhr.responseText);        
+            document.getElementById('BMP').innerHTML=getData.BMP;        
+            document.getElementById('BMT').innerHTML=getData.BMT;        
+            document.getElementById('BMH').innerHTML=getData.BMH;        
+            document.getElementById('Temp').innerHTML=getData.Temp;        
+            document.getElementById('Hum').innerHTML=getData.Hum;        
+            document.getElementById('OW1').innerHTML=getData.OW1;        
+            document.getElementById('OBJ').innerHTML=getData.OBJ;        
+            document.getElementById('AMB').innerHTML=getData.AMB;        
+            document.getElementById('BHV').innerHTML=getData.BHV;        
+            document.getElementById('RT').innerHTML=getData.RT;      
+        };      
+        xhr.send();    
+    }
+</script>
 </head>
 <body style="text-align:center">
 <h1>Weather Station</h1>
-
 <table>
 <thead>    
-<tr><th>Sensor</th><th>Value</th></tr>    
+    <tr><th>Sensor</th><th>Value</th></tr>    
 </thead>
 <tbody>      
-<tr><td>Pressure</td><td><span id='BMP'>747.71</span> mmHg</td></tr>      
-<tr><td>Temperature BME280</td><td><span id='BMT'>25.36</span> &deg;</td></tr>      
-<tr><td>Humidity BME280</td><td><span id='BMH'>56.23</span> %</td></tr>      
-<tr><td>Temperature DHT22</td><td><span id='Temp'>23.80</span> &deg;</td></tr>      
-<tr><td>Humidity DHT22</td><td><span id='Hum'>64.80</span> %</td></tr>      
-<tr><td>Temperature OneWire</td><td><span id='OW1'>23.63</span> &deg;</td></tr>      
-<tr><td>Object MLX90614</td><td><span id='OBJ'>24.53</span> &deg;</td></tr>      
-<tr><td>Ambient MLX90614</td><td><span id='AMB'>24.55</span> &deg;</td></tr>    
+    <tr><td>Pressure</td><td><span id='BMP'>742.26</span> mmHg</td></tr>      
+    <tr><td>Temperature BME280</td><td><span id='BMT'>28.16</span> &deg;</td></tr>      
+    <tr><td>Humidity BME280</td><td><span id='BMH'>50.32</span> %</td></tr>      
+    <tr><td>Temperature DHT22</td><td><span id='Temp'>26.60</span> &deg;</td></tr>      
+    <tr><td>Humidity DHT22</td><td><span id='Hum'>57.80</span> %</td></tr>      
+    <tr><td>Temperature OneWire</td><td><span id='OW1'>26.50</span> &deg;</td></tr>      
+    <tr><td>Object MLX90614</td><td><span id='OBJ'>26.21</span> &deg;</td></tr>      
+    <tr><td>Ambient MLX90614</td><td><span id='AMB'>26.99</span> &deg;</td></tr>      
+    <tr><td>Illuminance BH1750FVI</td><td><span id='BHV'>0.21</span> lx</td></tr>    
 </tbody>
 </table>
-<p class="footer">WEATHER STATION Mk II v0.9 [20200802]. Passed since start: <span class="footer"><span id='RT'>72029</span> ms</p>
-<a href='/configmode' onclick="return confirm('Station would stop gathering data and will enter config mode. Are you sure? If Yes connect by WiFi to AP [WeatherStation] to change configuration')">Enter config mode</a>
-
-</body></html>
+<p class='footer'>WEATHER STATION MkII v1.2 [20200822]. Passed since start: <span class='footer'><span id='RT'>36975</span> ms</p><a href='/configmode' onclick="return confirm('Station would stop gathering data and will enter config mode. Are you sure? If Yes connect by WiFi to AP [WeatherStation] to change configuration')">Enter config mode</a></body></html>

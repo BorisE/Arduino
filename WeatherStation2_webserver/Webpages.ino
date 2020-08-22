@@ -6,17 +6,17 @@ const char HTTP_HTML_HEADER[] PROGMEM = "<!DOCTYPE html>\
 <head>\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
 <title>Weather Station</title>\
-<style>\
+<style>\n\
 table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: left;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }\n\
 table td, table th {  border: 1px solid #AAAAAA;  padding: 3px 2px; }\
 table thead {  background: #2672B5;  background: -moz-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: -webkit-linear-gradient(top, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);   background: linear-gradient(to bottom, #5c95c7 0%, #3b80bc 66%, #2672B5 100%);  border-bottom: 1px solid #000000;  font-size: 15px;  font-weight: bold;  color: #FFFFFF; }\
 table tbody td {  font-size: 13px; }\
 .footer { font-size:10px }\
-</style>\
+</style>\n\
 <script></script>\
-</head>\
-<body style=\"text-align:center\">\
-<h1>Weather Station</h1>";
+</head>\n\
+<body style=\"text-align:center\">\n\
+<h1>Weather Station</h1>\n";
 
 /*
  * TEMPLATE FOOTER
@@ -172,7 +172,6 @@ void handleRoot() {
  * NOT FOUND PAGE
  */
 void handleNotFound() {
-  digitalWrite(STATUS_LED, HIGH);
   String message = F("File Not Found\n\n");
   message += "URI: ";
   message += server.uri();
@@ -185,9 +184,6 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  
-  printRequestData();
-  digitalWrite(STATUS_LED, LOW);
 }
 
 /*

@@ -3,16 +3,19 @@
   (c) 2020 by Boris Emchenko
 
   TODO:
-  - mobile layout with cards
   - NTP server
   - data logging using SPIFFS
   - Capacitive rain sensor
   - UV sensor?
   - CO2 sensor?
   - OTA web update
+  - OTA auto update  
   - Deepsleep mode?
 
  Changes:
+   ver 2.0 2020/08/22 [446280/32388]
+                      - webserver: load webpages from SPIFFS
+                      - new card design
    ver 1.2 2020/08/22 [444088/32260]
                       - ArduinoOTA update
    ver 1.11 2020/08/15 [430436/31744]
@@ -69,7 +72,7 @@
 */
 
 //Compile version
-#define VERSION "1.2"
+#define VERSION "2.0"
 #define VERSION_DATE "20200822"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
@@ -285,11 +288,11 @@ void setup(void) {
 
   ////////////////////////////////
   // WebServer INIT
-  server.on("/", handleRoot);
+  server.on("/table", handleRoot);
   server.on("/json", handleJSON);
   server.on("/configmode", handleConfigMode);
   server.on("/ping", handlePingRequest);
-  server.onNotFound(handleNotFound);
+  server.onNotFound(handleSPIFSS);
 
   server.begin();
   Serial.println(F("HTTP server started"));
