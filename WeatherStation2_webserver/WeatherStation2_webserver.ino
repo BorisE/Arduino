@@ -13,6 +13,8 @@
   - Deepsleep mode?
 
  Changes:
+   ver 1.2 2020/08/22 [444088/32260]
+                      - ArduinoOTA update
    ver 1.11 2020/08/15 [430436/31744]
                       - memory (F(..)) optimization
    ver 1.1 2020/08/09 [430424/32244]
@@ -67,8 +69,8 @@
 */
 
 //Compile version
-#define VERSION "1.11"
-#define VERSION_DATE "20200815"
+#define VERSION "1.2"
+#define VERSION_DATE "20200822"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -78,6 +80,7 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
+#include <ArduinoOTA.h>
 
 #include <Wire.h>
 #include <BME280_I2C.h>
@@ -96,6 +99,7 @@
 //const char* password = STAPSK;
 const char* ssid = "WeatherStation";
 const char* host = "weather";
+#define OTA_PORT 18266
 
 struct Config {
   char POST_URL[101];
@@ -291,6 +295,23 @@ void setup(void) {
   Serial.println(F("HTTP server started"));
 
   ////////////////////////////////
+  // OTA Update
+  ArduinoOTA.setHostname(host);
+  ArduinoOTA.setPort(OTA_PORT);
+  //ArduinoOTA.setPassword("esp8266");
+  ArduinoOTA.onStart(onStartOTA);
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\n[OTA] End");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("[OTA] Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError(onErrorOTA);
+  ArduinoOTA.begin();
+  Serial.println("[OTA] OTA ready");
+
+  
+  ////////////////////////////////
   // START HARDWARE
   Wire.begin(config.I2CSDAPin, config.I2CSCLPin);
 
@@ -323,6 +344,7 @@ void loop(void) {
   
   server.handleClient();
   MDNS.update();
+  ArduinoOTA.handle();
   
   // Send data to webserver
   // Every given interval
