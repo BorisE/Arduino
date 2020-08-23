@@ -7,10 +7,10 @@
         <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/responsive-tiles.css?1221">
         <link rel="stylesheet" href="css/weather-icons.min.css?21">
-        <script type="text/javascript" src="jscript/sun.js"></script>
+        <script type="text/javascript" src="jscript/suncalc.js"></script>
         <script>
             window.setInterval("update()", 10000); 
-            AstroData();
+
             function DisplayCurrentTime() {
                   var date = new Date();
                   var hours = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
@@ -44,10 +44,47 @@
                 DisplayCurrentTime();                
             }
             function AstroData() {
-                var sunset = new Date().sunset(43.93, 39.93);
-                var sunrise = new Date().sunrise(43.93, 39.93);
-                document.getElementById('sunrise').innerHTML = sunrise.getHours() + ':' + sunrise.getMinutes();
-                document.getElementById('sunset').innerHTML = sunset.getHours() + ':' + sunset.getMinutes();;
+                var times = SunCalc.getTimes(new Date(), 43.93, 39.93);
+                
+                document.getElementById('sunrise').innerHTML = times.sunrise.getHours() + ':' + times.sunrise.getMinutes();
+                document.getElementById('sunset').innerHTML = times.sunset.getHours() + ':' + times.sunset.getMinutes();
+
+                document.getElementById('civiltwilightend').innerHTML = times.dusk.getHours() + ':' + times.dusk.getMinutes();
+                document.getElementById('nauttwilightend').innerHTML = times.nauticalDusk.getHours() + ':' + times.nauticalDusk.getMinutes();
+                document.getElementById('astrotwilightend').innerHTML = times.night.getHours() + ':' + times.night.getMinutes();
+
+                document.getElementById('civiltwilightstart').innerHTML = times.dawn.getHours() + ':' + times.dawn.getMinutes();
+                document.getElementById('nauttwilightstart').innerHTML = times.nauticalDawn.getHours() + ':' + times.nauticalDawn.getMinutes();
+                document.getElementById('astrotwilightstart').innerHTML = times.nightEnd.getHours() + ':' + times.nightEnd.getMinutes();
+                
+                var moonphase = SunCalc.getMoonIllumination(new Date());
+                var moonico=""; 
+                var moonphaseconst=0.035714;
+                var moonicoid = 0; 
+                if (moonphase.phase <       0.250) {
+                    moonicoid = (( moonphase.phase / moonphaseconst ) | 0); 
+                    if (moonphase.phase <       0.0357) moonico = "wi-moon-alt-new";
+                    else moonico = "wi-moon-alt-waxing-crescent-" + moonicoid; 
+                }else if (moonphase.phase < 0.5) {
+                    moonicoid = (( (moonphase.phase - 0.25) / moonphaseconst ) | 0); 
+                    if (moonphase.phase <       0.2857) moonico = "wi-moon-alt-first-quarter";
+                    else moonico = "wi-moon-alt-waxing-gibbous-" + moonicoid; 
+                }else if (moonphase.phase < 0.75) {
+                    moonicoid = (( (moonphase.phase - 0.5) / moonphaseconst ) | 0); 
+                    if (moonphase.phase <       0.5357) moonico = "wi-moon-alt-full";
+                    else moonico = "wi-moon-alt-waxing-gibbous-" + moonicoid; 
+                }else {
+                    moonicoid = (( (moonphase.phase - 0.75) / moonphaseconst ) | 0); 
+                    if (moonphase.phase <       0,7857) moonico = "wi-moon-alt-third-quarter";
+                    else moonico = "wi-moon-alt-waning-crescent-" + moonicoid; 
+                }
+                
+                document.getElementById("moonphaseicon").className = "wi wi-4x " + moonico;
+                document.getElementById('moonphase').innerHTML = moonphase.phase.toLocaleString(  undefined, { minimumFractionDigits: 2 }) ; // leave undefined to use the browser's locale, r use a string like 'en-US' to override it.
+                
+                var moontimes = SunCalc.getMoonTimes(new Date(), 43.93, 39.93);
+                document.getElementById('moonrise').innerHTML = moontimes.rise.getHours() + ':' + moontimes.rise.getMinutes();
+                document.getElementById('moonset').innerHTML = moontimes.set.getHours() + ':' + moontimes.set.getMinutes();
 
             }
             function load(){
@@ -191,9 +228,9 @@
                         </tr>
                         </table>
                         <p>
-                        Civil twilight: ends <span id="nauttwilightend">20:55</span>/starts <span id="nauttwilightstart">5:15</span><br>
+                        Civil twilight: ends <span id="civiltwilightend">20:55</span>/starts <span id="civiltwilightstart">5:15</span><br>
                         Nautial twilight: ends <span id="nauttwilightend">20:55</span>/starts <span id="nauttwilightstart">5:15</span><br>
-                        Astronomical twilight: ends <span id="nauttwilightend">20:55</span>/starts <span id="nauttwilightstart">5:15</span></p>
+                        Astronomical twilight: ends <span id="astrotwilightend">20:55</span>/starts <span id="astrotwilightstart">5:15</span></p>
                         
                       </div>
                     </div>
@@ -206,14 +243,14 @@
                         <h2>Moon</h2>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
                         <tr><td><i class="wi wi-moonrise wi-2x">&nbsp;</i></td>
-                        <td>1:10&nbsp;</td>
-                        <td rowspan=2>&nbsp;<i class="wi wi-moon-alt-waning-gibbous-6 wi-4x">&nbsp;</i></td>
+                        <td><span id="moonrise">0:00</span>&nbsp;</td>
+                        <td rowspan=2>&nbsp;<i id="moonphaseicon" class="wi wi-moon-alt-waning-gibbous-6 wi-4x">&nbsp;</i></td>
                         </tr>
                         <tr><td><i class="wi wi-moonset wi-2x">&nbsp;</i></td>
-                        <td>10:21&nbsp;</td>
+                        <td><span id="moonset">0:00</span>&nbsp;</td>
                         </tr>
                         </table>
-                        <p>Currently doesn't calculate</p>
+                        <p>fraction: <span id="moonphase">0</span></p>
                       </div>
                     </div>
                   </div>

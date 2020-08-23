@@ -13,6 +13,8 @@
   - Deepsleep mode?
 
  Changes:
+   ver 2.02 2020/08/23 [446280/32388]
+                      - html design update2 (astrodata through suncalc.js lib)
    ver 2.01 2020/08/23 [446280/32388]
                       - html design update (header, currtime, sunrise/sunset through sun.js lib)
    ver 2.0 2020/08/22 [446280/32388]
@@ -74,7 +76,7 @@
 */
 
 //Compile version
-#define VERSION "2.01"
+#define VERSION "2.02"
 #define VERSION_DATE "20200823"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
