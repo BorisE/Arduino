@@ -6,9 +6,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
         <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/responsive-tiles.css?1221">
-        <link rel="stylesheet" href="css/weather-icons.min.css?aaa1121">
+        <link rel="stylesheet" href="css/weather-icons.min.css?21">
+        <script type="text/javascript" src="jscript/sun.js"></script>
         <script>
-            window.setInterval("update()", 10000);    
+            window.setInterval("update()", 10000); 
+            AstroData();
+            function DisplayCurrentTime() {
+                  var date = new Date();
+                  var hours = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+                  var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+                  var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+                  time = hours + ":" + minutes + ":" + seconds;
+                  var currentTime = document.getElementById("currentTime");
+                  currentTime.innerHTML = time;
+            };            
             function update(){      
                 var xhr=new XMLHttpRequest();      
                 xhr.open("GET", "/json", true);      
@@ -26,30 +37,59 @@
                     document.getElementById('AMB').innerHTML=getData.AMB;        
                     document.getElementById('BHV').innerHTML=getData.BHV;        
                     document.getElementById('RT').innerHTML=getData.RT;      
+                    document.getElementById('VER').innerHTML=getData.Ver;
+                    document.getElementById('VED').innerHTML=getData.VDate;
                 };      
-                xhr.send();    
+                xhr.send();
+                DisplayCurrentTime();                
+            }
+            function AstroData() {
+                var sunset = new Date().sunset(43.93, 39.93);
+                var sunrise = new Date().sunrise(43.93, 39.93);
+                document.getElementById('sunrise').innerHTML = sunrise.getHours() + ':' + sunrise.getMinutes();
+                document.getElementById('sunset').innerHTML = sunset.getHours() + ':' + sunset.getMinutes();;
+
+            }
+            function load(){
+                update();
+                AstroData();
             }
         </script>
     </head>
-    <body onload="update()">
+    <body onload="load()">
         <div class="container">
           <section class="cms-boxes">
             <div class="container-fluid">
             
-              <div class="row">
-              
+                <div class="header-row">
+                <div class="cms-boxes-outer">
+                    <div class="cms-boxes-items">
+                        <div class="boxes-align">
+                            <div class="header-box">
+                                <h2>Weather Station</h2>
+                                <p><small>WEATHER STATION MkII v<span id="VER">2.0</span> [<span id="VED">20200822</span>]</small>.<bra>
+                                <small>Last updated <span id="currentTime">0:00:00</span>, runtime <span id="RT">100</span> msec</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            
+            
+                <!-- 1st row -->
+                <div class="row">
                 <div class="col-md-4 cms-boxes-outer">
                   <div class="cms-boxes-items cms-temp">
                     <div class="boxes-align">
                       <div class="small-box">
                         <h2>Temperature</h2>
-                        <i class="wi wi-thermometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="OW1">24</i><i class="wi wi-celsius wi-2x">&nbsp;</i>
+                        <i class="wi wi-thermometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="OW1"><span class="wi wi-na normal-color"></span></i><i class="wi wi-celsius wi-2x">&nbsp;</i>
                         <p>Current temperature, measured by ds18b20 sensor</p>
                         Additional readings:
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
-                        <tr><td><span id="BMT">24.1</span><i class="wi wi-celsius">&nbsp;</i></td><td class="tdcomment">by BME280</td>
+                        <tr><td><span id="Temp">100</span><i class="wi wi-celsius">&nbsp;</i></</td><td class="tdcomment">by DHT22</td>
                         </tr>
-                        <tr><td><span id="Temp">25.2</span><i class="wi wi-celsius">&nbsp;</i></</td><td class="tdcomment">by DHT22</td>
+                        <tr><td><span id="BMT">100</span><i class="wi wi-celsius">&nbsp;</i></td><td class="tdcomment">by BME280</td>
                         </tr>
                         </table>
                       </div>
@@ -61,11 +101,11 @@
                     <div class="boxes-align">
                       <div class="small-box">
                         <h2>Humidity</h2>
-                        <i class="wi wi-humidity wi-4x">&nbsp;</i><i class="wi wi-4x" id="Hum">59.2</i><i class="wi wi-2x">&nbsp;%</i>
+                        <i class="wi wi-humidity wi-4x">&nbsp;</i><i class="wi wi-4x" id="Hum"><span class="wi wi-na normal-color"></span></i><i class="wi wi-2x">&nbsp;%</i>
                         <h6><small>Current humidity, measured by DHT22 sensor</small></h6>
                         Additional readings:
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
-                        <tr><td><span id="BMH">54.1</span><i class="wi">%&nbsp;</i></td><td class="tdcomment">by BME280</td>
+                        <tr><td><span id="BMH">0</span><i class="wi">%&nbsp;</i></td><td class="tdcomment">by BME280</td>
                         </tr>
                         </table>
                       </div>
@@ -77,15 +117,65 @@
                     <div class="boxes-align">
                       <div class="small-box">
                         <h2>Pressure</h2>
-                        <i class="wi wi-barometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="BMP">744</i><i class="wi wi-2x">&nbsp;mmHg</i>
+                        <i class="wi wi-barometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="BMP"><span class="wi wi-na normal-color"></span></i><i class="wi wi-2x">&nbsp;mmHg</i>
                         <p>Current pressure, measured by BME280 sensor</p>
                       </div>
                     </div>
                   </div>
                 </div>
-              
               </div>
+
+              <!-- 2nd row -->
+              <div class="row">
+                <div class="col-md-4 cms-boxes-outer">
+                  <div class="cms-boxes-items cms-mlx">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Cloud sensor</h2>
+                        <i class="wi wi-cloudy wi-4x">&nbsp;</i><i class="wi wi-4x" id="CS"><span class="wi wi-na normal-color"></span></i><i class="wi wi-celsius wi-2x">&nbsp;</i>
+                        <p>Measured by ML90614 sensor</p>
+                        Additional data:
+                        <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
+                        <tr><td><span id="OBJ">100</span><i class="wi wi-celsius">&nbsp;</i></</td><td class="tdcomment">Object temp</td>
+                        </tr>
+                        <tr><td><span id="AMB">100</span><i class="wi wi-celsius">&nbsp;</i></td><td class="tdcomment">Ambient temp</td>
+                        </tr>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 cms-boxes-outer">
+                  <div class="cms-boxes-items cms-illum">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Illumination</h2>
+                        <i class="wi wi-day-sunny wi-4x">&nbsp;</i><i class="wi wi-4x" id="BHV"><span class="wi wi-na normal-color"></span></i><i class="wi wi-2x">&nbsp;lux</i>
+                        <p>Current illumination, measured by BH1750FVI sensor</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4 cms-boxes-outer">
+                  <div class="cms-boxes-items cms-wind">
+                    <div class="boxes-align">
+                      <div class="small-box">
+                        <h2>Rain</h2>
+                        <i class="wi wi-showers wi-4x">&nbsp;</i><i class="wi wi-4x" id="Rain"><span class="wi wi-na normal-color"></span></i>
+                        <p>As reading by ceramic sensor</p>
+                        Additional readings:
+                        <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
+                        <tr><td><span id="Rain2">0</span><i class="wi">%&nbsp;</i></td><td class="tdcomment">by classic rain sensor</td>
+                        </tr>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               
+              <!-- 3rd row -->
               <div class="row">
                 <div class="col-md-4 cms-boxes-outersmall">
                   <div class="cms-boxes-items cms-astro">
@@ -93,15 +183,17 @@
                       <div class="small-box">
                         <h2>Sun</h2>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
-                        <tr><td rowspan=2>
-                            <i class="wi wi-sunrise wi-2x">&nbsp;</i>
-                        </td>
-                        <td>3:30&nbsp;</td><td class="tdcomment"></td>
+                        <tr><td><i class="wi wi-sunrise wi-2x">&nbsp;</i></td>
+                        <td><span id="sunrise">0</span>&nbsp;</td>
                         </tr>
-                        <tr><td>19:54&nbsp;</i></</td><td class="tdcomment"></td>
+                        <tr><td><i class="wi wi-sunset wi-2x">&nbsp;</i></td>
+                        <td><span id="sunset">0</span>&nbsp;</i></td>
                         </tr>
                         </table>
-                        <p>Current temperature, measured by DHT22 sensor</p>
+                        <p>
+                        Civil twilight: ends <span id="nauttwilightend">20:55</span>/starts <span id="nauttwilightstart">5:15</span><br>
+                        Nautial twilight: ends <span id="nauttwilightend">20:55</span>/starts <span id="nauttwilightstart">5:15</span><br>
+                        Astronomical twilight: ends <span id="nauttwilightend">20:55</span>/starts <span id="nauttwilightstart">5:15</span></p>
                         
                       </div>
                     </div>
@@ -121,7 +213,7 @@
                         <td>10:21&nbsp;</td>
                         </tr>
                         </table>
-                        <p>Current humidity, measured by BME280 sensor</p>
+                        <p>Currently doesn't calculate</p>
                       </div>
                     </div>
                   </div>
@@ -130,16 +222,13 @@
                   <div class="cms-boxes-items cms-misc">
                     <div class="boxes-align">
                       <div class="small-box">
-                        <h2>Config</h2>
-                        <i class="wi wi-refresh wi-2x">&nbsp;<span class="wi wi-na normal-color"></span></i>
-                        <p>Current pressure, measured by BME280 sensor</p>
+                        <i class="wi wi-refresh wi-2x">&nbsp;Enter config mode</i>
+                        
+                        <p>Under construction</p>
                       </div>
                     </div>
                   </div>
                 </div>
-                            
-
-
               </div>
             </div>
           </section>

@@ -13,6 +13,8 @@
   - Deepsleep mode?
 
  Changes:
+   ver 2.01 2020/08/23 [446280/32388]
+                      - html design update (header, currtime, sunrise/sunset through sun.js lib)
    ver 2.0 2020/08/22 [446280/32388]
                       - webserver: load webpages from SPIFFS
                       - new card design
@@ -72,8 +74,8 @@
 */
 
 //Compile version
-#define VERSION "2.0"
-#define VERSION_DATE "20200822"
+#define VERSION "2.01"
+#define VERSION_DATE "20200823"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -84,6 +86,7 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
 #include <ArduinoOTA.h>
+#include <ESP8266HTTPUpdateServer.h>
 
 #include <Wire.h>
 #include <BME280_I2C.h>
@@ -119,6 +122,7 @@ Config config;                              // <- global configuration object
 #define WIFI_CONFIG_PORTAL_WAITTIME_STARTUP  60
 
 ESP8266WebServer server(80);
+ESP8266HTTPUpdateServer httpUpdater;
 
 #define DEFAULT_POST_URL "http://192.168.0.199/weather/adddata.php"
 //char POST_URL[101] = "http://192.168.0.199/weather/adddata.php"; //Where to post data
@@ -293,6 +297,8 @@ void setup(void) {
   server.on("/configmode", handleConfigMode);
   server.on("/ping", handlePingRequest);
   server.onNotFound(handleSPIFSS);
+
+  httpUpdater.setup(&server, "/update");
 
   server.begin();
   Serial.println(F("HTTP server started"));
