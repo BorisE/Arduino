@@ -9,16 +9,20 @@
         <link rel="stylesheet" href="css/weather-icons.min.css?21">
         <script type="text/javascript" src="jscript/suncalc.js"></script>
         <script>
-            window.setInterval("update()", 10000); 
+            var date, hours, minutes, seconds;
+			var times;
+			
+			window.setInterval("update()", 10000); 
 
-            function DisplayCurrentTime() {
-                  var date = new Date();
-                  var hours = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-                  var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-                  var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-                  time = hours + ":" + minutes + ":" + seconds;
-                  var currentTime = document.getElementById("currentTime");
-                  currentTime.innerHTML = time;
+            function formatLeadingZero(i) {
+				return i < 10 ? "0" + i : i;
+			}
+			function DisplayCurrentTime() {
+                  date = new Date();
+                  hours = formatLeadingZero(date.getHours());
+                  minutes = formatLeadingZero(date.getMinutes());
+                  seconds = formatLeadingZero(date.getSeconds());
+                  var currentTime = document.getElementById("currentTime").innerHTML = hours + ":" + minutes + ":" + seconds;
             };            
             function update(){      
                 var xhr=new XMLHttpRequest();      
@@ -27,35 +31,36 @@
                     if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) 
                         return;        
                     var getData = JSON.parse(xhr.responseText);        
-                    document.getElementById('BMP').innerHTML=getData.BMP;        
-                    document.getElementById('BMT').innerHTML=getData.BMT;        
-                    document.getElementById('BMH').innerHTML=getData.BMH;        
-                    document.getElementById('Temp').innerHTML=getData.Temp;        
-                    document.getElementById('Hum').innerHTML=getData.Hum;        
-                    document.getElementById('OW1').innerHTML=getData.OW1;        
-                    document.getElementById('OBJ').innerHTML=getData.OBJ;        
-                    document.getElementById('AMB').innerHTML=getData.AMB;        
-                    document.getElementById('BHV').innerHTML=getData.BHV;        
+                    document.getElementById('BMP').innerHTML=getData.BMP.toFixed(1);        
+                    document.getElementById('BMT').innerHTML=getData.BMT.toFixed(1);        
+                    document.getElementById('BMH').innerHTML=getData.BMH.toFixed(1);        
+                    document.getElementById('Temp').innerHTML=getData.Temp.toFixed(1);        
+                    document.getElementById('Hum').innerHTML=getData.Hum.toFixed(1);        
+                    document.getElementById('OW1').innerHTML=getData.OW1.toFixed(1);        
+                    document.getElementById('OBJ').innerHTML=getData.OBJ.toFixed(1);
+                    document.getElementById('AMB').innerHTML=getData.AMB.toFixed(1);        
+                    document.getElementById('BHV').innerHTML=getData.BHV.toFixed(1);        
                     document.getElementById('RT').innerHTML=getData.RT;      
                     document.getElementById('VER').innerHTML=getData.Ver;
                     document.getElementById('VED').innerHTML=getData.VDate;
+					DisplayCurrentTime();
+					DisplayCloudIDX((getData.OW1 - getData.OBJ));
                 };      
                 xhr.send();
-                DisplayCurrentTime();                
             }
             function AstroData() {
-                var times = SunCalc.getTimes(new Date(), 43.93, 39.93);
+                times = SunCalc.getTimes(new Date(), 43.93, 39.93);
                 
-                document.getElementById('sunrise').innerHTML = times.sunrise.getHours() + ':' + times.sunrise.getMinutes();
-                document.getElementById('sunset').innerHTML = times.sunset.getHours() + ':' + times.sunset.getMinutes();
+                document.getElementById('sunrise').innerHTML = formatLeadingZero(times.sunrise.getHours()) + ':' + formatLeadingZero(times.sunrise.getMinutes());
+                document.getElementById('sunset').innerHTML = formatLeadingZero(times.sunset.getHours()) + ':' + formatLeadingZero(times.sunset.getMinutes());
 
-                document.getElementById('civiltwilightend').innerHTML = times.dusk.getHours() + ':' + times.dusk.getMinutes();
-                document.getElementById('nauttwilightend').innerHTML = times.nauticalDusk.getHours() + ':' + times.nauticalDusk.getMinutes();
-                document.getElementById('astrotwilightend').innerHTML = times.night.getHours() + ':' + times.night.getMinutes();
+                document.getElementById('civiltwilightend').innerHTML = formatLeadingZero(times.dusk.getHours()) + ':' + formatLeadingZero(times.dusk.getMinutes());
+                document.getElementById('nauttwilightend').innerHTML = formatLeadingZero(times.nauticalDusk.getHours()) + ':' + formatLeadingZero(times.nauticalDusk.getMinutes());
+                document.getElementById('astrotwilightend').innerHTML = formatLeadingZero(times.night.getHours()) + ':' + formatLeadingZero(times.night.getMinutes());
 
-                document.getElementById('civiltwilightstart').innerHTML = times.dawn.getHours() + ':' + times.dawn.getMinutes();
-                document.getElementById('nauttwilightstart').innerHTML = times.nauticalDawn.getHours() + ':' + times.nauticalDawn.getMinutes();
-                document.getElementById('astrotwilightstart').innerHTML = times.nightEnd.getHours() + ':' + times.nightEnd.getMinutes();
+                document.getElementById('civiltwilightstart').innerHTML =	formatLeadingZero(times.dawn.getHours()) + ':' + formatLeadingZero(times.dawn.getMinutes());
+                document.getElementById('nauttwilightstart').innerHTML = 	formatLeadingZero(times.nauticalDawn.getHours()) + ':' + formatLeadingZero(times.nauticalDawn.getMinutes());
+                document.getElementById('astrotwilightstart').innerHTML = 	formatLeadingZero(times.nightEnd.getHours()) + ':' + formatLeadingZero(times.nightEnd.getMinutes());
                 
                 var moonphase = SunCalc.getMoonIllumination(new Date());
                 var moonico=""; 
@@ -87,7 +92,26 @@
                 document.getElementById('moonset').innerHTML = moontimes.set.getHours() + ':' + moontimes.set.getMinutes();
 
             }
-            function load(){
+			function DisplayCloudIDX(CIDX) {
+				var cloudico = "wi-cloudy";
+				if (date.getHours() >= times.sunset.getHours() || date.getHours() <= times.sunrise.getHours()) {
+					//alert("night: "+date.getHours() + "(" + times.sunset.getHours() + ")");
+					if (CIDX > 7)
+						cloudico = "wi-stars";
+					else if (CIDX > 4)
+						cloudico = "wi-night-alt-partly-cloudy";
+					
+				} else {
+					//alert("day: "+date.getHours() + "(" + times.sunset.getHours() + ")");
+					if (CIDX > 7)
+						cloudico = "wi-day-sunny";
+					else if (CIDX > 4)
+						cloudico = "wi-day-cloudy";
+				}
+				document.getElementById("CIDX").className = "wi wi-4x " + cloudico;
+				document.getElementById('CIDX').innerHTML=CIDX.toFixed(1);
+			}
+			function load(){
                 update();
                 AstroData();
             }
@@ -169,7 +193,7 @@
                     <div class="boxes-align">
                       <div class="small-box">
                         <h2>Cloud sensor</h2>
-                        <i class="wi wi-cloudy wi-4x">&nbsp;</i><i class="wi wi-4x" id="CS"><span class="wi wi-na normal-color"></span></i><i class="wi wi-celsius wi-2x">&nbsp;</i>
+                        <i class="wi wi-cloudy wi-4x" id="CIDX">&nbsp;<span class="wi wi-na normal-color"></span></i>
                         <p>Measured by ML90614 sensor</p>
                         Additional data:
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
