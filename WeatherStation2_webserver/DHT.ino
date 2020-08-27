@@ -97,3 +97,22 @@ void readDHTSensor(float &t, float &h)
       Serial.println(F("DHT Unknown"));
   }
 }
+
+
+
+
+void printDHT(float &t, float &h)
+{
+  h = dht.getHumidity();
+  t = dht.getTemperature();
+
+  if ( isnan(h) ) h = NONVALID_HUMIDITY;
+  if ( isnan(t) ) t = NONVALID_TEMPERATURE;
+
+  Serial.print(dht.getStatusString());
+  Serial.print("\t");
+  Serial.print(h, 1);
+  Serial.print("\t\t");
+  Serial.print(t, 1);
+  Serial.print("\t\t");
+}

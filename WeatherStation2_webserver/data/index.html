@@ -63,6 +63,7 @@
                 document.getElementById('astrotwilightstart').innerHTML = 	formatLeadingZero(times.nightEnd.getHours()) + ':' + formatLeadingZero(times.nightEnd.getMinutes());
                 
                 var moonphase = SunCalc.getMoonIllumination(new Date());
+				
                 var moonico=""; 
                 var moonphaseconst=0.035714;
                 var moonicoid = 0; 
@@ -85,11 +86,19 @@
                 }
                 
                 document.getElementById("moonphaseicon").className = "wi wi-4x " + moonico;
-                document.getElementById('moonphase').innerHTML = moonphase.phase.toLocaleString(  undefined, { minimumFractionDigits: 2 }) ; // leave undefined to use the browser's locale, r use a string like 'en-US' to override it.
+                document.getElementById('moonphase').innerHTML = moonphase.fraction.toLocaleString(  undefined, { minimumFractionDigits: 2 }) ; // leave undefined to use the browser's locale, r use a string like 'en-US' to override it.
                 
                 var moontimes = SunCalc.getMoonTimes(new Date(), 43.93, 39.93);
-                document.getElementById('moonrise').innerHTML = moontimes.rise.getHours() + ':' + moontimes.rise.getMinutes();
-                document.getElementById('moonset').innerHTML = moontimes.set.getHours() + ':' + moontimes.set.getMinutes();
+                if (moontimes.rise === undefined) {
+					var yest = new Date(); yest.setDate(new Date().getDate()-1);
+					moontimes = SunCalc.getMoonTimes(yest, 43.93, 39.93);
+				}
+				document.getElementById('moonrise').innerHTML = moontimes.rise.getHours() + ':' + moontimes.rise.getMinutes();
+                if (moontimes.set === undefined) {
+					var tomorrow = new Date(); tomorrow.setDate(new Date().getDate()+1);
+					moontimes = SunCalc.getMoonTimes(tomorrow, 43.93, 39.93);
+				}
+				document.getElementById('moonset').innerHTML = moontimes.set.getHours() + ':' + moontimes.set.getMinutes();
 
             }
 			function DisplayCloudIDX(CIDX) {

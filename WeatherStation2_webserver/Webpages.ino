@@ -262,8 +262,8 @@ String SensorsJSON()
   page += "\"AMB\": " + String(mlxAmb) + ", ";
   page += "\"BHV\": " + String(bh1750Lux) + ", ";
   page += "\"RT\": " + String(currenttime) + ", ";
-  page += "\"Ver\": " + String(VERSION) + ", ";
-  page += "\"VDate\": " + String(VERSION_DATE) + "";
+  page += "\"Ver\": \"" + String(VERSION) + "\", ";
+  page += "\"VDate\": \"" + String(VERSION_DATE) + "\"";
 
   page +="}";
 

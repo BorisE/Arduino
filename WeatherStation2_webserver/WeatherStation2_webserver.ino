@@ -13,6 +13,9 @@
   - Deepsleep mode?
 
  Changes:
+   ver 2.1beta 2020/08/27 [452700/32624]
+                      - moved to DHTesp lib (not finally, just to test)
+                      - some bugs in html cleared
    ver 2.02 2020/08/23 [446280/32388]
                       - html design update2 (astrodata through suncalc.js lib)
    ver 2.01 2020/08/23 [446280/32388]
@@ -76,8 +79,8 @@
 */
 
 //Compile version
-#define VERSION "2.02"
-#define VERSION_DATE "20200823"
+#define VERSION "2.1beta"
+#define VERSION_DATE "20200827"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -96,6 +99,7 @@
 #include <MLX90614.h>
 #include <DallasTemperature.h>
 #include <BH1750.h>
+#include "DHTesp.h"
 
 #include <Ticker.h>//for LED status
 
@@ -195,6 +199,7 @@ enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN 
 float dhtTemp = NONVALID_TEMPERATURE;
 float dhtHum =0;
 unsigned long _lastReadTime_DHT=0;
+DHTesp dht;
 
 //I2C wire
 #define SDA_PIN_DEFAULT D3
@@ -326,6 +331,8 @@ void setup(void) {
   // START HARDWARE
   Wire.begin(config.I2CSDAPin, config.I2CSCLPin);
 
+  dht.setup(config.DHT22Pin, DHTesp::DHT22);
+   
   //init BME280 sensor
   if (!bme.begin(config.I2CSDAPin, config.I2CSCLPin)) 
   {
@@ -376,7 +383,8 @@ void loop(void) {
   if (_lastReadTime_DHT ==0 || (currenttime - _lastReadTime_DHT) > DHT_READ_INTERVAL)
   {
     bOutput=true;
-    readDHTSensor(dhtTemp, dhtHum);
+    //readDHTSensor(dhtTemp, dhtHum);
+    printDHT(dhtTemp, dhtHum);
     _lastReadTime_DHT= currenttime;
   }
   
