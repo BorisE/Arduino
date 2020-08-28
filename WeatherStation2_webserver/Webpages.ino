@@ -270,6 +270,13 @@ String SensorsJSON()
   return page;
 }
 
+String SensorsParamString(){
+  String buf="ID=ESP" + WiFi.macAddress()+ "&";
+  buf.replace(":", ""); 
+}
+
+
+
 void printRequestData()
 {
   Serial.print(F("[HTTP REQUEST] client: "));
