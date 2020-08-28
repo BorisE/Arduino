@@ -21,7 +21,7 @@
                     if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) 
                         return;        
                     var getData = JSON.parse(xhr.responseText);        
-                    document.getElementById('BMP').innerHTML	= getData.BMP.toFixed(1);        
+                    document.getElementById('BMP').innerHTML	= getData.BMP.toFixed(1);
                     document.getElementById('BMT').innerHTML	= getData.BMT.toFixed(1);        
                     document.getElementById('BMH').innerHTML	= getData.BMH.toFixed(1);        
                     document.getElementById('Temp').innerHTML	= getData.Temp.toFixed(1);        
@@ -35,6 +35,7 @@
                     document.getElementById('VED').innerHTML	= getData.VDate;
 					DisplayCurrentTime();
 					DisplayCloudIDX((getData.OW1 - getData.OBJ));
+					DisplayNormalizedPress(getData.BMP, getData.OW1, 165);
                 };      
                 xhr.send();
             }
@@ -115,6 +116,11 @@
 				}
 				document.getElementById("CIDX").className = "wi wi-4x " + cloudico;
 				document.getElementById('CIDX').innerHTML=CIDX.toFixed(1);
+			}
+			function DisplayNormalizedPress(press, temp, h) {
+				var mult1 = -0.029 * 9.81 * h / (8.31*(273.15 + temp));
+				var pressN = press / Math.exp(mult1);
+				document.getElementById("PRESN").innerHTML = pressN.toFixed(1);
 			}
 			function load(){
                 update();
@@ -203,6 +209,8 @@
                         <h2>Pressure</h2>
                         <i class="wi wi-barometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="BMP"><span class="wi wi-na normal-color"></span></i><i class="wi wi-2x">&nbsp;mmHg</i>
                         <p>Current pressure, measured by BME280 sensor</p>
+                        <p>Normalized pressure <span id="PRESN">0</span>mmHg at sea level</p>
+						
                       </div>
                     </div>
                   </div>
@@ -319,7 +327,7 @@
                     <div class="cms-boxes-items">
                         <div class="boxes-align">
                             <div class="header-box">
-                                <small>WEATHER STATION MkII firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], web v2.3 [20200828].<bra>
+                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.4 [20200829].<bra>
 								Runtime: <span id="RT">0</span></small></p>
                             </div>
                         </div>
