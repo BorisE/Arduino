@@ -5,7 +5,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
         <link rel="stylesheet" href="css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/responsive-tiles.css?1221">
+        <link rel="stylesheet" href="css/responsive-tiles.css?1">
         <link rel="stylesheet" href="css/weather-icons.min.css?21">
         <script type="text/javascript" src="jscript/suncalc.js"></script>
         <script>
@@ -14,16 +14,6 @@
 			
 			window.setInterval("update()", 10000); 
 
-            function formatLeadingZero(i) {
-				return i < 10 ? "0" + i : i;
-			}
-			function DisplayCurrentTime() {
-                  date = new Date();
-                  hours = formatLeadingZero(date.getHours());
-                  minutes = formatLeadingZero(date.getMinutes());
-                  seconds = formatLeadingZero(date.getSeconds());
-                  var currentTime = document.getElementById("currentTime").innerHTML = hours + ":" + minutes + ":" + seconds;
-            };            
             function update(){      
                 var xhr=new XMLHttpRequest();      
                 xhr.open("GET", "/json", true); // /json | json.html
@@ -31,18 +21,18 @@
                     if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) 
                         return;        
                     var getData = JSON.parse(xhr.responseText);        
-                    document.getElementById('BMP').innerHTML=getData.BMP.toFixed(1);        
-                    document.getElementById('BMT').innerHTML=getData.BMT.toFixed(1);        
-                    document.getElementById('BMH').innerHTML=getData.BMH.toFixed(1);        
-                    document.getElementById('Temp').innerHTML=getData.Temp.toFixed(1);        
-                    document.getElementById('Hum').innerHTML=getData.Hum.toFixed(1);        
-                    document.getElementById('OW1').innerHTML=getData.OW1.toFixed(1);        
-                    document.getElementById('OBJ').innerHTML=getData.OBJ.toFixed(1);
-                    document.getElementById('AMB').innerHTML=getData.AMB.toFixed(1);        
-                    document.getElementById('BHV').innerHTML=getData.BHV.toFixed(1);        
-                    document.getElementById('RT').innerHTML=getData.RT;      
-                    document.getElementById('VER').innerHTML=getData.Ver;
-                    document.getElementById('VED').innerHTML=getData.VDate;
+                    document.getElementById('BMP').innerHTML	= getData.BMP.toFixed(1);        
+                    document.getElementById('BMT').innerHTML	= getData.BMT.toFixed(1);        
+                    document.getElementById('BMH').innerHTML	= getData.BMH.toFixed(1);        
+                    document.getElementById('Temp').innerHTML	= getData.Temp.toFixed(1);        
+                    document.getElementById('Hum').innerHTML	= getData.Hum.toFixed(1);        
+                    document.getElementById('OW1').innerHTML	= getData.OW1.toFixed(1);        
+                    document.getElementById('OBJ').innerHTML	= getData.OBJ.toFixed(1);
+                    document.getElementById('AMB').innerHTML	= getData.AMB.toFixed(1);        
+                    document.getElementById('BHV').innerHTML	= getData.BHV.toFixed(1);        
+					document.getElementById('RT').innerHTML		= formatRunTime(getData.RT);
+                    document.getElementById('VER').innerHTML	= getData.Ver;
+                    document.getElementById('VED').innerHTML	= getData.VDate;
 					DisplayCurrentTime();
 					DisplayCloudIDX((getData.OW1 - getData.OBJ));
                 };      
@@ -51,16 +41,16 @@
             function AstroData() {
                 times = SunCalc.getTimes(new Date(), 43.93, 39.93);
                 
-                document.getElementById('sunrise').innerHTML = formatLeadingZero(times.sunrise.getHours()) + ':' + formatLeadingZero(times.sunrise.getMinutes());
-                document.getElementById('sunset').innerHTML = formatLeadingZero(times.sunset.getHours()) + ':' + formatLeadingZero(times.sunset.getMinutes());
+                document.getElementById('sunrise').innerHTML 			= formatLeadingZero(times.sunrise.getHours()) 		+ ':' + formatLeadingZero(times.sunrise.getMinutes());
+                document.getElementById('sunset').innerHTML 			= formatLeadingZero(times.sunset.getHours()) 		+ ':' + formatLeadingZero(times.sunset.getMinutes());
 
-                document.getElementById('civiltwilightend').innerHTML = formatLeadingZero(times.dusk.getHours()) + ':' + formatLeadingZero(times.dusk.getMinutes());
-                document.getElementById('nauttwilightend').innerHTML = formatLeadingZero(times.nauticalDusk.getHours()) + ':' + formatLeadingZero(times.nauticalDusk.getMinutes());
-                document.getElementById('astrotwilightend').innerHTML = formatLeadingZero(times.night.getHours()) + ':' + formatLeadingZero(times.night.getMinutes());
+                document.getElementById('civiltwilightend').innerHTML 	= formatLeadingZero(times.dusk.getHours()) 			+ ':' + formatLeadingZero(times.dusk.getMinutes());
+                document.getElementById('nauttwilightend').innerHTML 	= formatLeadingZero(times.nauticalDusk.getHours()) 	+ ':' + formatLeadingZero(times.nauticalDusk.getMinutes());
+                document.getElementById('astrotwilightend').innerHTML 	= formatLeadingZero(times.night.getHours()) 		+ ':' + formatLeadingZero(times.night.getMinutes());
 
-                document.getElementById('civiltwilightstart').innerHTML =	formatLeadingZero(times.dawn.getHours()) + ':' + formatLeadingZero(times.dawn.getMinutes());
-                document.getElementById('nauttwilightstart').innerHTML = 	formatLeadingZero(times.nauticalDawn.getHours()) + ':' + formatLeadingZero(times.nauticalDawn.getMinutes());
-                document.getElementById('astrotwilightstart').innerHTML = 	formatLeadingZero(times.nightEnd.getHours()) + ':' + formatLeadingZero(times.nightEnd.getMinutes());
+                document.getElementById('civiltwilightstart').innerHTML = formatLeadingZero(times.dawn.getHours()) 			+ ':' + formatLeadingZero(times.dawn.getMinutes());
+                document.getElementById('nauttwilightstart').innerHTML 	= formatLeadingZero(times.nauticalDawn.getHours()) 	+ ':' + formatLeadingZero(times.nauticalDawn.getMinutes());
+                document.getElementById('astrotwilightstart').innerHTML = formatLeadingZero(times.nightEnd.getHours()) 		+ ':' + formatLeadingZero(times.nightEnd.getMinutes());
                 
                 var moonphase = SunCalc.getMoonIllumination(new Date());
 				
@@ -84,7 +74,6 @@
                     if (moonphase.phase <       0,7857) moonico = "wi-moon-alt-third-quarter";
                     else moonico = "wi-moon-alt-waning-crescent-" + moonicoid; 
                 }
-                
                 document.getElementById("moonphaseicon").className = "wi wi-4x " + moonico;
                 document.getElementById('moonphase').innerHTML = moonphase.fraction.toLocaleString(  undefined, { minimumFractionDigits: 2 }) ; // leave undefined to use the browser's locale, r use a string like 'en-US' to override it.
                 
@@ -100,6 +89,12 @@
 					moontimes = SunCalc.getMoonTimes(tomorrow, 43.93, 39.93);
 				}
 				document.getElementById('moonset').innerHTML = moontimes.set.getHours() + ':' + moontimes.set.getMinutes();
+
+				var date = new Date();
+				var d = formatLeadingZero(date.getDate());
+				var m = formatLeadingZero(date.getMonth() + 1);
+				var y = formatLeadingZero(date.getFullYear());
+				document.getElementById("currentdate").innerHTML = y + "-" + m + "-" + d;
 
             }
 			function DisplayCloudIDX(CIDX) {
@@ -125,6 +120,25 @@
                 update();
                 AstroData();
             }
+            function formatLeadingZero(i) {
+				return i < 10 ? "0" + i : i;
+			}
+			function DisplayCurrentTime() {
+                  date = new Date();
+                  hours = formatLeadingZero(date.getHours());
+                  minutes = formatLeadingZero(date.getMinutes());
+                  seconds = formatLeadingZero(date.getSeconds());
+                  var currentTime = document.getElementById("currentTime").innerHTML = hours + ":" + minutes + ":" + seconds;
+            };            
+			function formatRunTime(runtime) {
+				var runtime = ( runtime / 1000 ) | 0 ;
+				var runtime_d 	= ( runtime / 86400 ) | 0; 
+				var runtime_h 	= ( runtime / 3600 ) | 0 - runtime_d * 24; 
+				var runtime_min = (( runtime  / 60 ) | 0 ) - (runtime_d * 24 + runtime_h) * 60;
+				var runtime_sec = (( runtime  ) | 0 ) - ((runtime_d * 24 + runtime_h) * 60 + runtime_min ) * 60;
+				return ((runtime_d > 0 ? runtime_d + "d" : "") + (runtime_h > 0 ? runtime_h + "h" : "") + (runtime_min > 0 ? runtime_min + "m" : "") + (runtime_sec > 0 ? runtime_sec + "s" : ""));
+
+			}
         </script>
     </head>
     <body onload="load()">
@@ -138,8 +152,7 @@
                         <div class="boxes-align">
                             <div class="header-box">
                                 <h2>Weather Station</h2>
-                                <p><small>WEATHER STATION MkII v<span id="VER">2.0</span> [<span id="VED">20200822</span>]</small>.<bra>
-                                <small>Last updated <span id="currentTime">0:00:00</span>, runtime <span id="RT">100</span> msec</small></p>
+                                <p>Last updated <span id="currentTime">0:00:00</span><p>
                             </div>
                         </div>
                     </div>
@@ -233,10 +246,10 @@
                       <div class="small-box">
                         <h2>Rain</h2>
                         <i class="wi wi-showers wi-4x">&nbsp;</i><i class="wi wi-4x" id="Rain"><span class="wi wi-na normal-color"></span></i>
-                        <p>As reading by ceramic sensor</p>
+                        <p>Measured by ceramic sensor</p>
                         Additional readings:
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
-                        <tr><td><span id="Rain2">0</span><i class="wi">%&nbsp;</i></td><td class="tdcomment">by classic rain sensor</td>
+                        <tr><td><span id="Rain2">0</span><i class="wi">&nbsp;</i></td><td class="tdcomment">by classic rain sensor</td>
                         </tr>
                         </table>
                       </div>
@@ -256,16 +269,15 @@
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
                         <tr><td><i class="wi wi-sunrise wi-2x">&nbsp;</i></td>
                         <td><span id="sunrise">0</span>&nbsp;</td>
+						<td>&nbsp;&nbsp;<small><span id="astrotwilightstart">20:55</span> | <span id="nauttwilightstart">20:55</span> | <span id="civiltwilightstart">20:55</span></small></td>
+						
                         </tr>
                         <tr><td><i class="wi wi-sunset wi-2x">&nbsp;</i></td>
                         <td><span id="sunset">0</span>&nbsp;</i></td>
+						<td>&nbsp;&nbsp;<small><span id="civiltwilightend">20:55</span> | <span id="nauttwilightend">20:55</span> | <span id="astrotwilightend">20:55</span></small></td>
                         </tr>
                         </table>
-                        <p>
-                        Civil twilight: ends <span id="civiltwilightend">20:55</span>/starts <span id="civiltwilightstart">5:15</span><br>
-                        Nautial twilight: ends <span id="nauttwilightend">20:55</span>/starts <span id="nauttwilightstart">5:15</span><br>
-                        Astronomical twilight: ends <span id="astrotwilightend">20:55</span>/starts <span id="astrotwilightstart">5:15</span></p>
-                        
+                        <p>Today is <span id="currentdate">2020-08-10</span></p>
                       </div>
                     </div>
                   </div>
@@ -290,7 +302,7 @@
                   </div>
                 </div>
                 <div class="col-md-4 cms-boxes-outersmall">
-                  <div class="cms-boxes-items cms-misc">
+                  <div class="cms-boxes-items cms-misc" onclick="if (confirm('Station would stop gathering data and will enter CONFIG MODE. Are you sure?')) document.location = '/configmode';">
                     <div class="boxes-align">
                       <div class="small-box">
                         <i class="wi wi-refresh wi-2x">&nbsp;Enter config mode</i>
@@ -301,6 +313,20 @@
                   </div>
                 </div>
               </div>
+			  
+                <div class="header-row">
+                <div class="cms-boxes-outer">
+                    <div class="cms-boxes-items">
+                        <div class="boxes-align">
+                            <div class="header-box">
+                                <small>WEATHER STATION MkII firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], web v2.3 [20200828].<bra>
+								Runtime: <span id="RT">0</span></small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+			  
             </div>
           </section>
         </div>

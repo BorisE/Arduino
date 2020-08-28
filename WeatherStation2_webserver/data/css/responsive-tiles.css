@@ -49,7 +49,7 @@ section.cms-boxes .small-box, section.cms-boxes .large-box, section.cms-boxes .v
     text-align: center;
 }
 
-section.cms-boxes .cms-boxes-items:hover {
+section.cms-boxes .cms-misc:hover {
   opacity: .2;
   cursor: pointer;
 }
