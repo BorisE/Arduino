@@ -271,8 +271,21 @@ String SensorsJSON()
 }
 
 String SensorsParamString(){
-  String buf="ID=ESP" + WiFi.macAddress()+ "&";
+  String buf="ID=" + WiFi.macAddress()+ "&";
   buf.replace(":", ""); 
+
+  buf+= "TEMP1=" + String(OW_Temp1) + "&";
+  buf+= "PRESS=" + String(bmePres) + "&";
+  buf+= "HUM=";
+  if ((dhtHum) > 0) 
+    buf+= String(dhtHum);
+  else 
+    buf+= String(bmeHum);
+  buf+= "&";
+  buf+= "LUX=" + String(bh1750Lux) + "&";
+  buf+= "CIDX=" + String((OW_Temp1 - mlxObj));
+
+  return buf;
 }
 
 
