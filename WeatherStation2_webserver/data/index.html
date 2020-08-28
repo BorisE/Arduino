@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>WeatherStation</title>
+        <title>Weather Station</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
         <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -26,7 +26,7 @@
             };            
             function update(){      
                 var xhr=new XMLHttpRequest();      
-                xhr.open("GET", "/json", true);      
+                xhr.open("GET", "/json", true); // /json | json.html
                 xhr.onreadystatechange = function () {        
                     if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) 
                         return;        
@@ -94,7 +94,8 @@
 					moontimes = SunCalc.getMoonTimes(yest, 43.93, 39.93);
 				}
 				document.getElementById('moonrise').innerHTML = moontimes.rise.getHours() + ':' + moontimes.rise.getMinutes();
-                if (moontimes.set === undefined) {
+				
+                if (moontimes.set === undefined || moontimes.set.getHours() < 7 ) {
 					var tomorrow = new Date(); tomorrow.setDate(new Date().getDate()+1);
 					moontimes = SunCalc.getMoonTimes(tomorrow, 43.93, 39.93);
 				}
