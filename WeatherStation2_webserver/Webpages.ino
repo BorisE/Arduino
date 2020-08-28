@@ -94,7 +94,7 @@ const char HTTP_HTML_PINGANDRETURN[] PROGMEM = "<script>\
 const char HTTP_HTML_REDIRECT[] PROGMEM = "<script>\
     window.setTimeout(\"update()\", {update});\
     function update(){\
-        window.location.href = 'http://{self_url}/';\
+        window.location.href = '/';\
     }\
   </script>";
 
@@ -222,7 +222,7 @@ void handleConfigMode(){
 
   page.replace("<script></script>", FPSTR(HTTP_HTML_REDIRECT));
   page.replace("{update}", "6000"); //timeout before redirecting page
-  page.replace("{self_url}", WiFi.localIP().toString());
+  //page.replace("{self_url}", WiFi.localIP().toString());
 
   server.send(200, "text/html", page);
 

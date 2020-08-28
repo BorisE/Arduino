@@ -13,7 +13,7 @@
   - Deepsleep mode?
 
  Changes:
-   ver 2.1beta 2020/08/27 [452700/32624]
+   ver 2.1c 2020/08/28 [452668/32608]
                       - moved to DHTesp lib (not finally, just to test)
                       - some bugs in html cleared
    ver 2.02 2020/08/23 [446280/32388]
@@ -79,8 +79,8 @@
 */
 
 //Compile version
-#define VERSION "2.1beta"
-#define VERSION_DATE "20200827"
+#define VERSION "2.1c"
+#define VERSION_DATE "20200828"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
