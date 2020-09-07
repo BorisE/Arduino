@@ -9,7 +9,6 @@
   - UV sensor?
   - CO2 sensor?
   - OTA web update
-  - OTA auto update  
   - Deepsleep mode?
 
  Changes:

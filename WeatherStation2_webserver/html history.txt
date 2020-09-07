@@ -1,0 +1,8 @@
+WeatherStation HTML history
+
+v2.5 [20200906]	- loading history from server
+				- bug fix for waning moon phase
+				- bug fix for runtime calc
+
+v2.4 [20200829] - classic interface
+v2.0 			- Tile design
