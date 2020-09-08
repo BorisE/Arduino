@@ -1,8 +1,19 @@
 WeatherStation HTML history
 
+v2.5a [20200908]- some js optimization
+				- some bugfix
+				- today instead of last24h
+				- inc height
+				- set statistics to load every 5 min only
 v2.5 [20200906]	- loading history from server
+				- tooltips
 				- bug fix for waning moon phase
 				- bug fix for runtime calc
-
-v2.4 [20200829] - classic interface
-v2.0 			- Tile design
+v2.4 [2020/08/29] 	- normalized pressure calc
+v2.3 [2020/08/28]   - more javascript
+v2.2c [2020/08/28]  - moon calculations enhanced
+v2.2b [2020/08/27]  - some bugs in html cleared (with firmware ver 2.1beta)
+v2.2a [2020/08/26]   - html update (with firmware v2.02)
+v2.2 [2020/08/23]   - astrodata through suncalc.js lib
+v2.1 [2020/08/23] 	- header, currtime, sunrise/sunset through sun.js lib
+v2.0 [2020/08/23]	- new card design

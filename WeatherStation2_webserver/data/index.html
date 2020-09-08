@@ -5,15 +5,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
         <link rel="stylesheet" href="css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/responsive-tiles.css?1">
+        <link rel="stylesheet" href="css/responsive-tiles.css?2">
         <link rel="stylesheet" href="css/weather-icons.min.css?21">
         <script type="text/javascript" src="jscript/suncalc.js"></script>
         <script>
-            var date, hours, minutes, seconds;
-			var times;
+            var TodayDate, YesterdayDate, TommorowDate;
+			var hours, minutes, seconds;
+			var astroTimes, astroTimesT1;
 			
 			window.setInterval("update()", 10000); 
-			window.setInterval("updateStat()", 10000); 
+			window.setInterval("updateStat()", 300000); 
 
             function update(){      
                 var xhr=new XMLHttpRequest();      
@@ -49,9 +50,9 @@
                         return;        
                     var getData = JSON.parse(xhr.responseText);        
 					//BMP
-                    document.getElementById('bmpminl24').innerHTML	= parseFloat(getData.bmpminl24).toFixed(1);
-                    document.getElementById('bmpmaxl24').innerHTML	= parseFloat(getData.bmpmaxl24).toFixed(1);
-                    document.getElementById('bmpavgl24').innerHTML	= parseFloat(getData.bmpavgl24).toFixed(1);
+                    document.getElementById('bmpmint0').innerHTML	= parseFloat(getData.bmpmint0).toFixed(1);
+                    document.getElementById('bmpmaxt0').innerHTML	= parseFloat(getData.bmpmaxt0).toFixed(1);
+                    document.getElementById('bmpavgt0').innerHTML	= parseFloat(getData.bmpavgt0).toFixed(1);
 
                     document.getElementById('bmpmint_1').innerHTML	= parseFloat(getData.bmpmint_1).toFixed(1);
                     document.getElementById('bmpmaxt_1').innerHTML	= parseFloat(getData.bmpmaxt_1).toFixed(1);
@@ -62,9 +63,9 @@
                     document.getElementById('bmpavgw').innerHTML	= parseFloat(getData.bmpavgw).toFixed(1);
 
 					//HUM
-                    document.getElementById('humminl24').innerHTML	= parseFloat(getData.humminl24).toFixed(1);
-                    document.getElementById('hummaxl24').innerHTML	= parseFloat(getData.hummaxl24).toFixed(1);
-                    document.getElementById('humavgl24').innerHTML	= parseFloat(getData.humavgl24).toFixed(1);
+                    document.getElementById('hummint0').innerHTML	= parseFloat(getData.hummint0).toFixed(1);
+                    document.getElementById('hummaxt0').innerHTML	= parseFloat(getData.hummaxt0).toFixed(1);
+                    document.getElementById('humavgt0').innerHTML	= parseFloat(getData.humavgt0).toFixed(1);
 
 					document.getElementById('hummint_1').innerHTML	= parseFloat(getData.hummint_1).toFixed(1);
                     document.getElementById('hummaxt_1').innerHTML	= parseFloat(getData.hummaxt_1).toFixed(1);
@@ -75,9 +76,9 @@
                     document.getElementById('humavgw').innerHTML	= parseFloat(getData.humavgw).toFixed(1);
 
 					//OW1
-                    document.getElementById('ow1minl24').innerHTML	= parseFloat(getData.ow1minl24).toFixed(1);
-                    document.getElementById('ow1maxl24').innerHTML	= parseFloat(getData.ow1maxl24).toFixed(1);
-                    document.getElementById('ow1avgl24').innerHTML	= parseFloat(getData.ow1avgl24).toFixed(1);
+                    document.getElementById('ow1mint0').innerHTML	= parseFloat(getData.ow1mint0).toFixed(1);
+                    document.getElementById('ow1maxt0').innerHTML	= parseFloat(getData.ow1maxt0).toFixed(1);
+                    document.getElementById('ow1avgt0').innerHTML	= parseFloat(getData.ow1avgt0).toFixed(1);
 
 					document.getElementById('ow1mint_1').innerHTML	= parseFloat(getData.ow1mint_1).toFixed(1);
                     document.getElementById('ow1maxt_1').innerHTML	= parseFloat(getData.ow1maxt_1).toFixed(1);
@@ -88,9 +89,9 @@
                     document.getElementById('ow1avgw').innerHTML	= parseFloat(getData.ow1avgw).toFixed(1);
 
 					//CIDX
-					document.getElementById('cidxminl24').innerHTML	= parseFloat(getData.cidxminl24).toFixed(1);
-                    document.getElementById('cidxmaxl24').innerHTML	= parseFloat(getData.cidxmaxl24).toFixed(1);
-                    document.getElementById('cidxavgl24').innerHTML	= parseFloat(getData.cidxavgl24).toFixed(1);
+					document.getElementById('cidxmint0').innerHTML	= parseFloat(getData.cidxmint0).toFixed(1);
+                    document.getElementById('cidxmaxt0').innerHTML	= parseFloat(getData.cidxmaxt0).toFixed(1);
+                    document.getElementById('cidxavgt0').innerHTML	= parseFloat(getData.cidxavgt0).toFixed(1);
 
 					document.getElementById('cidxmint_1').innerHTML	= parseFloat(getData.cidxmint_1).toFixed(1);
                     document.getElementById('cidxmaxt_1').innerHTML	= parseFloat(getData.cidxmaxt_1).toFixed(1);
@@ -101,9 +102,9 @@
                     document.getElementById('cidxavgw').innerHTML	= parseFloat(getData.cidxavgw).toFixed(1);
 					
 					//BHV
-					document.getElementById('bhvminl24').innerHTML	= parseFloat(getData.bhvminl24).toFixed(1);
-                    document.getElementById('bhvmaxl24').innerHTML	= parseFloat(getData.bhvmaxl24).toFixed(1);
-                    document.getElementById('bhvavgl24').innerHTML	= parseFloat(getData.bhvavgl24).toFixed(1);
+					document.getElementById('bhvmint0').innerHTML	= parseFloat(getData.bhvmint0).toFixed(1);
+                    document.getElementById('bhvmaxt0').innerHTML	= parseFloat(getData.bhvmaxt0).toFixed(1);
+                    document.getElementById('bhvavgt0').innerHTML	= parseFloat(getData.bhvavgt0).toFixed(1);
 
 					document.getElementById('bhvmint_1').innerHTML	= parseFloat(getData.bhvmint_1).toFixed(1);
                     document.getElementById('bhvmaxt_1').innerHTML	= parseFloat(getData.bhvmaxt_1).toFixed(1);
@@ -119,20 +120,21 @@
 			
 			
             function AstroData() {
-                times = SunCalc.getTimes(new Date(), 43.93, 39.93);
+				astroTimes = SunCalc.getTimes(TodayDate, 43.93, 39.93);
+				astroTimesT1 = SunCalc.getTimes(TommorowDate, 43.93, 39.93);
                 
-                document.getElementById('sunrise').innerHTML 			= formatLeadingZero(times.sunrise.getHours()) 		+ ':' + formatLeadingZero(times.sunrise.getMinutes());
-                document.getElementById('sunset').innerHTML 			= formatLeadingZero(times.sunset.getHours()) 		+ ':' + formatLeadingZero(times.sunset.getMinutes());
+                document.getElementById('sunrise').innerHTML 			= formatLeadingZero(astroTimes.sunrise.getHours()) 		+ ':' + formatLeadingZero(astroTimes.sunrise.getMinutes());
+                document.getElementById('sunset').innerHTML 			= formatLeadingZero(astroTimes.sunset.getHours()) 		+ ':' + formatLeadingZero(astroTimes.sunset.getMinutes());
 
-                document.getElementById('civiltwilightend').innerHTML 	= formatLeadingZero(times.dusk.getHours()) 			+ ':' + formatLeadingZero(times.dusk.getMinutes());
-                document.getElementById('nauttwilightend').innerHTML 	= formatLeadingZero(times.nauticalDusk.getHours()) 	+ ':' + formatLeadingZero(times.nauticalDusk.getMinutes());
-                document.getElementById('astrotwilightend').innerHTML 	= formatLeadingZero(times.night.getHours()) 		+ ':' + formatLeadingZero(times.night.getMinutes());
+                document.getElementById('civiltwilightend').innerHTML 	= formatLeadingZero(astroTimes.dusk.getHours()) 			+ ':' + formatLeadingZero(astroTimes.dusk.getMinutes());
+                document.getElementById('nauttwilightend').innerHTML 	= formatLeadingZero(astroTimes.nauticalDusk.getHours()) 	+ ':' + formatLeadingZero(astroTimes.nauticalDusk.getMinutes());
+                document.getElementById('astrotwilightend').innerHTML 	= formatLeadingZero(astroTimes.night.getHours()) 		+ ':' + formatLeadingZero(astroTimes.night.getMinutes());
 
-                document.getElementById('civiltwilightstart').innerHTML = formatLeadingZero(times.dawn.getHours()) 			+ ':' + formatLeadingZero(times.dawn.getMinutes());
-                document.getElementById('nauttwilightstart').innerHTML 	= formatLeadingZero(times.nauticalDawn.getHours()) 	+ ':' + formatLeadingZero(times.nauticalDawn.getMinutes());
-                document.getElementById('astrotwilightstart').innerHTML = formatLeadingZero(times.nightEnd.getHours()) 		+ ':' + formatLeadingZero(times.nightEnd.getMinutes());
+                document.getElementById('civiltwilightstart').innerHTML = formatLeadingZero(astroTimes.dawn.getHours()) 			+ ':' + formatLeadingZero(astroTimes.dawn.getMinutes());
+                document.getElementById('nauttwilightstart').innerHTML 	= formatLeadingZero(astroTimes.nauticalDawn.getHours()) 	+ ':' + formatLeadingZero(astroTimes.nauticalDawn.getMinutes());
+                document.getElementById('astrotwilightstart').innerHTML = formatLeadingZero(astroTimes.nightEnd.getHours()) 		+ ':' + formatLeadingZero(astroTimes.nightEnd.getMinutes());
                 
-                var moonphase = SunCalc.getMoonIllumination(new Date());
+                var moonphase = SunCalc.getMoonIllumination(TodayDate);
 				
                 var moonico=""; 
                 var moonphaseconst=0.035714;
@@ -157,37 +159,36 @@
                 document.getElementById("moonphaseicon").className = "wi wi-4x " + moonico;
                 document.getElementById('moonphase').innerHTML = moonphase.fraction.toLocaleString(  undefined, { minimumFractionDigits: 2 }); // leave undefined to use the browser's locale, r use a string like 'en-US' to override it.
                 
-                var moontimes = SunCalc.getMoonTimes(new Date(), 43.93, 39.93);
+                var moontimes = SunCalc.getMoonTimes(TodayDate, 43.93, 39.93);
                 if (moontimes.rise === undefined) {
-					var yest = new Date(); yest.setDate(new Date().getDate()-1);
-					moontimes = SunCalc.getMoonTimes(yest, 43.93, 39.93);
+					moontimes = SunCalc.getMoonTimes(YesterdayDate, 43.93, 39.93);
 				}
 				document.getElementById('moonrise').innerHTML = moontimes.rise.getHours() + ':' + moontimes.rise.getMinutes();
 				
                 if (moontimes.set === undefined || moontimes.set.getHours() < 7 ) {
-					var tomorrow = new Date(); tomorrow.setDate(new Date().getDate()+1);
-					moontimes = SunCalc.getMoonTimes(tomorrow, 43.93, 39.93);
+					moontimes = SunCalc.getMoonTimes(TommorowDate, 43.93, 39.93);
 				}
 				document.getElementById('moonset').innerHTML = moontimes.set.getHours() + ':' + moontimes.set.getMinutes();
 
-				var date = new Date();
-				var d = formatLeadingZero(date.getDate());
-				var m = formatLeadingZero(date.getMonth() + 1);
-				var y = formatLeadingZero(date.getFullYear());
+				var d = formatLeadingZero(TodayDate.getDate());
+				var m = formatLeadingZero(TodayDate.getMonth() + 1);
+				var y = formatLeadingZero(TodayDate.getFullYear());
 				document.getElementById("currentdate").innerHTML = y + "-" + m + "-" + d;
 
             }
 			function DisplayCloudIDX(CIDX) {
 				var cloudico = "wi-cloudy";
-				if (date.getHours() >= times.sunset.getHours() || date.getHours() <= times.sunrise.getHours()) {
-					//alert("night: "+date.getHours() + "(" + times.sunset.getHours() + ")");
+				//alert(TodayDate + " - "  + astroTimesT1.sunrise + " = " + (TodayDate - astroTimesT1.sunrise));
+				if ((TodayDate - astroTimes.sunset) >0 && (TodayDate - astroTimesT1.sunrise) < 0) {
+				//night
 					if (CIDX > 7)
 						cloudico = "wi-stars";
 					else if (CIDX > 4)
 						cloudico = "wi-night-alt-partly-cloudy";
 					
 				} else {
-					//alert("day: "+date.getHours() + "(" + times.sunset.getHours() + ")");
+				//day
+					//alert("day: "+TodayDate.getHours() + "(" + astroTimes.sunset.getHours() + ")");
 					if (CIDX > 7)
 						cloudico = "wi-day-sunny";
 					else if (CIDX > 4)
@@ -202,18 +203,21 @@
 				document.getElementById("PRESN").innerHTML = pressN.toFixed(1);
 			}
 			function load(){
-                update();
-				updateStat();
+                DisplayCurrentTime();
                 AstroData();
+				update();
+				updateStat();
             }
             function formatLeadingZero(i) {
 				return i < 10 ? "0" + i : i;
 			}
 			function DisplayCurrentTime() {
-                  date = new Date();
-                  hours = formatLeadingZero(date.getHours());
-                  minutes = formatLeadingZero(date.getMinutes());
-                  seconds = formatLeadingZero(date.getSeconds());
+                  TodayDate = new Date();
+				  YesterdayDate = new Date(); YesterdayDate.setDate(new Date().getDate()-1);
+				  TommorowDate = new Date(); TommorowDate.setDate(new Date().getDate()+1);
+                  hours = formatLeadingZero(TodayDate.getHours());
+                  minutes = formatLeadingZero(TodayDate.getMinutes());
+                  seconds = formatLeadingZero(TodayDate.getSeconds());
                   var currentTime = document.getElementById("currentTime").innerHTML = hours + ":" + minutes + ":" + seconds;
             };            
 			function formatRunTime(runtime) {
@@ -260,7 +264,7 @@
                         <p><span id="Temp">100</span><i class="wi wi-celsius">&nbsp;</i>by DHT22 | <span id="BMT">100</span><i class="wi wi-celsius">&nbsp;</i>by BME280</p>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center" style="width:75%">
                         <tr><td></td><td>min</td><td>max</td><td>avg</td></tr>
-                        <tr><td class="tdcomment">Last 24h</td><td><span id="ow1minl24"></span></td><td><span id="ow1maxl24"></span></td><td><span id="ow1avgl24"></span></td></tr>
+                        <tr><td class="tdcomment">Today</td><td><span id="ow1mint0"></span></td><td><span id="ow1maxt0"></span></td><td><span id="ow1avgt0"></span></td></tr>
                         <tr><td class="tdcomment">Yesterday</td><td><span id="ow1mint_1"></span></td><td><span id="ow1maxt_1"></span></td><td><span id="ow1avgt_1"></span></td></tr>
                         <tr><td class="tdcomment">Last week</td><td><span id="ow1minw"></span></td><td><span id="ow1maxw"></span></td><td><span id="ow1avgw"></span></td></tr>
                         </table>
@@ -281,7 +285,7 @@
                         </table>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center" style="width:75%">
                         <tr><td></td><td>min</td><td>max</td><td>avg</td></tr>
-                        <tr><td class="tdcomment">Last 24h</td><td><span id="humminl24"></span></td><td><span id="hummaxl24"></span></td><td><span id="humavgl24"></span></td></tr>
+                        <tr><td class="tdcomment">Today</td><td><span id="hummint0"></span></td><td><span id="hummaxt0"></span></td><td><span id="humavgt0"></span></td></tr>
                         <tr><td class="tdcomment">Yesterday</td><td><span id="hummint_1"></span></td><td><span id="hummaxt_1"></span></td><td><span id="humavgt_1"></span></td></tr>
                         <tr><td class="tdcomment">Last week</td><td><span id="humminw"></span></td><td><span id="hummaxw"></span></td><td><span id="humavgw"></span></td></tr>
                         </table>
@@ -295,12 +299,12 @@
                       <div class="small-box">
                         <h2>Pressure</h2>
 						<span class="tooltip2" data-tooltip="Current atmospheric pressure measured by BME280 sensor">
-						<i class="wi wi-barometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="BMP"><span class="wi wi-na normal-color"></span></i><i class="wi wi-2x">&nbsp;mmHg&nbsp;</i>
-						</span>
+						<i class="wi wi-barometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="BMP"><span class="wi wi-na normal-color"></span></i></span><i class="wi wi-2x">&nbsp;mmHg&nbsp;</i>
+						
                         <p>Corresponds to <span id="PRESN">0</span>mmHg at sea level</p>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center" style="width:75%">
                         <tr><td></td><td>min</td><td>max</td><td>avg</td></tr>
-                        <tr><td class="tdcomment">Last 24h</td><td><span id="bmpminl24"></span></td><td><span id="bmpmaxl24"></span></td><td><span id="bmpavgl24"></span></td></tr>
+                        <tr><td class="tdcomment">Today</td><td><span id="bmpmint0"></span></td><td><span id="bmpmaxt0"></span></td><td><span id="bmpavgt0"></span></td></tr>
                         <tr><td class="tdcomment">Yesterday</td><td><span id="bmpmint_1"></span></td><td><span id="bmpmaxt_1"></span></td><td><span id="bmpavgt_1"></span></td></tr>
                         <tr><td class="tdcomment">Last week</td><td><span id="bmpminw"></span></td><td><span id="bmpmaxw"></span></td><td><span id="bmpavgw"></span></td></tr>
                         </table>
@@ -324,7 +328,7 @@
                         <p>Object: <span id="OBJ">100</span><i class="wi wi-celsius">&nbsp;</i>| Ambient: <span id="AMB">100</span><i class="wi wi-celsius">&nbsp;</i></p>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center" style="width:75%">
                         <tr><td></td><td>min</td><td>max</td><td>avg</td></tr>
-                        <tr><td class="tdcomment">Last 24h</td><td><span id="cidxminl24"></span></td><td><span id="cidxmaxl24"></span></td><td><span id="cidxavgl24"></span></td></tr>
+                        <tr><td class="tdcomment">Today</td><td><span id="cidxmint0"></span></td><td><span id="cidxmaxt0"></span></td><td><span id="cidxavgt0"></span></td></tr>
                         <tr><td class="tdcomment">Yesterday</td><td><span id="cidxmint_1"></span></td><td><span id="cidxmaxt_1"></span></td><td><span id="cidxavgt_1"></span></td></tr>
                         <tr><td class="tdcomment">Last week</td><td><span id="cidxminw"></span></td><td><span id="cidxmaxw"></span></td><td><span id="cidxavgw"></span></td></tr>
                         </table>						
@@ -338,12 +342,11 @@
                       <div class="small-box">
                         <h2>Illumination</h2>
                         <span class="tooltip2" data-tooltip="Current illumination measured by BH1750FVI sensor">
-                        <i class="wi wi-day-sunny wi-4x">&nbsp;</i><i class="wi wi-4x" id="BHV"><span class="wi wi-na normal-color"></span></i><i class="wi wi-2x">&nbsp;lux</i>
-						</span>
+                        <i class="wi wi-day-sunny wi-4x">&nbsp;</i><i class="wi wi-4x" id="BHV"><span class="wi wi-na normal-color"></span></i></span><i class="wi wi-2x">&nbsp;lux</i>
                         <p>&nbsp;</p>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center" style="width:75%">
                         <tr><td></td><td>min</td><td>max</td><td>avg</td></tr>
-                        <tr><td class="tdcomment">Last 24h</td><td><span id="bhvminl24"></span></td><td><span id="bhvmaxl24"></span></td><td><span id="bhvavgl24"></span></td></tr>
+                        <tr><td class="tdcomment">Today</td><td><span id="bhvmint0"></span></td><td><span id="bhvmaxt0"></span></td><td><span id="bhvavgt0"></span></td></tr>
                         <tr><td class="tdcomment">Yesterday</td><td><span id="bhvmint_1"></span></td><td><span id="bhvmaxt_1"></span></td><td><span id="bhvavgt_1"></span></td></tr>
                         <tr><td class="tdcomment">Last week</td><td><span id="bhvminw"></span></td><td><span id="bhvmaxw"></span></td><td><span id="bhvavgw"></span></td></tr>
                         </table>						
@@ -356,8 +359,10 @@
                     <div class="boxes-align">
                       <div class="small-box">
                         <h2>Rain</h2>
+                        <span class="tooltip2" data-tooltip="Rain sensors aren't connected yet">
                         <i class="wi wi-showers wi-4x">&nbsp;</i><i class="wi wi-4x" id="Rain"><span class="wi wi-na normal-color"></span></i>
-                        <p>Measured by ceramic sensor</p>
+						</span>
+                        <p>&nbsp;</p><p>Measured by ceramic sensor</p>
                         Additional readings:
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
                         <tr><td><span id="Rain2">0</span><i class="wi">&nbsp;</i></td><td class="tdcomment">by classic rain sensor</td>
@@ -430,7 +435,7 @@
                     <div class="cms-boxes-items">
                         <div class="boxes-align">
                             <div class="header-box">
-                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.5 [20200906].<bra>
+                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.5a [20200908].<bra>
 								Runtime: <span id="RT">0</span></small></p>
                             </div>
                         </div>
