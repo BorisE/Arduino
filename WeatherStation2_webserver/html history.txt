@@ -1,5 +1,7 @@
 WeatherStation HTML history
 
+v2.5b [20200914]- favicon
+				- bug fix for waning crescent mooon
 v2.5a [20200908]- some js optimization
 				- some bugfix
 				- today instead of last24h

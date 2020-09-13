@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="css/responsive-tiles.css?2">
         <link rel="stylesheet" href="css/weather-icons.min.css?21">
         <script type="text/javascript" src="jscript/suncalc.js"></script>
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
         <script>
             var TodayDate, YesterdayDate, TommorowDate;
 			var hours, minutes, seconds;
@@ -153,7 +154,7 @@
                     else moonico = "wi-moon-alt-waning-gibbous-" + moonicoid; 
                 }else {
                     moonicoid = (( (moonphase.phase - 0.75) / moonphaseconst ) | 0); 
-                    if (moonphase.phase <       0,7857) moonico = "wi-moon-alt-third-quarter";
+                    if (moonphase.phase <       0.7857) moonico = "wi-moon-alt-third-quarter";
                     else moonico = "wi-moon-alt-waning-crescent-" + moonicoid; 
                 }
                 document.getElementById("moonphaseicon").className = "wi wi-4x " + moonico;
@@ -435,7 +436,7 @@
                     <div class="cms-boxes-items">
                         <div class="boxes-align">
                             <div class="header-box">
-                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.5a [20200908].<bra>
+                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.5b [20200911].<bra>
 								Runtime: <span id="RT">0</span></small></p>
                             </div>
                         </div>
