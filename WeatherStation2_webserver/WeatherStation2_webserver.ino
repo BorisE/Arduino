@@ -13,8 +13,11 @@
   - Deepsleep mode?
 
  Changes:
-   ver 2.02 2020/08/23 [446280/32388]
+   ver 2.1 2020/08/23 [452480/32548]
+                      - web update for firmware and SPIFFS
+   ver 2.02 2020/08/23 
                       - html design update2 (astrodata through suncalc.js lib)
+                      - flash reformated: spiffs 1mb,ota 1mb
    ver 2.01 2020/08/23 [446280/32388]
                       - html design update (header, currtime, sunrise/sunset through sun.js lib)
    ver 2.0 2020/08/22 [446280/32388]
@@ -76,8 +79,8 @@
 */
 
 //Compile version
-#define VERSION "2.02"
-#define VERSION_DATE "20200823"
+#define VERSION "2.1"
+#define VERSION_DATE "20200824"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -188,7 +191,6 @@ static const uint8_t D10  = 1;
 Ticker ticker;
 const int STATUS_LED = LED_BUILTIN;
 
-#define DHT_PINold D11
 #define DHT_PIN_DEFAULT D11
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
 enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};  // DHT error codes enumerated
