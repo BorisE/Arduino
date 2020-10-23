@@ -8,6 +8,7 @@
   - more asbtracted waterflow control
   - AUTOMATION
 
+   ver 0.6 2020/10/23 [343236/29368] - OTA added
    ver 0.5 2020/08/16 [322776/28536] - fully working device with: 2 relays, 3 water level sensors and waterflow sensor
    ver 0.4 2020/08/16                - waterflow sensor counting
    ver 0.3 2020/08/16                - relay/wsensors status to serial output
@@ -15,14 +16,16 @@
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.5"
-#define VERSION_DATE "20200816"
+#define VERSION "0.6c"
+#define VERSION_DATE "20201023"
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPClient.h>
+#include <ArduinoOTA.h>
+#include <ESP8266HTTPUpdateServer.h>
 
 #ifndef STASSID
 #define STASSID "BATMAJ"
@@ -32,8 +35,10 @@
 const char* ssid = STASSID;
 const char* password = STAPSK;
 const char* host = "watersupply";
+#define OTA_PORT 18266
 
 ESP8266WebServer server(80);
+ESP8266HTTPUpdateServer httpUpdater;
 
 
 /* for Wemos D1 R2
@@ -159,8 +164,27 @@ void setup() {
   server.on("/relay", handleRelaySwitch);
   server.onNotFound(handleNotFound);
 
+  httpUpdater.setup(&server, "/update");
+
   server.begin();
   Serial.println(F("HTTP server started"));
+
+  ////////////////////////////////
+  // OTA Update
+  ArduinoOTA.setHostname(host);
+  ArduinoOTA.setPort(OTA_PORT);
+  //ArduinoOTA.setPassword("esp8266");
+  ArduinoOTA.onStart(onStartOTA);
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\n[OTA] End");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("[OTA] Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError(onErrorOTA);
+  ArduinoOTA.begin();
+  Serial.println("[OTA] OTA ready");
+
 
   ////////////////////////////////
   // START HARDWARE
@@ -180,7 +204,8 @@ void loop() {
 
   server.handleClient();
   MDNS.update();
-
+  ArduinoOTA.handle();
+  
    // Every second, calculate and print litres/hour
    if(currenttime >= (_lastReadTime_WaterFlow + WATERFLOW_COUNT_FREQUENCY))
    {

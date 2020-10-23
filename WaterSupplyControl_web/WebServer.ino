@@ -216,7 +216,10 @@ String SensorsJSON()
 
   page += "\"WS1\": \"" + String(getSensorStatusString(config.WS1_PIN)) + "\",";
   page += "\"WS2\": \"" + String(getSensorStatusString(config.WS2_PIN)) + "\",";
-  page += "\"WS3\": \"" + String(getSensorStatusString(config.WS3_PIN)) + "\",";
+  
+  //page += "\"WS3\": \"" + String(getSensorStatusString(config.WS3_PIN)) + "\",";
+  page += "\"WS3\": \"" + String(digitalRead(config.WS3_PIN)) + "\",";
+  
 
   page += "\"WF\": \"" + String(flow_l_min) + "\",";
 
