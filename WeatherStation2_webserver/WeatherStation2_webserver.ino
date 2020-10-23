@@ -9,15 +9,16 @@
   - UV sensor?
   - CO2 sensor?
   - OTA web update
-  - OTA auto update  
   - Deepsleep mode?
 
  Changes:
-   ver 2.1 2020/08/23 [452480/32548]
-                      - web update for firmware and SPIFFS
-   ver 2.02 2020/08/23 
+   ver 2.2 2020/08/28 [453716/32776]
+                      - send data to narodmon.ru
+   ver 2.1c 2020/08/28 [452668/32608]
+                      - moved to DHTesp lib (not finally, just to test)
+                      - some bugs in html cleared
+   ver 2.02 2020/08/23 [446280/32388]
                       - html design update2 (astrodata through suncalc.js lib)
-                      - flash reformated: spiffs 1mb,ota 1mb
    ver 2.01 2020/08/23 [446280/32388]
                       - html design update (header, currtime, sunrise/sunset through sun.js lib)
    ver 2.0 2020/08/22 [446280/32388]
@@ -79,8 +80,8 @@
 */
 
 //Compile version
-#define VERSION "2.1"
-#define VERSION_DATE "20200824"
+#define VERSION "2.2"
+#define VERSION_DATE "20200829"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -99,6 +100,7 @@
 #include <MLX90614.h>
 #include <DallasTemperature.h>
 #include <BH1750.h>
+#include "DHTesp.h"
 
 #include <Ticker.h>//for LED status
 
@@ -112,7 +114,7 @@ const char* ssid = "WeatherStation";
 const char* host = "weather";
 #define OTA_PORT 18266
 
-struct Config {
+struct ConfigStruct {
   char POST_URL[101];
   uint8_t OneWirePin;
   uint8_t I2CSDAPin;
@@ -120,8 +122,7 @@ struct Config {
   uint8_t DHT22Pin;
 };
 const char *configFilename = "/config.cfg";  
-Config config;                              // <- global configuration object
-
+ConfigStruct configData;                              // <- global configuration object
 
 #define WIFI_CONFIG_PORTAL_WAITTIME  30
 #define WIFI_CONFIG_PORTAL_WAITTIME_STARTUP  60
@@ -132,6 +133,8 @@ ESP8266HTTPUpdateServer httpUpdater;
 #define DEFAULT_POST_URL "http://192.168.0.199/weather/adddata.php"
 //char POST_URL[101] = "http://192.168.0.199/weather/adddata.php"; //Where to post data
 unsigned long _last_HTTP_SEND=0;
+#define NARODMON_SERVER "http://narodmon.ru/post"
+unsigned long _last_NARODMON_SEND;
 
 
 /* for Wemos D1 R1
@@ -191,12 +194,14 @@ static const uint8_t D10  = 1;
 Ticker ticker;
 const int STATUS_LED = LED_BUILTIN;
 
+#define DHT_PINold D11
 #define DHT_PIN_DEFAULT D11
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
 enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};  // DHT error codes enumerated
 float dhtTemp = NONVALID_TEMPERATURE;
 float dhtHum =0;
 unsigned long _lastReadTime_DHT=0;
+DHTesp dht;
 
 //I2C wire
 #define SDA_PIN_DEFAULT D3
@@ -238,6 +243,7 @@ unsigned long _lastReadTime_BH1750=0;
 
 unsigned long currenttime;              // millis from script start 
 #define POST_DATA_INTERVAL    120000
+#define POST_NARODMONDATA_INTERVAL    320000
 #define JS_UPDATEDATA_INTERVAL  10000
 #define DHT_READ_INTERVAL     10000
 #define BME_READ_INTERVAL     10000
@@ -326,19 +332,21 @@ void setup(void) {
   
   ////////////////////////////////
   // START HARDWARE
-  Wire.begin(config.I2CSDAPin, config.I2CSCLPin);
+  Wire.begin(configData.I2CSDAPin, configData.I2CSCLPin);
 
+  dht.setup(configData.DHT22Pin, DHTesp::DHT22);
+   
   //init BME280 sensor
-  if (!bme.begin(config.I2CSDAPin, config.I2CSCLPin)) 
+  if (!bme.begin(configData.I2CSDAPin, configData.I2CSCLPin)) 
   {
     Serial.println(F("Could not find a valid BME280 sensor, check wiring!"));
   } 
 
   //MLX
-  mlx.begin(config.I2CSDAPin, config.I2CSCLPin);  
+  mlx.begin(configData.I2CSDAPin, configData.I2CSCLPin);  
 
   //Dallas Sensors
-  OneWireBus.begin(config.OneWirePin);
+  OneWireBus.begin(configData.OneWirePin);
   ds18b20.begin();
   Serial.print(F("OneWire devices: "));
   Serial.println(ds18b20.getDeviceCount());
@@ -372,13 +380,26 @@ void loop(void) {
       }
       _last_HTTP_SEND = currenttime;
   }
+  if ( currenttime - _last_NARODMON_SEND > POST_NARODMONDATA_INTERVAL ) {
+      /* try to send data. test ret status. 
+       * if no connection start CheckConnection procedure  */
+      if (!NarodMon_sent())
+      {
+        server.stop(); // stop web server because of conflict with WiFi manager
+        WiFi_CheckConnection(WIFI_CONFIG_PORTAL_WAITTIME);
+        server.begin(); // start again
+      }
+      _last_NARODMON_SEND = currenttime;
+  }
+  
 
   //DHT Read very time consuming
   //So read only in given interval
   if (_lastReadTime_DHT ==0 || (currenttime - _lastReadTime_DHT) > DHT_READ_INTERVAL)
   {
     bOutput=true;
-    readDHTSensor(dhtTemp, dhtHum);
+    //readDHTSensor(dhtTemp, dhtHum);
+    printDHT(dhtTemp, dhtHum);
     _lastReadTime_DHT= currenttime;
   }
   

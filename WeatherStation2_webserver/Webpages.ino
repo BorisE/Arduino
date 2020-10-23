@@ -94,7 +94,7 @@ const char HTTP_HTML_PINGANDRETURN[] PROGMEM = "<script>\
 const char HTTP_HTML_REDIRECT[] PROGMEM = "<script>\
     window.setTimeout(\"update()\", {update});\
     function update(){\
-        window.location.href = 'http://{self_url}/';\
+        window.location.href = '/';\
     }\
   </script>";
 
@@ -222,7 +222,7 @@ void handleConfigMode(){
 
   page.replace("<script></script>", FPSTR(HTTP_HTML_REDIRECT));
   page.replace("{update}", "6000"); //timeout before redirecting page
-  page.replace("{self_url}", WiFi.localIP().toString());
+  //page.replace("{self_url}", WiFi.localIP().toString());
 
   server.send(200, "text/html", page);
 
@@ -262,13 +262,33 @@ String SensorsJSON()
   page += "\"AMB\": " + String(mlxAmb) + ", ";
   page += "\"BHV\": " + String(bh1750Lux) + ", ";
   page += "\"RT\": " + String(currenttime) + ", ";
-  page += "\"Ver\": " + String(VERSION) + ", ";
-  page += "\"VDate\": " + String(VERSION_DATE) + "";
+  page += "\"Ver\": \"" + String(VERSION) + "\", ";
+  page += "\"VDate\": \"" + String(VERSION_DATE) + "\"";
 
   page +="}";
 
   return page;
 }
+
+String SensorsParamString(){
+  String buf="ID=" + WiFi.macAddress()+ "&";
+  buf.replace(":", ""); 
+
+  buf+= "TEMP1=" + String(OW_Temp1) + "&";
+  buf+= "PRESS=" + String(bmePres) + "&";
+  buf+= "HUM=";
+  if ((dhtHum) > 0) 
+    buf+= String(dhtHum);
+  else 
+    buf+= String(bmeHum);
+  buf+= "&";
+  buf+= "LUX=" + String(bh1750Lux) + "&";
+  buf+= "CIDX=" + String((OW_Temp1 - mlxObj));
+
+  return buf;
+}
+
+
 
 void printRequestData()
 {
