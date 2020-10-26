@@ -15,7 +15,7 @@ table tbody td {  font-size: 13px; }\
 </style>\n\
 <script></script>\n\
 </head>\n\
-<body style=\"text-align:center\">\
+<body style=\"text-align:center\" onload='load()'>\
 <h1>Water Supply Control System</h1>";
 
 /*
@@ -141,6 +141,10 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         for (var i=calcWF+1; i <= 10; i++) {\
             document.getElementById('WF'+i).style.backgroundColor = '';\
         }\
+    }\n\
+    \
+    function load(){\
+      update();\
     }\n\
     </script>";
 

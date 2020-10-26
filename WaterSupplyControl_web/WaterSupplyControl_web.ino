@@ -8,7 +8,8 @@
   - more asbtracted waterflow control
   - AUTOMATION
 
-   ver 0.8 2020/10/26 [345620/31724] - Controlling - auto switch on, autoswitch off VENT1 based on WS1 sensor
+   ver 0.8 2020/10/26 [345684/31724] - Controlling - auto switch on, autoswitch off VENT1 based on WS1 sensor
+                                     - some JS fix
    ver 0.7 2020/10/26 [344408/29384] - Switch timeout, some small improvements
    ver 0.6 2020/10/23 [343236/29368] - OTA added
    ver 0.5 2020/08/16 [322776/28536] - fully working device with: 2 relays, 3 water level sensors and waterflow sensor
@@ -18,7 +19,7 @@
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.7"
+#define VERSION "0.8a"
 #define VERSION_DATE "20201026"
 
 #include <ESP8266WiFi.h>
