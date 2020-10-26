@@ -25,21 +25,21 @@ void checkSupplyStatus_changeState() {
 
   //2.  If WS TOP state changed from 0 to 1
   //    init close sequence but in a defined timeout
-  if (WS_top_flag==1 && lastWS_top_flag ==0 ) {
+  if (WS_top_flag == 1 && lastWS_top_flag == 0 ) {
       debug(ss_str[0]);
       
-      needToClose_flag = 1;
-      needToOpen_flag = 0;
+      needToClose_flag  = 1;
+      needToOpen_flag   = 0;
       waitToEngageVent1_starttime = currenttime;
   }
 
   //3.  if WS TOP state changed from 1 to 0
   //    init open sequence 
-  if (WS_top_flag==0 && lastWS_top_flag == 1 ) {
+  if (WS_top_flag == 0 && lastWS_top_flag == 1 ) {
       debug(ss_str[1]);
 
-      needToOpen_flag=1;
-      needToClose_flag = 0;
+      needToOpen_flag   = 1;
+      needToClose_flag  = 0;
       waitToEngageVent1_starttime = currenttime;
   }
 

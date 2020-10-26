@@ -15,13 +15,13 @@ void initRelays()
 /*********************************************************************
 // Switch Relay
 //    relayName - "relay1", "relay2", etc
-//    relayTargetStat - target relay state "1"/"0"
+//    relayTargetStat - target relay state "1"|"0" ("on"|"off")
 **********************************************************************/
 int relaySwitchByParams(String relayName, String relayTargetStat ) {
   int pin = getRelayPinByName (relayName);
   if (pin >= 0) {
     int targetStat = convertReyalyStatusToInt(relayTargetStat);
-    if (targetStat >=0) {
+    if ( targetStat >=0 ) {
       digitalWrite(pin, targetStat);
       return 1;
     } else {

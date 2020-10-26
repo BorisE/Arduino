@@ -8,7 +8,7 @@
   - more asbtracted waterflow control
   - AUTOMATION
 
-   ver 0.8 2020/10/26 [345684/31724] - Controlling - auto switch on, autoswitch off VENT1 based on WS1 sensor
+   ver 0.8 2020/10/26 [345640/31704] - Controlling - auto switch on, autoswitch off VENT1 based on WS1 sensor
                                      - some JS fix
    ver 0.7 2020/10/26 [344408/29384] - Switch timeout, some small improvements
    ver 0.6 2020/10/23 [343236/29368] - OTA added
@@ -19,7 +19,7 @@
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.8b"
+#define VERSION "0.8с"
 #define VERSION_DATE "20201026"
 
 #include <ESP8266WiFi.h>
@@ -94,9 +94,9 @@ volatile int flow_count; // variable to store the “rise ups” from the flowme
 unsigned int flow_l_min; // Calculated litres/min
 #define WATERFLOW_COUNT_FREQUENCY 1000    //millis
 
-#define RELAY_READ_INTERVAL     10000
-#define WSENSORS_READ_INTERVAL  10000
-#define JS_UPDATEDATA_INTERVAL  10000
+#define RELAY_READ_INTERVAL     3000      // how oftet read relay status, deffault 10000
+#define WSENSORS_READ_INTERVAL  3000      // how often read wsensor status, deffault 10000
+#define JS_UPDATEDATA_INTERVAL  3000      // how ofter to update webpage, deffault 10000
 
 #define VENT_CHANGESTATE_TIMEOUT  10000   // how long to give vent to change it state before switching off 
                                           // need to be set experimentally
