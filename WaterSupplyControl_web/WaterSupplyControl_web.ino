@@ -19,7 +19,7 @@
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.8a"
+#define VERSION "0.8b"
 #define VERSION_DATE "20201026"
 
 #include <ESP8266WiFi.h>
