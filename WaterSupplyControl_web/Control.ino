@@ -35,7 +35,7 @@ void checkSupplyStatus_changeState() {
 
   //3.  if WS TOP state changed from 1 to 0
   //    init open sequence 
-  if (WS_top_flag==1 && lastWS_top_flag == 0 ) {
+  if (WS_top_flag==0 && lastWS_top_flag == 1 ) {
       debug(ss_str[1]);
 
       needToOpen_flag=1;
@@ -47,8 +47,8 @@ void checkSupplyStatus_changeState() {
   if (needToClose_flag == 1 && (currenttime - waitToEngageVent1_starttime) > VENT_CLOSE_DELAY) {
       debug(ss_str[2]);
 
-      relaySwitchByParams(VENT1_CLOSE_RELAY_NAME, "1");
       relaySwitchByParams(VENT1_OPEN_RELAY_NAME,  "0");
+      relaySwitchByParams(VENT1_CLOSE_RELAY_NAME, "1");
       needToClose_flag=0;
 
       Vent1_ChangingState = 1;

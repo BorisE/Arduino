@@ -9,9 +9,10 @@ void calcWaterFlow() {
   flow_l_min = (flow_count / (passedMillSec / 1000.0) / 6.6);      // (Pulse frequency x 60 min) / 6.6Q = flowrate in L/hour
 
   // Print litres/hour
+  /*
   Serial.print("[Flow: ");            
   Serial.print(flow_l_min, DEC);            
   Serial.println(" L/min]");
-
+  */
   flow_count = 0;                       // Reset Counter
 }
