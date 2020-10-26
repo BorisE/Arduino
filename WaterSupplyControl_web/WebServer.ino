@@ -28,7 +28,7 @@ const char HTTP_HTML_END[] PROGMEM = "</body></html>";
  RELAY TABLE TEMPLATE
  */
 const char HTTP_HTML_RELAYTABLE[] PROGMEM = "<table><thead>\
-        <tr><th>Relay 1</th><th>Relay 2</th><th>Relay 3</th><th>Relay 4</th></tr>\
+        <tr><th>Relay OPEN</th><th>Relay CLOSE</th><th>Relay 3</th><th>Relay 4</th></tr>\
     </thead><tbody>\n\
       <tr>\
         <td id='relay1'>{relay1}</td>\
@@ -49,13 +49,13 @@ const char HTTP_HTML_RELAYTABLE[] PROGMEM = "<table><thead>\
  */
 const char HTTP_HTML_WSTABLE[] PROGMEM = "<br><table><tbody>\n\
       <tr>\
-        <td id='WS3'>{WS3}</td>\
+        <td id='WS1'>{WS1}</td>\
       </tr>\n\
       <tr>\
         <td id='WS2'>{WS2}</td>\
       </tr>\n\
       <tr>\
-        <td id='WS1'>{WS1}</td>\
+        <td id='WS3'>{WS3}</td>\
       </tr>\n\
     </tbody></table>\n";
 
@@ -86,6 +86,7 @@ const char HTTP_HTML_WFLOWTABLE[] PROGMEM = "<br><table><tbody>\n\
  */
 const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
     window.setInterval(\"update()\", {update});\
+    \
     function update(){\
       var xhr=new XMLHttpRequest();\
       xhr.open(\"GET\", \"/json\", true);\
@@ -101,28 +102,36 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         displaywsens(3,getData.WS3);\
         waterflowdraw(getData.WF);\
         document.getElementById('RT').innerHTML=getData.RT;\
+        document.getElementById('debug').innerHTML=document.getElementById('debug').innerHTML + '<br>' + getData.debug;\
       };\
       xhr.send();\
     }\n\
+    \
     function displayrelaystat(rnum, rstat) {\
       document.getElementById('relay'+rnum).innerHTML=rstat;\
       document.getElementById('relay'+rnum).style.backgroundColor = (rstat == 'ON'? '#26b569' :'#b5262b');\
     }\n\
+    \
     function relaysend(rnum, rstat) {\
       var xhr=new XMLHttpRequest();\
       xhr.open(\"GET\", '/relay?relay' + rnum + '=' + rstat, true);\
       xhr.onreadystatechange = function () {\
         if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) return;\
         var getData = xhr.responseText;\
-        document.getElementById('debug').innerHTML=getData;\
+        document.getElementById('debug').innerHTML=document.getElementById('debug').innerHTML + '<br>' + getData;\
         update();\
+        if (rstat==1){\
+          setTimeout('relaysend('+rnum+',0)', {engine_move_timeout} );\
+        }\
       };\
       xhr.send();\
     }\n\
+    \
     function displaywsens(rnum, wstat) {\
       document.getElementById('WS'+rnum).innerHTML=wstat;\
       document.getElementById('WS'+rnum).style.backgroundColor = (wstat == '+'? '#26b5b1' :'');\
     }\n\
+    \
     function waterflowdraw(waterflow) {\
         document.getElementById('WFval').innerHTML=waterflow;\n\
         var calcWF=waterflow/100*10;\n\
@@ -184,6 +193,9 @@ void handleRoot() {
 
   page.replace("<script></script>", FPSTR(HTTP_HTML_UPDATE));
   page.replace("{update}", String(JS_UPDATEDATA_INTERVAL));
+  page.replace("{engine_move_timeout}", String(VENT_CHANGESTATE_TIMEOUT));
+
+  
 
   server.send(200, "text/html", page);
 
@@ -216,16 +228,17 @@ String SensorsJSON()
 
   page += "\"WS1\": \"" + String(getSensorStatusString(config.WS1_PIN)) + "\",";
   page += "\"WS2\": \"" + String(getSensorStatusString(config.WS2_PIN)) + "\",";
-  
-  //page += "\"WS3\": \"" + String(getSensorStatusString(config.WS3_PIN)) + "\",";
-  page += "\"WS3\": \"" + String(digitalRead(config.WS3_PIN)) + "\",";
+  page += "\"WS3\": \"" + String(getSensorStatusString(config.WS3_PIN)) + "\",";
+  //page += "\"WS3\": \"" + String(digitalRead(config.WS3_PIN)) + "\",";
   
 
   page += "\"WF\": \"" + String(flow_l_min) + "\",";
-
+  page += "\"debug\": \"" + String(debugstack) + "\",";
   page += "\"RT\": " + String(currenttime) + "";
-
+  
   page +="}";
+
+  debugstack[0] = '\0'; //empty buffer
 
   return page;
 }

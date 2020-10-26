@@ -8,6 +8,8 @@
   - more asbtracted waterflow control
   - AUTOMATION
 
+   ver 0.8 2020/10/26 [345620/31724] - Controlling - auto switch on, autoswitch off VENT1 based on WS1 sensor
+   ver 0.7 2020/10/26 [344408/29384] - Switch timeout, some small improvements
    ver 0.6 2020/10/23 [343236/29368] - OTA added
    ver 0.5 2020/08/16 [322776/28536] - fully working device with: 2 relays, 3 water level sensors and waterflow sensor
    ver 0.4 2020/08/16                - waterflow sensor counting
@@ -16,8 +18,8 @@
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.6c"
-#define VERSION_DATE "20201023"
+#define VERSION "0.7"
+#define VERSION_DATE "20201026"
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -68,9 +70,10 @@ const int STATUS_LED = LED_BUILTIN;
 #define H2_1_PIN_DEFAULT D5 
 #define H2_2_PIN_DEFAULT D0
 
-#define WS1_PIN_DEFAULT D1
-#define WS2_PIN_DEFAULT D2
-#define WS3_PIN_DEFAULT D8 
+#define WS1_PIN_DEFAULT D2  //верхний
+#define WS2_PIN_DEFAULT D1  //средний
+#define WS3_PIN_DEFAULT D8  //нижний
+
 
 #define WATERFLOW_PIN_DEFAULT D3
 
@@ -90,19 +93,35 @@ volatile int flow_count; // variable to store the “rise ups” from the flowme
 unsigned int flow_l_min; // Calculated litres/min
 #define WATERFLOW_COUNT_FREQUENCY 1000    //millis
 
-unsigned long currenttime=0;              // millis from script start 
-unsigned long _lastReadTime_Relay=0;
-unsigned long _lastReadTime_WS=0;
-unsigned long _lastReadTime_WaterFlow=0;
-
 #define RELAY_READ_INTERVAL     10000
 #define WSENSORS_READ_INTERVAL  10000
 #define JS_UPDATEDATA_INTERVAL  10000
+
+#define VENT_CHANGESTATE_TIMEOUT  10000   // how long to give vent to change it state before switching off 
+                                          // need to be set experimentally
+
+#define VENT_CLOSE_DELAY        10000     // Delay after WaterSensor stop becomes 1 and starting closing routine
+                                          // for debug, better set to 60000 or larger
+
+#define VENT1_CLOSE_RELAY_NAME  "relay2"
+#define VENT1_OPEN_RELAY_NAME   "relay1"
 
 //Interrupt function, so that the counting of pulse “rise ups” dont interfere with the rest of the code  (attachInterrupt)
 void ICACHE_RAM_ATTR flow_ISR(){   
   flow_count++;
 }
+
+char debugstack[2048]; //buffer to store debug messages befor outputing to web
+
+unsigned long currenttime=0;              // millis from script start 
+unsigned long _lastReadTime_Relay=0;
+unsigned long _lastReadTime_WS=0;
+unsigned long _lastReadTime_WaterFlow=0;
+uint8_t  WS_top_flag, lastWS_top_flag;//ИНИЦИАЛИЗИРОВАТЬ!
+bool needToClose_flag = false,needToOpen_flag = false;
+uint8_t  Vent1_ChangingState = 0;
+unsigned long waitToEngageVent1_starttime=0;
+unsigned long Vent1_ChangeState_starttime=0;
 
 /********************************************************
 *     SETUP
@@ -189,6 +208,9 @@ void setup() {
   ////////////////////////////////
   // START HARDWARE
   initRelays ();
+
+  WS_top_flag = digitalRead(config.WS1_PIN);
+  lastWS_top_flag = WS_top_flag;
   
   pinMode(config.WATERFLOW_PIN, INPUT_PULLUP);
   // Attach an interrupt to the ISR vector
@@ -223,6 +245,21 @@ void loop() {
   if (_lastReadTime_WS ==0 || (currenttime - _lastReadTime_WS) > WSENSORS_READ_INTERVAL)
   {
     printWSensorStatus();
+    checkSupplyStatus_changeState();
     _lastReadTime_WS= currenttime;
   }
+}
+
+
+//Print debug information
+void debug(char* st) {
+  
+  //Обнулим в случае переполнения
+  if ((strlen(debugstack) + strlen(st)) > (sizeof(debugstack)-1)) {
+    debugstack[0]='\0';
+    strcat(debugstack, "ovf! ");
+  }
+  strcat(debugstack, st);
+  Serial.println(st);
+  
 }

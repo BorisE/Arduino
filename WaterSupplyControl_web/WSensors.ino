@@ -37,3 +37,6 @@ void printWSensorStatus() {
   Serial.print(digitalRead(config.WS3_PIN));
   Serial.println("]");
 }
+
+
+ 

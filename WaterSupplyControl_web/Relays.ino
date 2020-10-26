@@ -12,7 +12,11 @@ void initRelays()
 
 }
 
-
+/*********************************************************************
+// Switch Relay
+//    relayName - "relay1", "relay2", etc
+//    relayTargetStat - target relay state "1"/"0"
+**********************************************************************/
 int relaySwitchByParams(String relayName, String relayTargetStat ) {
   int pin = getRelayPinByName (relayName);
   if (pin >= 0) {
