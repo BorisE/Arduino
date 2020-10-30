@@ -8,6 +8,7 @@
   - more asbtracted waterflow control
   - AUTOMATION
 
+   ver 0.8d 2020/10/30 [345932/31724] - web debug info improvents
    ver 0.8 2020/10/26 [345640/31704] - Controlling - auto switch on, autoswitch off VENT1 based on WS1 sensor
                                      - some JS fix
    ver 0.7 2020/10/26 [344408/29384] - Switch timeout, some small improvements
@@ -19,8 +20,8 @@
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.8с"
-#define VERSION_DATE "20201026"
+#define VERSION "0.8d"
+#define VERSION_DATE "20201030"
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -251,16 +252,25 @@ void loop() {
   }
 }
 
-
-//Print debug information
-void debug(char* st) {
+/********************************************************
+* Print debug information
+********************************************************/
+void debug(const char* st) {
   
   //Обнулим в случае переполнения
   if ((strlen(debugstack) + strlen(st)) > (sizeof(debugstack)-1)) {
     debugstack[0]='\0';
     strcat(debugstack, "ovf! ");
   }
+
+  long timestamp = currenttime/1000;
+  char timestampst[9];
+  ltoa(timestamp, timestampst,DEC);
+  strcat(timestampst, ": ");
+  strcat(debugstack, timestampst);
   strcat(debugstack, st);
+  strcat(debugstack, "|");
+
   Serial.println(st);
   
 }

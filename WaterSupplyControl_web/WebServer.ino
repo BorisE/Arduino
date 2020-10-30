@@ -5,6 +5,7 @@ const char HTTP_HTML_HEADER[] PROGMEM = "<!DOCTYPE html>\
 <html>\
 <head>\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\
+<meta charset=\"utf-8\">\
 <title>Water Supply Control System</title>\n\
 <style>\
 table {  width: 100%;  max-width: 500px;  border: 1px solid #1C6EA4;  text-align: center;  border-collapse: collapse;  margin-left:auto;   margin-right:auto; }\n\
@@ -21,7 +22,7 @@ table tbody td {  font-size: 13px; }\
 /*
  * TEMPLATE FOOTER
  */
-const char HTTP_HTML_FOOTER[] PROGMEM = "<p class='footer'>WaterSupplyControl v{Ver} [{VDate}]. Passed since start: <span class='footer'><span id='RT'>{RT}</span> ms</p><span id='debug'></span>";
+const char HTTP_HTML_FOOTER[] PROGMEM = "<p class='footer'>WaterSupplyControl v{Ver} [{VDate}]. Passed since start: <span class='footer'><span id='RT'>{RT}</span> ms</p><div id='jdebug'></div><div id='debug'></div><p id='debug2'></p>";
 const char HTTP_HTML_END[] PROGMEM = "</body></html>";
 
 /*
@@ -92,6 +93,7 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
       xhr.open(\"GET\", \"/json\", true);\
       xhr.onreadystatechange = function () {\
         if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) return;\
+        /*document.getElementById('debug2').innerHTML=xhr.responseText;*/\
         var getData = JSON.parse(xhr.responseText);\
         displayrelaystat(1,getData.relay1);\
         displayrelaystat(2,getData.relay2);\
@@ -101,8 +103,8 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         displaywsens(2,getData.WS2);\
         displaywsens(3,getData.WS3);\
         waterflowdraw(getData.WF);\
-        document.getElementById('RT').innerHTML=getData.RT;\
-        document.getElementById('debug').innerHTML=document.getElementById('debug').innerHTML + '<br>' + getData.debug;\
+        document.getElementById('RT').innerHTML=getData.RT / 1000;\
+        document.getElementById('debug').innerHTML=document.getElementById('debug').innerHTML + (getData.debug !='' ? '<br>' + getData.debug : '');\
       };\
       xhr.send();\
     }\n\
@@ -118,7 +120,7 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
       xhr.onreadystatechange = function () {\
         if (xhr.readyState != XMLHttpRequest.DONE || xhr.status != 200) return;\
         var getData = xhr.responseText;\
-        document.getElementById('debug').innerHTML=document.getElementById('debug').innerHTML + '<br>' + getData;\
+        document.getElementById('jdebug').innerHTML=getData;\
         update();\
         if (rstat==1){\
           setTimeout('relaysend('+rnum+',0)', {engine_move_timeout} );\

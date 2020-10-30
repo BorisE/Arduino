@@ -18,11 +18,22 @@ void initRelays()
 //    relayTargetStat - target relay state "1"|"0" ("on"|"off")
 **********************************************************************/
 int relaySwitchByParams(String relayName, String relayTargetStat ) {
+  const char *ss[] = {
+    "Relay ",
+    " is set to ",
+    };
+  char st[100]={'\0'};
+
   int pin = getRelayPinByName (relayName);
   if (pin >= 0) {
     int targetStat = convertReyalyStatusToInt(relayTargetStat);
     if ( targetStat >=0 ) {
       digitalWrite(pin, targetStat);
+      strcat(st,ss[0]);
+      strcat(st,relayName.c_str());
+      strcat(st,ss[1]);
+      strcat(st,relayTargetStat.c_str());
+      debug(st);
       return 1;
     } else {
       return -2;

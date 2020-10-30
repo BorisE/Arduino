@@ -1,5 +1,5 @@
 
-char *ss_str[] = {
+const char *ss_str[] = {
   "WS1 become 1, waiting to start close procedure", // 0
   "WS1 become 0, waiting to start open procedure",  // 1
   "Delay finished, start VENT1 close procedure",    // 2
