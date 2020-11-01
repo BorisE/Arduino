@@ -223,7 +223,7 @@ void handleJSON(){
   digitalWrite(STATUS_LED, LOW);
 }
 
-String SensorsJSON()
+String SensorsJSON(bool postdebug=true)
 {
   String page = "{";
   
@@ -239,12 +239,14 @@ String SensorsJSON()
   
 
   page += "\"WF\": \"" + String(flow_l_min) + "\",";
-  page += "\"debug\": \"" + String(debugstack) + "\",";
+  if (postdebug)
+  { 
+    page += "\"debug\": \"" + String(debugstack) + "\",";
+    debugstack[0] = '\0'; //empty buffer
+  }
   page += "\"RT\": " + String(currenttime) + "";
-  
-  page +="}";
 
-  debugstack[0] = '\0'; //empty buffer
+  page +="}";
 
   return page;
 }

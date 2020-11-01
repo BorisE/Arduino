@@ -3,6 +3,7 @@
   (c) 2020 by Boris Emchenko
 
   TODO:
+  - send data to server
   - WiFi manager
   - Config saving in SPIFFS
   - more asbtracted waterflow control
@@ -20,8 +21,8 @@
    ver 0.1 2020/08/16 [319288/27988] - relays reading status and changing status throug web page
 */
 //Compile version
-#define VERSION "0.8d"
-#define VERSION_DATE "20201030"
+#define VERSION "0.9"
+#define VERSION_DATE "20201031"
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -80,6 +81,7 @@ const int STATUS_LED = LED_BUILTIN;
 #define WATERFLOW_PIN_DEFAULT D3
 
 struct Config {
+  char POST_URL[101];
   uint8_t H1_1_PIN;
   uint8_t H1_2_PIN;
   uint8_t H2_1_PIN;
@@ -90,6 +92,9 @@ struct Config {
   uint8_t WATERFLOW_PIN;  
 };
 Config config;      
+
+#define DEFAULT_POST_URL "http://192.168.0.199/watersupply/adddata.php"
+unsigned long _last_HTTP_SEND=0;
 
 volatile int flow_count; // variable to store the “rise ups” from the flowmeter pulses
 unsigned int flow_l_min; // Calculated litres/min

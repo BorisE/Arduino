@@ -15,7 +15,9 @@
 void LoadDefaults()
 {
   Serial.println(F("[CONFIG] Loading default values..."));
-  //strlcpy (config.POST_URL, DEFAULT_POST_URL, sizeof(config.POST_URL));
+  
+  strlcpy (config.POST_URL, DEFAULT_POST_URL, sizeof(config.POST_URL));
+  
   config.H1_1_PIN=H1_1_PIN_DEFAULT;
   config.H1_2_PIN=H1_2_PIN_DEFAULT;
   config.H2_1_PIN=H2_1_PIN_DEFAULT;
@@ -34,24 +36,27 @@ void LoadDefaults()
 void PrintConfig()
 {
   Serial.println(F("[CONFIG] Current config: "));
-  
-  Serial.print("[CONFIG]    H1_1_PIN: ");
+
+  Serial.print(F("[CONFIG]    POST_URL: "));
+  Serial.println( configData.POST_URL );
+
+  Serial.print(F("[CONFIG]    H1_1_PIN: "));
   Serial.println( config.H1_1_PIN );
-  Serial.print("[CONFIG]    H1_2_PIN: ");
+  Serial.print(F("[CONFIG]    H1_2_PIN: "));
   Serial.println( config.H1_2_PIN );
-  Serial.print("[CONFIG]    H2_1_PIN: ");
+  Serial.print(F("[CONFIG]    H2_1_PIN: "));
   Serial.println( config.H2_1_PIN );
-  Serial.print("[CONFIG]    H2_2_PIN: ");
+  Serial.print(F("[CONFIG]    H2_2_PIN: "));
   Serial.println( config.H2_2_PIN );
 
-  Serial.print("[CONFIG]    WS1_PIN: ");
+  Serial.print(F("[CONFIG]    WS1_PIN: "));
   Serial.println( config.WS1_PIN );
-  Serial.print("[CONFIG]    WS2_PIN: ");
+  Serial.print(F("[CONFIG]    WS2_PIN: "));
   Serial.println( config.WS2_PIN );
-  Serial.print("[CONFIG]    WS3_PIN: ");
+  Serial.print(F("[CONFIG]    WS3_PIN: "));
   Serial.println( config.WS3_PIN );
 
-  Serial.print("[CONFIG]    WATERFLOW_PIN: ");
+  Serial.print(F("[CONFIG]    WATERFLOW_PIN: "));
   Serial.println( config.WATERFLOW_PIN );
 
   Serial.println(F("[CONFIG] end of current config"));
