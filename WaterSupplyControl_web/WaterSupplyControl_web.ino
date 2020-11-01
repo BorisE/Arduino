@@ -8,7 +8,7 @@
   - more asbtracted waterflow control
   - AUTOMATION
 
-   ver 0.8d 2020/10/30 [345932/31724] - web debug info improvents
+   ver 0.8d2020/10/30 [345932/31724] - web debug info improvents
    ver 0.8 2020/10/26 [345640/31704] - Controlling - auto switch on, autoswitch off VENT1 based on WS1 sensor
                                      - some JS fix
    ver 0.7 2020/10/26 [344408/29384] - Switch timeout, some small improvements
