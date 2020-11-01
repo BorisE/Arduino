@@ -102,7 +102,10 @@ void readDHTSensor(float &t, float &h)
 
 
 
-
+/*
+ * Read values using DHTesp lib
+ * 
+ */
 void printDHT(float &t, float &h)
 {
   h = dht.getHumidity();
@@ -111,10 +114,15 @@ void printDHT(float &t, float &h)
   if ( isnan(h) ) h = NONVALID_HUMIDITY;
   if ( isnan(t) ) t = NONVALID_TEMPERATURE;
 
-  Serial.print(dht.getStatusString());
-  Serial.print("\t");
-  Serial.print(h, 1);
-  Serial.print("\t\t");
-  Serial.print(t, 1);
-  Serial.print("\t\t");
+  if (h == NONVALID_HUMIDITY || t == NONVALID_TEMPERATURE) {
+    Serial.print("[DHT] ");
+    Serial.println(dht.getStatusString());
+  }else{
+    Serial.print("[!Hum:");
+    Serial.print(h);
+    Serial.println("]");
+    Serial.print("[!Temp:");
+    Serial.print(t);
+    Serial.println("]");
+  }
 }

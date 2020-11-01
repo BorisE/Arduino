@@ -1,3 +1,6 @@
+/*
+ * New way of rendering web queries
+ */
 void handleSPIFSS(){
   digitalWrite(STATUS_LED, HIGH);
 

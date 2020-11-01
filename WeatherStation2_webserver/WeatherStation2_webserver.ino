@@ -12,6 +12,9 @@
   - Deepsleep mode?
 
  Changes:
+   ver 2.3 2020/11/01 [454156/32808]
+                      - rain sensor
+                      - dht verbose data corrected
    ver 2.2 2020/08/28 [453716/32776]
                       - send data to narodmon.ru
    ver 2.1c 2020/08/28 [452668/32608]
@@ -80,8 +83,8 @@
 */
 
 //Compile version
-#define VERSION "2.2"
-#define VERSION_DATE "20200829"
+#define VERSION "2.3"
+#define VERSION_DATE "20201101"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -240,6 +243,9 @@ unsigned long _lastReadTime_MLX=0;
 BH1750 lightMeter (BH1750_ADDR);
 float bh1750Lux = NONVALID_LUX;
 unsigned long _lastReadTime_BH1750=0;
+
+//Rain sensor
+unsigned int rainSensor;
 
 unsigned long currenttime;              // millis from script start 
 #define POST_DATA_INTERVAL    120000
@@ -424,6 +430,12 @@ void loop(void) {
     
     Serial.print("[!OW1:");
     Serial.print(OW_Temp1);
+    Serial.println("]");
+
+
+    rainSensor = 1024 - analogRead(A0);
+    Serial.print("[!Rain:");
+    Serial.print(rainSensor);
     Serial.println("]");
 
     _lastReadTime_OW= currenttime;

@@ -44,6 +44,7 @@ const char HTTP_HTML_SENSORSTABLE[] PROGMEM = "<table><thead>\
       <tr><td>Object MLX90614</td><td><span id='OBJ'>{OBJ}</span> &deg;</td></tr>\
       <tr><td>Ambient MLX90614</td><td><span id='AMB'>{AMB}</span> &deg;</td></tr>\
       <tr><td>Illuminance BH1750FVI</td><td><span id='BHV'>{BHV}</span> lx</td></tr>\
+      <tr><td>Rain analog sensor</td><td><span id='Rain'>{Rain}</span> lx</td></tr>\
     </tbody></table>";
 
 
@@ -67,6 +68,7 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         document.getElementById('OBJ').innerHTML=getData.OBJ;\
         document.getElementById('AMB').innerHTML=getData.AMB;\
         document.getElementById('BHV').innerHTML=getData.BHV;\
+        document.getElementById('Rain').innerHTML=getData.Rain;\
         document.getElementById('RT').innerHTML=getData.RT;\
       };\
       xhr.send();\
@@ -128,6 +130,8 @@ const char HTTP_HTML_SETTINGS[] PROGMEM = "<!DOCTYPE html>\
 
 /*
  * ROOT PAGE
+ * old table design before moving to SPIFFS templates
+ * left for compatibility
  */
 void handleRoot() {
   digitalWrite(STATUS_LED, HIGH);
@@ -153,6 +157,7 @@ void handleRoot() {
   page.replace("{OBJ}", String(mlxObj));
   page.replace("{AMB}", String(mlxAmb));
   page.replace("{BHV}", String(bh1750Lux));
+  page.replace("{Rain}", String(rainSensor));
   
   page.replace("{RT}", String(currenttime));
   page.replace("{Ver}", String(VERSION));
@@ -188,6 +193,8 @@ void handleNotFound() {
 
 /*
  * JSON Sensor Status Page
+ * 
+ * used for dynamic data update
  */
 void handleJSON(){
   digitalWrite(STATUS_LED, HIGH);
@@ -247,7 +254,9 @@ void handlePingRequest(){
   digitalWrite(STATUS_LED, LOW);
 }
 
-
+/*
+ * Function to make JSON string with all current sensor data
+ */
 String SensorsJSON()
 {
   String page = "{";
@@ -261,6 +270,7 @@ String SensorsJSON()
   page += "\"OBJ\": " + String(mlxObj) + ", ";
   page += "\"AMB\": " + String(mlxAmb) + ", ";
   page += "\"BHV\": " + String(bh1750Lux) + ", ";
+  page += "\"Rain\": " + String(rainSensor) + ", ";
   page += "\"RT\": " + String(currenttime) + ", ";
   page += "\"Ver\": \"" + String(VERSION) + "\", ";
   page += "\"VDate\": \"" + String(VERSION_DATE) + "\"";
@@ -270,6 +280,9 @@ String SensorsJSON()
   return page;
 }
 
+/*
+ * Make param string for NarodMon
+ */
 String SensorsParamString(){
   String buf="ID=" + WiFi.macAddress()+ "&";
   buf.replace(":", ""); 
@@ -288,8 +301,10 @@ String SensorsParamString(){
   return buf;
 }
 
-
-
+/*
+ * Print Request Info
+ * for verbose debug
+ */
 void printRequestData()
 {
   Serial.print(F("[HTTP REQUEST] client: "));

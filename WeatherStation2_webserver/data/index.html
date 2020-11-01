@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>Weather Station</title>
-        <meta charset="utf-8">
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
         <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/responsive-tiles.css?2">
@@ -33,6 +33,7 @@
                     document.getElementById('OBJ').innerHTML	= getData.OBJ.toFixed(1);
                     document.getElementById('AMB').innerHTML	= getData.AMB.toFixed(1);        
                     document.getElementById('BHV').innerHTML	= getData.BHV.toFixed(1);        
+                    document.getElementById('Rain').innerHTML	= getData.Rain.toFixed(1);        
 					document.getElementById('RT').innerHTML		= formatRunTime(getData.RT);
                     document.getElementById('VER').innerHTML	= getData.Ver;
                     document.getElementById('VED').innerHTML	= getData.VDate;
@@ -158,6 +159,7 @@
                     else moonico = "wi-moon-alt-waning-crescent-" + moonicoid; 
                 }
                 document.getElementById("moonphaseicon").className = "wi wi-4x " + moonico;
+				document.getElementById("moonphaseicon").title = moonico;
                 document.getElementById('moonphase').innerHTML = moonphase.fraction.toLocaleString(  undefined, { minimumFractionDigits: 2 }); // leave undefined to use the browser's locale, r use a string like 'en-US' to override it.
                 
                 var moontimes = SunCalc.getMoonTimes(TodayDate, 43.93, 39.93);
@@ -360,15 +362,9 @@
                     <div class="boxes-align">
                       <div class="small-box">
                         <h2>Rain</h2>
-                        <span class="tooltip2" data-tooltip="Rain sensors aren't connected yet">
+                        <span class="tooltip2" data-tooltip="Resistance rain sensor">
                         <i class="wi wi-showers wi-4x">&nbsp;</i><i class="wi wi-4x" id="Rain"><span class="wi wi-na normal-color"></span></i>
 						</span>
-                        <p>&nbsp;</p><p>Measured by ceramic sensor</p>
-                        Additional readings:
-                        <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center">
-                        <tr><td><span id="Rain2">0</span><i class="wi">&nbsp;</i></td><td class="tdcomment">by classic rain sensor</td>
-                        </tr>
-                        </table>
                       </div>
                     </div>
                   </div>
@@ -436,7 +432,7 @@
                     <div class="cms-boxes-items">
                         <div class="boxes-align">
                             <div class="header-box">
-                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.5b [20200911].<bra>
+                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.6 [20201101].<bra>
 								Runtime: <span id="RT">0</span></small></p>
                             </div>
                         </div>
