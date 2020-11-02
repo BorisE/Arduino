@@ -160,15 +160,15 @@ static const uint8_t D3   = 5;                --> SDA
 static const uint8_t D4   = 4;                --> SCL
 static const uint8_t D5   = 14;               --> DHT_2
 static const uint8_t D6   = 12;               --> OneWire bus
-static const uint8_t D7   = 13;               /не заработал OneWire
+static const uint8_t D7   = 13; /=D11             
 static const uint8_t D8   = 0;  /startup pin.  pulled up to Vcc. Don't use as intput. Special care as output
 static const uint8_t D9   = 2;  /startup pin. LED.  pulled up to Vcc. Don't use as intput. Special care as output         -->Used as LED
 static const uint8_t D10  = 15; /startup pin. pulled down to GND. Don't use as intput. Special care as output
-static const uint8_t D11  = 13;               --> DHT_1
-static const uint8_t D12  = 12;
-static const uint8_t D13  = 14;
-static const uint8_t D14  = 4;
-static const uint8_t D15  = 5;
+static const uint8_t D11  = 13; /=D7          --> DHT_1
+static const uint8_t D12  = 12; /=D6
+static const uint8_t D13  = 14; /=D5
+static const uint8_t D14  = 4;  /=D4
+static const uint8_t D15  = 5;  /=D3
 
 GPIO6-GPIO11 - flash pins
 
@@ -194,6 +194,24 @@ static const uint8_t D9   = 3;
 static const uint8_t D10  = 1;
 */
 
+/* Wemos D1 Mini
+#define PIN_WIRE_SDA (4)  D2
+#define PIN_WIRE_SCL (5)  D1
+
+#define LED_BUILTIN 2
+
+static const uint8_t D0   = 16;
+static const uint8_t D1   = 5;
+static const uint8_t D2   = 4;
+static const uint8_t D3   = 0;
+static const uint8_t D4   = 2;
+static const uint8_t D5   = 14;
+static const uint8_t D6   = 12;
+static const uint8_t D7   = 13;
+static const uint8_t D8   = 15;
+static const uint8_t RX   = 3;
+static const uint8_t TX   = 1;
+ */
 #define NONVALID_TEMPERATURE -100
 #define NONVALID_PRESSURE 0
 #define NONVALID_HUMIDITY 0
