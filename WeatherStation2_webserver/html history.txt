@@ -1,5 +1,6 @@
 WeatherStation HTML history
 
+v2.8b [20201102]- rain history
 v2.8  [20201102]- rain icons 
 v2.7  [20201102]- additional DHT22 sensor
 v2.6  [20201101]- rain sensor data

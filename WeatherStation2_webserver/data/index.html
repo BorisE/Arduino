@@ -117,6 +117,19 @@
 					document.getElementById('bhvminw').innerHTML	= parseFloat(getData.bhvminw).toFixed(1);
                     document.getElementById('bhvmaxw').innerHTML	= parseFloat(getData.bhvmaxw).toFixed(1);
                     document.getElementById('bhvavgw').innerHTML	= parseFloat(getData.bhvavgw).toFixed(1);
+
+					//Rain
+					document.getElementById('rainmint0').innerHTML	= parseFloat(getData.rainmint0).toFixed(1);
+                    document.getElementById('rainmaxt0').innerHTML	= parseFloat(getData.rainmaxt0).toFixed(1);
+                    document.getElementById('rainavgt0').innerHTML	= parseFloat(getData.rainavgt0).toFixed(1);
+
+					document.getElementById('rainmint_1').innerHTML	= parseFloat(getData.rainmint_1).toFixed(1);
+                    document.getElementById('rainmaxt_1').innerHTML	= parseFloat(getData.rainmaxt_1).toFixed(1);
+                    document.getElementById('rainavgt_1').innerHTML	= parseFloat(getData.rainavgt_1).toFixed(1);
+					
+					document.getElementById('rainminw').innerHTML	= parseFloat(getData.rainminw).toFixed(1);
+                    document.getElementById('rainmaxw').innerHTML	= parseFloat(getData.rainmaxw).toFixed(1);
+                    document.getElementById('rainavgw').innerHTML	= parseFloat(getData.rainavgw).toFixed(1);
 					
 				};      
                 xhr.send();
@@ -376,6 +389,13 @@
                         <h2>Rain</h2>
                         <span class="tooltip2" data-tooltip="Resistance rain sensor">
                         <i class="wi wi-showers wi-4x" id="RainIco">&nbsp;</i><i class="wi wi-4x" id="Rain"><span class="wi wi-na normal-color"></span></i>
+                        <p>&nbsp;</p>
+                        <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center" style="width:75%">
+                        <tr><td></td><td>min</td><td>max</td><td>avg</td></tr>
+                        <tr><td class="tdcomment">Today</td><td><span id="rainmint0"></span></td><td><span id="rainmaxt0"></span></td><td><span id="rainavgt0"></span></td></tr>
+                        <tr><td class="tdcomment">Yesterday</td><td><span id="rainmint_1"></span></td><td><span id="rainmaxt_1"></span></td><td><span id="rainavgt_1"></span></td></tr>
+                        <tr><td class="tdcomment">Last week</td><td><span id="rainminw"></span></td><td><span id="rainmaxw"></span></td><td><span id="rainavgw"></span></td></tr>
+                        </table>						
 						</span>
                       </div>
                     </div>
@@ -444,7 +464,7 @@
                     <div class="cms-boxes-items">
                         <div class="boxes-align">
                             <div class="header-box">
-                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.8 [20201102].<bra>
+                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.8b [20201102].<bra>
 								Runtime: <span id="RT">0</span></small></p>
                             </div>
                         </div>
