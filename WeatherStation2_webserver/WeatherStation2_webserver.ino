@@ -12,6 +12,10 @@
   - Deepsleep mode?
 
  Changes:
+   ver 2.4с 2020/11/02 [454744/32904]
+                      - moving to narodmon GET sending failed and left POST with some modifications
+   ver 2.4 2020/11/02 [454480/32884]
+                      - moving to narodmon GET sending
    ver 2.3 2020/11/01 [454156/32808]
                       - rain sensor
                       - dht verbose data corrected
@@ -83,8 +87,8 @@
 */
 
 //Compile version
-#define VERSION "2.3"
-#define VERSION_DATE "20201101"
+#define VERSION "2.4"
+#define VERSION_DATE "20201102"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
@@ -137,8 +141,6 @@ ESP8266HTTPUpdateServer httpUpdater;
 #define DEFAULT_POST_URL "http://192.168.0.199/weather/adddata.php"
 //char POST_URL[101] = "http://192.168.0.199/weather/adddata.php"; //Where to post data
 unsigned long _last_HTTP_SEND=0;
-#define NARODMON_SERVER "http://narodmon.ru/post"
-unsigned long _last_NARODMON_SEND;
 
 
 /* for Wemos D1 R1
@@ -252,16 +254,19 @@ unsigned int rainSensor;
 //Send to NAROMDMON
 #define NARODMON_DATA_SENDING_DEFAULT true         // Default value for narodmon sending flag
 bool bNarodmon_Send_Data=true;
+#define NARODMON_SERVER_POST  "http://narodmon.ru/post"
+#define NARODMON_SERVER_GET   "http://narodmon.ru/get"
+unsigned long _last_NARODMON_SEND;
 
 unsigned long currenttime;              // millis from script start 
 #define POST_DATA_INTERVAL    120000    // 120000 = 2 мин
 #define POST_NARODMONDATA_INTERVAL    320000  //320000 = 5.33 мин
 #define JS_UPDATEDATA_INTERVAL  10000
-#define DHT_READ_INTERVAL     10000
-#define BME_READ_INTERVAL     10000
-#define OW_READ_INTERVAL      10000
-#define MLX_READ_INTERVAL     10000
-#define BH1750_READ_INTERVAL  10000
+#define OW_READ_INTERVAL      5555
+#define BH1750_READ_INTERVAL  6666
+#define MLX_READ_INTERVAL     7777
+#define BME_READ_INTERVAL     9999
+#define DHT_READ_INTERVAL     11111
 
 bool bOutput=false;
 
@@ -395,7 +400,7 @@ void loop(void) {
   if ( bNarodmon_Send_Data && currenttime - _last_NARODMON_SEND > POST_NARODMONDATA_INTERVAL ) {
       /* try to send data. test ret status. 
        * if no connection start CheckConnection procedure  */
-      if (!NarodMon_sent())
+      if (!NarodMon_sent_POST())
       {
         server.stop(); // stop web server because of conflict with WiFi manager
         WiFi_CheckConnection(WIFI_CONFIG_PORTAL_WAITTIME);
