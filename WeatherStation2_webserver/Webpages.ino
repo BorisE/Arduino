@@ -40,11 +40,13 @@ const char HTTP_HTML_SENSORSTABLE[] PROGMEM = "<table><thead>\
       <tr><td>Humidity BME280</td><td><span id='BMH'>{BMH}</span> %</td></tr>\
       <tr><td>Temperature DHT22</td><td><span id='Temp'>{Temp}</span> &deg;</td></tr>\
       <tr><td>Humidity DHT22</td><td><span id='Hum'>{Hum}</span> %</td></tr>\
+      <tr><td>Temperature DHT22_2</td><td><span id='Temp2'>{Temp2}</span> &deg;</td></tr>\
+      <tr><td>Humidity DHT22_2</td><td><span id='Hum2'>{Hum2}</span> %</td></tr>\
       <tr><td>Temperature OneWire</td><td><span id='OW1'>{OW1}</span> &deg;</td></tr>\
       <tr><td>Object MLX90614</td><td><span id='OBJ'>{OBJ}</span> &deg;</td></tr>\
       <tr><td>Ambient MLX90614</td><td><span id='AMB'>{AMB}</span> &deg;</td></tr>\
       <tr><td>Illuminance BH1750FVI</td><td><span id='BHV'>{BHV}</span> lx</td></tr>\
-      <tr><td>Rain analog sensor</td><td><span id='Rain'>{Rain}</span> lx</td></tr>\
+      <tr><td>Rain analog sensor</td><td><span id='Rain'>{Rain}</span></td></tr>\
     </tbody></table>";
 
 
@@ -64,6 +66,8 @@ const char HTTP_HTML_UPDATE[] PROGMEM = "<script>\
         document.getElementById('BMH').innerHTML=getData.BMH;\
         document.getElementById('Temp').innerHTML=getData.Temp;\
         document.getElementById('Hum').innerHTML=getData.Hum;\
+        document.getElementById('Temp2').innerHTML=getData.Temp2;\
+        document.getElementById('Hum2').innerHTML=getData.Hum2;\
         document.getElementById('OW1').innerHTML=getData.OW1;\
         document.getElementById('OBJ').innerHTML=getData.OBJ;\
         document.getElementById('AMB').innerHTML=getData.AMB;\
@@ -153,6 +157,8 @@ void handleRoot() {
   page.replace("{BMT}", String(bmeTemp));
   page.replace("{Temp}", String(dhtTemp));
   page.replace("{Hum}", String(dhtHum)); 
+  page.replace("{Temp2}", String(dhtTemp2));
+  page.replace("{Hum2}", String(dhtHum2)); 
   page.replace("{OW1}", String(OW_Temp1));
   page.replace("{OBJ}", String(mlxObj));
   page.replace("{AMB}", String(mlxAmb));
@@ -266,6 +272,8 @@ String SensorsJSON()
   page += "\"BMT\": " + String(bmeTemp) + ", ";
   page += "\"Temp\": " + String(dhtTemp) + ", ";
   page += "\"Hum\": " + String(dhtHum) + ", ";
+  page += "\"Temp2\": " + String(dhtTemp2) + ", ";
+  page += "\"Hum2\": " + String(dhtHum2) + ", ";
   page += "\"OW1\": " + String(OW_Temp1) + ", ";
   page += "\"OBJ\": " + String(mlxObj) + ", ";
   page += "\"AMB\": " + String(mlxAmb) + ", ";

@@ -1,5 +1,9 @@
 WeatherStation HTML history
 
+v2.8  [20201102]- rain icons 
+v2.7  [20201102]- additional DHT22 sensor
+v2.6  [20201101]- rain sensor data
+v2.5c [20200914]- moonico title
 v2.5b [20200914]- favicon
 				- bug fix for waning crescent mooon
 v2.5a [20200908]- some js optimization

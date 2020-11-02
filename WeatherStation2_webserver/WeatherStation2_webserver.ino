@@ -12,6 +12,8 @@
   - Deepsleep mode?
 
  Changes:
+   ver 2.5 2020/11/02 [455544/33040]
+                      - additional DHT22 sensor
    ver 2.4с 2020/11/02 [454744/32904]
                       - moving to narodmon GET sending failed and left POST with some modifications
    ver 2.4 2020/11/02 [454480/32884]
@@ -87,7 +89,7 @@
 */
 
 //Compile version
-#define VERSION "2.4"
+#define VERSION "2.5"
 #define VERSION_DATE "20201102"
 
 #include <FS.h>          // this needs to be first, or it all crashes and burns...
@@ -156,13 +158,13 @@ static const uint8_t D1   = 1;
 static const uint8_t D2   = 16;
 static const uint8_t D3   = 5;                --> SDA
 static const uint8_t D4   = 4;                --> SCL
-static const uint8_t D5   = 14;
+static const uint8_t D5   = 14;               --> DHT_2
 static const uint8_t D6   = 12;               --> OneWire bus
 static const uint8_t D7   = 13;               /не заработал OneWire
 static const uint8_t D8   = 0;  /startup pin.  pulled up to Vcc. Don't use as intput. Special care as output
 static const uint8_t D9   = 2;  /startup pin. LED.  pulled up to Vcc. Don't use as intput. Special care as output         -->Used as LED
 static const uint8_t D10  = 15; /startup pin. pulled down to GND. Don't use as intput. Special care as output
-static const uint8_t D11  = 13;               --> DHT11
+static const uint8_t D11  = 13;               --> DHT_1
 static const uint8_t D12  = 12;
 static const uint8_t D13  = 14;
 static const uint8_t D14  = 4;
@@ -200,14 +202,18 @@ static const uint8_t D10  = 1;
 Ticker ticker;
 const int STATUS_LED = LED_BUILTIN;
 
-#define DHT_PINold D11
 #define DHT_PIN_DEFAULT D11
+
 enum {DHT22_SAMPLE, DHT_TEMPERATURE, DHT_HUMIDITY, DHT_DATAPTR};  // DHT functions enumerated
 enum {DHT_OK = 0, DHT_ERROR_TIMEOUT = -1, DHT_ERROR_CRC = -2, DHT_ERROR_UNKNOWN = -3};  // DHT error codes enumerated
 float dhtTemp = NONVALID_TEMPERATURE;
 float dhtHum =0;
 unsigned long _lastReadTime_DHT=0;
 DHTesp dht;
+#define DHT_2_PIN_DEFAULT D5
+float dhtTemp2 = NONVALID_TEMPERATURE;
+float dhtHum2 =0;
+DHTesp dht2;
 
 //I2C wire
 #define SDA_PIN_DEFAULT D3
@@ -352,6 +358,7 @@ void setup(void) {
   Wire.begin(configData.I2CSDAPin, configData.I2CSCLPin);
 
   dht.setup(configData.DHT22Pin, DHTesp::DHT22);
+  dht2.setup(DHT_2_PIN_DEFAULT, DHTesp::DHT22);
    
   //init BME280 sensor
   if (!bme.begin(configData.I2CSDAPin, configData.I2CSCLPin)) 
@@ -417,6 +424,7 @@ void loop(void) {
     bOutput=true;
     //readDHTSensor(dhtTemp, dhtHum);
     printDHT(dhtTemp, dhtHum);
+    printDHT_2(dhtTemp2, dhtHum2);
     _lastReadTime_DHT= currenttime;
   }
   

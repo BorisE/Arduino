@@ -29,16 +29,18 @@
                     document.getElementById('BMH').innerHTML	= getData.BMH.toFixed(1);        
                     document.getElementById('Temp').innerHTML	= getData.Temp.toFixed(1);        
                     document.getElementById('Hum').innerHTML	= getData.Hum.toFixed(1);        
+                    document.getElementById('Temp2').innerHTML	= getData.Temp2.toFixed(1);        
+                    document.getElementById('Hum2').innerHTML	= getData.Hum2.toFixed(1);        
                     document.getElementById('OW1').innerHTML	= getData.OW1.toFixed(1);        
                     document.getElementById('OBJ').innerHTML	= getData.OBJ.toFixed(1);
                     document.getElementById('AMB').innerHTML	= getData.AMB.toFixed(1);        
                     document.getElementById('BHV').innerHTML	= getData.BHV.toFixed(1);        
-                    document.getElementById('Rain').innerHTML	= getData.Rain.toFixed(1);        
 					document.getElementById('RT').innerHTML		= formatRunTime(getData.RT);
                     document.getElementById('VER').innerHTML	= getData.Ver;
                     document.getElementById('VED').innerHTML	= getData.VDate;
 					DisplayCurrentTime();
 					DisplayCloudIDX((getData.OW1 - getData.OBJ));
+					DisplayRainSensor(getData.Rain);
 					DisplayNormalizedPress(getData.BMP, getData.OW1, 165);
                 };      
                 xhr.send();
@@ -200,6 +202,16 @@
 				document.getElementById("CIDX").className = "wi wi-4x " + cloudico;
 				document.getElementById('CIDX').innerHTML=CIDX.toFixed(1);
 			}
+			function DisplayRainSensor(RainSens) {
+				var rainico = "wi-cloud";
+				if (RainSens > 400)
+					rainico = "wi-rain";
+				else if (RainSens > 0)
+					rainico = "wi-sleet";
+					
+				document.getElementById("RainIco").className = "wi wi-4x " + rainico;
+				document.getElementById('Rain').innerHTML=RainSens;
+			}
 			function DisplayNormalizedPress(press, temp, h) {
 				var mult1 = -0.029 * 9.81 * h / (8.31*(273.15 + temp));
 				var pressN = press / Math.exp(mult1);
@@ -264,7 +276,7 @@
 						<span class="tooltip2" data-tooltip="Current temperature measured by ds18b20 sensor">
                         <i class="wi wi-thermometer wi-4x">&nbsp;</i><i class="wi wi-4x" id="OW1"><span class="wi wi-na normal-color"></span></i><i class="wi wi-celsius wi-2x">&nbsp;</i>
 						</span>
-                        <p><span id="Temp">100</span><i class="wi wi-celsius">&nbsp;</i>by DHT22 | <span id="BMT">100</span><i class="wi wi-celsius">&nbsp;</i>by BME280</p>
+                        <p><span id="Temp">100</span><i class="wi wi-celsius">&nbsp;</i>by DHT22 | <span id="BMT">100</span><i class="wi wi-celsius">&nbsp;</i>by BME280 | <span id="Temp2">100</span><i class="wi wi-celsius">&nbsp;</i>by DHT_2</p>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center" style="width:75%">
                         <tr><td></td><td>min</td><td>max</td><td>avg</td></tr>
                         <tr><td class="tdcomment">Today</td><td><span id="ow1mint0"></span></td><td><span id="ow1maxt0"></span></td><td><span id="ow1avgt0"></span></td></tr>
@@ -283,7 +295,7 @@
 						<span class="tooltip2" data-tooltip="Current humidity measured by DHT22 sensor">
 						<i class="wi wi-humidity wi-4x">&nbsp;</i><i class="wi wi-4x" id="Hum"></i><i class="wi wi-2x">&nbsp;%</i>
 						</span>
-                        <p><span id="BMH">0</span><i class="wi">%&nbsp;</i>by BME280</p>
+                        <p><span id="BMH">0</span><i class="wi">%&nbsp;</i>by BME280 | <span id="Hum2">0</span><i class="wi">%&nbsp;</i>by DHT22_2</p>
                         </tr>
                         </table>
                         <table class="tcenter"  cellspacing="0" border="0" cellpadding="0" align="center" style="width:75%">
@@ -363,7 +375,7 @@
                       <div class="small-box">
                         <h2>Rain</h2>
                         <span class="tooltip2" data-tooltip="Resistance rain sensor">
-                        <i class="wi wi-showers wi-4x">&nbsp;</i><i class="wi wi-4x" id="Rain"><span class="wi wi-na normal-color"></span></i>
+                        <i class="wi wi-showers wi-4x" id="RainIco">&nbsp;</i><i class="wi wi-4x" id="Rain"><span class="wi wi-na normal-color"></span></i>
 						</span>
                       </div>
                     </div>
@@ -432,7 +444,7 @@
                     <div class="cms-boxes-items">
                         <div class="boxes-align">
                             <div class="header-box">
-                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.6 [20201101].<bra>
+                                <small>WEATHER STATION MkII<br>Firmware v<span id="VER">0.0</span> [<span id="VED">20200101</span>], HTML v2.8 [20201102].<bra>
 								Runtime: <span id="RT">0</span></small></p>
                             </div>
                         </div>

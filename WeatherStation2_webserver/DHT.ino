@@ -126,3 +126,23 @@ void printDHT(float &t, float &h)
     Serial.println("]");
   }
 }
+void printDHT_2(float &t, float &h)
+{
+  h = dht2.getHumidity();
+  t = dht2.getTemperature();
+
+  if ( isnan(h) ) h = NONVALID_HUMIDITY;
+  if ( isnan(t) ) t = NONVALID_TEMPERATURE;
+
+  if (h == NONVALID_HUMIDITY || t == NONVALID_TEMPERATURE) {
+    Serial.print("[DHT2] ");
+    Serial.println(dht2.getStatusString());
+  }else{
+    Serial.print("[!Hum2:");
+    Serial.print(h);
+    Serial.println("]");
+    Serial.print("[!Temp2:");
+    Serial.print(t);
+    Serial.println("]");
+  }
+}
