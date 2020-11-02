@@ -123,6 +123,7 @@ struct ConfigStruct {
   uint8_t I2CSDAPin;
   uint8_t I2CSCLPin;
   uint8_t DHT22Pin;
+  uint8_t RainPin;
 };
 const char *configFilename = "/config.cfg";  
 ConfigStruct configData;                              // <- global configuration object
@@ -245,11 +246,16 @@ float bh1750Lux = NONVALID_LUX;
 unsigned long _lastReadTime_BH1750=0;
 
 //Rain sensor
+#define RAIN_PIN_DEFAULT A0 // Default pin for Resistance Rain Sensor. The only one for ESP8266 :)
 unsigned int rainSensor;
 
+//Send to NAROMDMON
+#define NARODMON_DATA_SENDING_DEFAULT true         // Default value for narodmon sending flag
+bool bNarodmon_Send_Data=true;
+
 unsigned long currenttime;              // millis from script start 
-#define POST_DATA_INTERVAL    120000
-#define POST_NARODMONDATA_INTERVAL    320000
+#define POST_DATA_INTERVAL    120000    // 120000 = 2 мин
+#define POST_NARODMONDATA_INTERVAL    320000  //320000 = 5.33 мин
 #define JS_UPDATEDATA_INTERVAL  10000
 #define DHT_READ_INTERVAL     10000
 #define BME_READ_INTERVAL     10000
@@ -386,7 +392,7 @@ void loop(void) {
       }
       _last_HTTP_SEND = currenttime;
   }
-  if ( currenttime - _last_NARODMON_SEND > POST_NARODMONDATA_INTERVAL ) {
+  if ( bNarodmon_Send_Data && currenttime - _last_NARODMON_SEND > POST_NARODMONDATA_INTERVAL ) {
       /* try to send data. test ret status. 
        * if no connection start CheckConnection procedure  */
       if (!NarodMon_sent())

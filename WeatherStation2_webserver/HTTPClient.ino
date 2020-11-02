@@ -59,15 +59,18 @@ int NarodMon_sent() {
     WiFiClient client;
     HTTPClient http;    //Declare object of class HTTPClient
 
-    Serial.print(F("[HTTP NARODMON] begin...\n"));
+    Serial.print(F("[HTTP NARODMON] start sending data to "));
+    Serial.println(NARODMON_SERVER);
+    
     // configure traged server and url
     http.begin(client, NARODMON_SERVER); //HTTP
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    Serial.print(F("[HTTP NARODMON] Sending data...\n"));
-
     String POST_Prarms= SensorsParamString();
-    
+
+    Serial.print(F("[HTTP NARODMON] Sending data: "));
+    Serial.println(POST_Prarms);
+   
     // start connection and send HTTP header and body
     int httpCode = http.POST(POST_Prarms);
 

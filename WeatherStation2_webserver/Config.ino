@@ -17,6 +17,8 @@ WiFiManagerParameter custom_OneWirePin;
 WiFiManagerParameter custom_I2CSDAPin;
 WiFiManagerParameter custom_I2CSCLPin;
 WiFiManagerParameter custom_DHT22Pin;
+WiFiManagerParameter custom_RainPin;
+
 
 //flag for saving data
 bool shouldSaveConfig = false;
@@ -31,6 +33,7 @@ void LoadDefaults()
   configData.I2CSDAPin      = SDA_PIN_DEFAULT;
   configData.I2CSCLPin      = SCL_PIN_DEFAULT;
   configData.DHT22Pin       = DHT_PIN_DEFAULT;
+  configData.RainPin        = RAIN_PIN_DEFAULT;
   
   PrintConfig();
 }
@@ -77,6 +80,7 @@ void LoadConfigData()
           configData.I2CSDAPin  = json["I2CSDAPin"]   | SDA_PIN_DEFAULT;
           configData.I2CSCLPin  = json["I2CSCLPin"]   | SCL_PIN_DEFAULT;
           configData.DHT22Pin   = json["DHT22Pin"]    | DHT_PIN_DEFAULT;
+          configData.RainPin    = json["RainPin"]    | RAIN_PIN_DEFAULT;
 
           // Close the file (Curiously, File's destructor doesn't close the file)
           configFile.close();
@@ -89,7 +93,7 @@ void LoadConfigData()
       Serial.println(F("[SPIFFS] config file not found"));
     }
   } else {
-    Serial.println("[SPIFFS] failed to mount FS");
+    Serial.println(F("[SPIFFS] failed to mount FS"));
   }
   //end read
   PrintConfig();
@@ -108,6 +112,7 @@ void SaveParameters()
   configData.I2CSDAPin  = atoi(custom_I2CSDAPin.getValue());
   configData.I2CSCLPin  = atoi(custom_I2CSCLPin.getValue());
   configData.DHT22Pin   = atoi(custom_DHT22Pin.getValue());
+  configData.RainPin   = atoi(custom_RainPin.getValue());
 
   StaticJsonDocument<capacity> json;
 
@@ -116,6 +121,7 @@ void SaveParameters()
   json["I2CSDAPin"]           = configData.I2CSDAPin;
   json["I2CSCLPin"]           = configData.I2CSCLPin;
   json["DHT22Pin"]            = configData.DHT22Pin;
+  json["RainPin"]             = configData.RainPin;
 
   //Print config object
   Serial.print(F("[CONFIG] saving JSON: "));
@@ -170,6 +176,8 @@ void PrintConfig()
   Serial.println( configData.I2CSCLPin );
   Serial.print(F("[CONFIG]    DHT22Pin: "));
   Serial.println( configData.DHT22Pin );
+  Serial.print(F("[CONFIG]    RainPin: "));
+  Serial.println( configData.RainPin );
 
   Serial.println(F("[CONFIG] end of current config"));
   
